@@ -4,12 +4,21 @@ import javax.persistence.*;
 
 import java.util.List;
 
+@NamedEntityGraph(
+        name = "full",
+        attributeNodes = {
+                @NamedAttributeNode("roles"),
+                @NamedAttributeNode("department")
+        }
+)
+
 @Entity
 @Table(name = "users")
 public class UserEntity extends BaseEntity{
     private String email;
     private String password;
     private List<RoleEntity> roles;
+    private DepartmentEntity department;
 
     public UserEntity() {
     }
@@ -41,6 +50,17 @@ public class UserEntity extends BaseEntity{
 
     public UserEntity setRoles(List<RoleEntity> roles) {
         this.roles = roles;
+        return this;
+    }
+
+
+    @ManyToOne
+    public DepartmentEntity getDepartment() {
+        return department;
+    }
+
+    public UserEntity setDepartment(DepartmentEntity department) {
+        this.department = department;
         return this;
     }
 }

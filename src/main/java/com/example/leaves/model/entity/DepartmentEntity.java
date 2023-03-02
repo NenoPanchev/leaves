@@ -2,6 +2,8 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import javax.persistence.*;
+import java.util.List;
+
 @Entity
 @Table(name = "departments")
 public class DepartmentEntity extends BaseEntity{
@@ -19,4 +21,5 @@ public class DepartmentEntity extends BaseEntity{
         this.department = department;
         return this;
     }
+
 }
