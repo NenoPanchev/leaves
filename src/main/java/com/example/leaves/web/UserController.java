@@ -4,7 +4,6 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.LoginDto;
 import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.dto.UserUpdateDto;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.view.UserView;
 import com.example.leaves.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -17,9 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/users")

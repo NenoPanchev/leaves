@@ -2,7 +2,7 @@ package com.example.leaves.model.service;
 
 import java.util.List;
 
-public class UserServiceModel extends BaseServiceModel{
+public class UserServiceModel extends BaseServiceModel {
     private String email;
     private String password;
     private List<String> roles;
