@@ -1,7 +1,9 @@
 package com.example.leaves.web;
 
+import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.LoginDto;
 import com.example.leaves.model.dto.UserCreateDto;
+import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.view.UserView;
 import com.example.leaves.service.UserService;
@@ -48,25 +50,14 @@ public class UserController {
         return new ResponseEntity<>("User signed-in successfully!", HttpStatus.OK);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<UserView> create(
             @Valid
             @RequestBody UserCreateDto dto,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            UserView view = new UserView();
-            List<String> messages = new ArrayList<>();
-
-            bindingResult
-                    .getFieldErrors()
-                    .forEach(e -> {
-                        messages.add(String.format("%s: %s", e.getField(), e.getDefaultMessage()));
-//                        sb.append(e.getField()).append(": ").append(e.getDefaultMessage());
-                    });
-            view.setMessages(messages);
-            return new ResponseEntity<>(view, HttpStatus.BAD_REQUEST);
+            throw new ValidationException(bindingResult);
         }
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -74,4 +65,32 @@ public class UserController {
 
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserView> getUser(@PathVariable ("id") String id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.findViewById(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserView> updateUser(@Valid @RequestBody UserUpdateDto dto,
+                                               @PathVariable ("id") String id,
+                                               BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+        UserView userView = userService.updateUser(id, dto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userView);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable ("id") String id) {
+        userService.deleteUser(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("User deleted");
+    }
 }

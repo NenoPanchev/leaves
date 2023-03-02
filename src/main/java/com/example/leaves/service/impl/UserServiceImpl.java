@@ -1,10 +1,11 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.UserCreateDto;
+import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.model.entity.enums.RoleEnum;
 import com.example.leaves.model.service.UserServiceModel;
 import com.example.leaves.model.view.UserView;
 import com.example.leaves.repository.UserRepository;
@@ -15,7 +16,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +44,8 @@ public class UserServiceImpl implements UserService {
         UserEntity admin = new UserEntity()
                 .setEmail("admin@admin.com")
                 .setPassword(passwordEncoder.encode("1234"))
-                .setRoles(roleService.findAllByRoleIn(RoleEnum.ADMIN, RoleEnum.USER))
-                .setDepartment(departmentService.findByDepartment("Admin"));
+                .setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"))
+                .setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(admin);
     }
 
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     public UserView createUserFromDto(UserCreateDto dto) {
         DepartmentEntity department = departmentService
                 .findByDepartment(dto.getDepartment());
-        List<RoleEntity> roles = roleService.findAllByRoleIn(RoleEnum.USER);
+        List<RoleEntity> roles = roleService.findAllByRoleIn("USER");
 
         UserEntity user = new UserEntity()
                 .setEmail(dto.getEmail())
@@ -66,17 +66,11 @@ public class UserServiceImpl implements UserService {
                 .setDepartment(department)
                 .setRoles(roles);
         user = userRepository.save(user);
-        UserServiceModel serviceModel = modelMapper.map(user, UserServiceModel.class)
-                .setRoles(user.getRoles()
-                        .stream()
-                        .map(enm -> enm.getRole().name())
-                        .collect(Collectors.toList()));
-        UserView view = new UserView();
+        UserServiceModel serviceModel = mapUserEntityToServiceModel(user);
+                UserView view = new UserView();
 
-        if (user != null) {
             view.setUser(serviceModel);
             view.setMessages(Arrays.asList("You've created a user"));
-        }
 
         return view;
     }
@@ -84,7 +78,52 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity findByEmail(String email) {
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElse(null);
+                .orElseThrow(ObjectNotFoundException::new);
         return userEntity;
+    }
+
+    @Override
+    public UserView findViewByEmail(String email) {
+        UserEntity user = findByEmail(email);
+        UserView view = new UserView()
+                 .setUser(mapUserEntityToServiceModel(user));
+         return view;
+    }
+
+    @Override
+    public UserView findViewById(String id) {
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+        UserView view = new UserView()
+                .setUser(mapUserEntityToServiceModel(userEntity));
+        return view;
+    }
+
+    @Override
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public UserView updateUser(String id, UserUpdateDto dto) {
+        UserEntity entity = userRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+        String[] roles = dto.getRoles().toArray(new String[0]);
+        entity
+                .setEmail(dto.getEmail())
+                .setDepartment(departmentService.findByDepartment(dto.getDepartment()))
+                .setPassword(passwordEncoder.encode(dto.getPassword()))
+                .setRoles(roleService.findAllByRoleIn(roles));
+        UserView userView = new UserView()
+                .setUser(mapUserEntityToServiceModel(userRepository.save(entity)));
+        return userView;
+    }
+
+    private UserServiceModel mapUserEntityToServiceModel(UserEntity entity) {
+        return modelMapper.map(entity, UserServiceModel.class)
+                .setRoles(entity.getRoles()
+                        .stream()
+                        .map(RoleEntity::getRole)
+                        .collect(Collectors.toList()));
     }
 }

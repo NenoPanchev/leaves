@@ -1,5 +1,6 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
@@ -32,7 +33,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentEntity findByDepartment(String department) {
         return departmentRepository.findByDepartment(department.toUpperCase())
-                .orElse(null);
+                .orElseThrow(ObjectNotFoundException::new);
     }
 
 }

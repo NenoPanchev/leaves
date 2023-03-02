@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface RoleService {
     void seedRoles();
-    List<RoleEntity> findAllByRoleIn(RoleEnum... roles);
+    List<RoleEntity> findAllByRoleIn(String... roles);
     void createRole(String role);
 }

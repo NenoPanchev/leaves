@@ -35,7 +35,7 @@ public class AppUserDetailService implements UserDetailsService {
         List<GrantedAuthority> authorities =
                 userEntity.getRoles()
                         .stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole().name()))
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole()))
                         .collect(Collectors.toList());
 
         return new org.springframework.security.core.userdetails.User(

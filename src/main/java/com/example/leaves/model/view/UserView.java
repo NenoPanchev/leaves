@@ -1,10 +1,11 @@
 package com.example.leaves.model.view;
 
-import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.service.UserServiceModel;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserView {
     private List<String> messages;
     private UserServiceModel user;
