@@ -34,4 +34,11 @@ public class RoleServiceImpl implements RoleService {
     public List<RoleEntity> findAllByRoleIn(RoleEnum... roles) {
         return roleRepository.findAllByRoleIn(roles);
     }
+
+    @Override
+    public void createRole(String role) {
+        RoleEnum roleEnum = RoleEnum.valueOf(role);
+        roleRepository.save(new RoleEntity()
+                .setRole(roleEnum));
+    }
 }

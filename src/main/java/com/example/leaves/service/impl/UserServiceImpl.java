@@ -4,15 +4,19 @@ import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
+import com.example.leaves.model.service.UserServiceModel;
+import com.example.leaves.model.view.UserView;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,12 +26,14 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final DepartmentService departmentService;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, DepartmentService departmentService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, DepartmentService departmentService, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
         this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -39,7 +45,7 @@ public class UserServiceImpl implements UserService {
                 .setEmail("admin@admin.com")
                 .setPassword(passwordEncoder.encode("1234"))
                 .setRoles(roleService.findAllByRoleIn(RoleEnum.ADMIN, RoleEnum.USER))
-                .setDepartment(departmentService.findByDepartment(DepartmentEnum.IT));
+                .setDepartment(departmentService.findByDepartment("Admin"));
         userRepository.save(admin);
     }
 
@@ -49,9 +55,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity createUserFromDto(UserCreateDto dto) {
+    public UserView createUserFromDto(UserCreateDto dto) {
         DepartmentEntity department = departmentService
-                .findByDepartment(DepartmentEnum.valueOf(dto.getDepartment().toUpperCase()));
+                .findByDepartment(dto.getDepartment());
         List<RoleEntity> roles = roleService.findAllByRoleIn(RoleEnum.USER);
 
         UserEntity user = new UserEntity()
@@ -59,8 +65,20 @@ public class UserServiceImpl implements UserService {
                 .setPassword(passwordEncoder.encode(dto.getPassword()))
                 .setDepartment(department)
                 .setRoles(roles);
+        user = userRepository.save(user);
+        UserServiceModel serviceModel = modelMapper.map(user, UserServiceModel.class)
+                .setRoles(user.getRoles()
+                        .stream()
+                        .map(enm -> enm.getRole().name())
+                        .collect(Collectors.toList()));
+        UserView view = new UserView();
 
-        return userRepository.save(user);
+        if (user != null) {
+            view.setUser(serviceModel);
+            view.setMessages(Arrays.asList("You've created a user"));
+        }
+
+        return view;
     }
 
     @Override

@@ -2,24 +2,22 @@ package com.example.leaves.model.dto;
 
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
+import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.List;
 
 public class UserCreateDto {
-    @Email
+
     private String email;
-    @Size(min = 4)
     private String password;
-    @NotBlank
     private String department;
 
     public UserCreateDto() {
     }
 
+    @NotEmpty(message = "Field cannot be empty")
+    @Email(message = "Enter valid email address")
     public String getEmail() {
         return email;
     }
@@ -29,6 +27,8 @@ public class UserCreateDto {
         return this;
     }
 
+    @Size(min = 4, max = 20, message = "Password must be between 4 and 20 characters")
+
     public String getPassword() {
         return password;
     }
@@ -37,6 +37,8 @@ public class UserCreateDto {
         this.password = password;
         return this;
     }
+
+    @Size(min = 2, max = 20, message = "Department must be between 2 and 20 characters")
 
     public String getDepartment() {
         return department;
