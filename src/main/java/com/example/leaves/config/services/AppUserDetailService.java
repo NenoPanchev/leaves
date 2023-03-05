@@ -1,4 +1,4 @@
-package com.example.leaves.service.impl;
+package com.example.leaves.config.services;
 
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.UserRepository;

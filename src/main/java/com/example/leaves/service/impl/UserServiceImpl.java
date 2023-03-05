@@ -37,16 +37,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void seedAdmin() {
+    public void seedUsers() {
         if (userRepository.count() > 0) {
             return;
         }
-        UserEntity admin = new UserEntity()
-                .setEmail("admin@admin.com")
+        UserEntity superAdmin = new UserEntity()
+                .setEmail("super@admin.com")
                 .setPassword(passwordEncoder.encode("1234"))
                 .setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"))
                 .setDepartment(departmentService.findByDepartment("Administration"));
+        userRepository.save(superAdmin);
+
+        UserEntity admin = new UserEntity()
+                .setEmail("admin@admin.com")
+                .setPassword(passwordEncoder.encode("1234"))
+                .setRoles(roleService.findAllByRoleIn("ADMIN", "USER"))
+                .setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(admin);
+
+        UserEntity user = new UserEntity()
+                .setEmail("user@user.com")
+                .setPassword(passwordEncoder.encode("1234"))
+                .setRoles(roleService.findAllByRoleIn("USER"))
+                .setDepartment(departmentService.findByDepartment("IT"));
+        userRepository.save(user);
     }
 
     @Override
