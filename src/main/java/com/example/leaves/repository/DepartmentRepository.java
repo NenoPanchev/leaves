@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DepartmentRepository extends JpaRepository<DepartmentEntity, String> {
+public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Long> {
     List<DepartmentEntity> findAllByDepartment (String... departments);
     Optional<DepartmentEntity> findByDepartment(String department);
 }

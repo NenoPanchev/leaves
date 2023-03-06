@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RoleRepository extends JpaRepository<RoleEntity, String> {
-    List<RoleEntity> findAllByRoleIn(String... roles);
+public interface RoleRepository extends JpaRepository<RoleEntity, Long> {
+    List<RoleEntity> findAllByNameIn(String... roles);
+    boolean existsByName(String name);
 }

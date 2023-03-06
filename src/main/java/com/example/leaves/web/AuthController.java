@@ -3,6 +3,7 @@ package com.example.leaves.web;
 import com.example.leaves.config.jwt.JwtUtil;
 import com.example.leaves.config.services.AppUserDetailService;
 import com.example.leaves.exceptions.ValidationException;
+import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.AuthenticationRequest;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody AuthenticationRequest authenticationRequest,
+    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserDto authenticationRequest,
                                                        BindingResult bindingResult) {
         if (bindingResult.hasErrors()){
             throw new ValidationException(bindingResult);

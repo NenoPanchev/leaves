@@ -5,12 +5,14 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Locale;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserEntity, String > {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @EntityGraph(value = "full")
     Optional<UserEntity> findByEmail(String email);
     @EntityGraph(value = "full")
-    Optional<UserEntity> findById(String id);
+    Optional<UserEntity> findById(Long id);
+    boolean existsByEmail(String email);
 }

@@ -1,8 +1,13 @@
 package com.example.leaves.model.entity;
 
+import com.example.leaves.model.dto.RoleDto;
+import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.service.UserServiceModel;
+
 import javax.persistence.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @NamedEntityGraph(
         name = "full",
@@ -62,5 +67,18 @@ public class UserEntity extends BaseEntity{
     public UserEntity setDepartment(DepartmentEntity department) {
         this.department = department;
         return this;
+    }
+
+    public UserDto toDto() {
+        List<RoleDto> roleDtos = roles.stream()
+                .map(RoleEntity::toDto)
+                .collect(Collectors.toList());
+
+        return new UserDto()
+                .setId(getId())
+                .setEmail(email)
+                .setPassword(password)
+                .setRoles(roleDtos)
+                .setDepartment(department.getDepartment());
     }
 }

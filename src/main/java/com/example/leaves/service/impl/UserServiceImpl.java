@@ -2,6 +2,7 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.UserCreateDto;
+import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,21 +107,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserView findViewById(String id) {
+    @Transactional
+    public UserDto findUserDtoById(Long id) {
         UserEntity userEntity = userRepository.findById(id)
                 .orElseThrow(ObjectNotFoundException::new);
-        UserView view = new UserView()
-                .setUser(mapUserEntityToServiceModel(userEntity));
-        return view;
+//        UserView view = new UserView()
+//                .setUser(mapUserEntityToServiceModel(userEntity));
+        return userEntity.toDto();
     }
 
     @Override
-    public void deleteUser(String id) {
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
-    public UserView updateUser(String id, UserUpdateDto dto) {
+    public UserView updateUser(Long id, UserUpdateDto dto) {
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(ObjectNotFoundException::new);
         String[] roles = dto.getRoles().toArray(new String[0]);
@@ -133,11 +136,16 @@ public class UserServiceImpl implements UserService {
         return userView;
     }
 
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
     private UserServiceModel mapUserEntityToServiceModel(UserEntity entity) {
         return modelMapper.map(entity, UserServiceModel.class)
                 .setRoles(entity.getRoles()
                         .stream()
-                        .map(RoleEntity::getRole)
+                        .map(RoleEntity::getName)
                         .collect(Collectors.toList()));
     }
 }

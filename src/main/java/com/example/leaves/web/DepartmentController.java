@@ -1,16 +1,15 @@
 package com.example.leaves.web;
 
 import com.example.leaves.model.dto.DepartmentCreateDto;
-import com.example.leaves.model.dto.RoleCreateDto;
-import com.example.leaves.model.view.UserView;
+import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.DepartmentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/departments")
@@ -21,8 +20,14 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
-    @PreAuthorize("hasPermission(#dto, 'read')")
-    @PostMapping("/create")
+    @GetMapping
+    public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(departmentService.getAllDepartmentDtos());
+    }
+
+    @PostMapping
     public ResponseEntity<String> create(@Valid @RequestBody DepartmentCreateDto dto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

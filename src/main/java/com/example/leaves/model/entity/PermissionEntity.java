@@ -1,5 +1,6 @@
 package com.example.leaves.model.entity;
 
+import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 
 import javax.persistence.Entity;
@@ -24,4 +25,12 @@ public class PermissionEntity extends BaseEntity{
         this.permissionEnum = permissionEnum;
         return this;
     }
+
+    public PermissionDto toDto() {
+        return new PermissionDto()
+                .setId(getId())
+                .setName(permissionEnum.name());
+    }
+
+
 }

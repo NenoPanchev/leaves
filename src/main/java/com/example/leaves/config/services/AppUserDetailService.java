@@ -42,8 +42,8 @@ public class AppUserDetailService implements UserDetailsService {
         List<String> roleNames = new ArrayList<>();
 
         for (RoleEntity role : userEntity.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getRole()));
-            roleNames.add(role.getRole());
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+            roleNames.add(role.getName());
         }
 
         Set<String> permissionNames = permissionService.findAllPermissionNamesByRoleNameIn(roleNames);

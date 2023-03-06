@@ -1,16 +1,16 @@
 package com.example.leaves.web;
 
-import com.example.leaves.model.dto.RoleCreateDto;
+import com.example.leaves.exceptions.ResourceAlreadyExistsException;
+import com.example.leaves.exceptions.ValidationException;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
@@ -21,18 +21,32 @@ public class RoleController {
         this.roleService = roleService;
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> create(@Valid @RequestBody RoleCreateDto dto,
+    @GetMapping
+    public ResponseEntity<List<RoleDto>> getAllRoles() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                        .body(roleService.getAllRoleDtos());
+    }
+
+    @PostMapping
+    public ResponseEntity<RoleDto> create(@Valid @RequestBody RoleDto dto,
                                          BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult
-                    .getFieldErrors()
-                    .forEach(e -> sb.append(e.getField()).append(": ").append(e.getDefaultMessage()));
-            return new ResponseEntity<>(sb.toString(), HttpStatus.BAD_REQUEST);
+           throw new ValidationException(bindingResult);
         }
-        roleService.createRole(dto.getRole());
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(String.format("You've successfully created %s role", dto.getRole()));
+        if (roleService.existsByName(dto.getName())) {
+            throw new ResourceAlreadyExistsException(String.format("Role %s already exists", dto.getName().toUpperCase()));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.createRole(dto));
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<RoleDto> getRole(@PathVariable("id") Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.findRoleById(id));
     }
 }

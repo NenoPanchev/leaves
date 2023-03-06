@@ -1,6 +1,7 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserCreateDto;
+import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.view.UserView;
@@ -13,9 +14,11 @@ public interface UserService {
 
     UserView findViewByEmail(String email);
 
-    UserView findViewById(String id);
+    UserDto findUserDtoById(Long id);
 
-    void deleteUser(String id);
+    void deleteUser(Long id);
 
-    UserView updateUser(String id, UserUpdateDto dto);
+    UserView updateUser(Long id, UserUpdateDto dto);
+
+    boolean existsByEmail(String email);
 }

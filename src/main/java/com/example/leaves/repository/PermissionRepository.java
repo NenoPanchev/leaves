@@ -9,13 +9,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Repository
-public interface PermissionRepository extends JpaRepository<PermissionEntity, String> {
+public interface PermissionRepository extends JpaRepository<PermissionEntity, Long> {
     List<PermissionEntity> findAllByPermissionEnumIn(PermissionEnum... permissions);
     @Query("SELECT p.permissionEnum FROM RoleEntity r " +
                   "LEFT JOIN r.permissions AS p " +
-                  "WHERE r.role IN (:roles)")
+                  "WHERE r.name IN (:roles)")
     Set<PermissionEnum> findAllPermissionEnumsByRole(@Param("roles") List<String> roles);
+    List<PermissionEntity> findAllByPermissionEnumIn(List<PermissionEnum> permissions);
 }

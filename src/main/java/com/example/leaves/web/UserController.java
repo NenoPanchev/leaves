@@ -1,18 +1,15 @@
 package com.example.leaves.web;
 
+import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
-import com.example.leaves.model.dto.LoginDto;
 import com.example.leaves.model.dto.UserCreateDto;
+import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.view.UserView;
 import com.example.leaves.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +27,22 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
+    @GetMapping
+    public ResponseEntity<UserView> viewAllUsers() {
+        return null;
+    }
+
     @PostMapping
     public ResponseEntity<UserView> create(
             @Valid
             @RequestBody UserCreateDto dto,
-            BindingResult bindingResult) {
+            BindingResult bindingResult) throws Exception {
 
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
+        }
+        if (userService.existsByEmail(dto.getEmail())) {
+            throw new ResourceAlreadyExistsException("This email is already in use");
         }
 
         return ResponseEntity.status(HttpStatus.OK)
@@ -45,18 +50,17 @@ public class UserController {
 
     }
 
-    @PreAuthorize("hasAuthority('WRITE')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserView> getUser(@PathVariable ("id") String id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable ("id") Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.findViewById(id));
+                .body(userService.findUserDtoById(id));
     }
 
 
     @PutMapping("/{id}")
     public ResponseEntity<UserView> updateUser(@Valid @RequestBody UserUpdateDto dto,
-                                               @PathVariable ("id") String id,
+                                               @PathVariable ("id") Long id,
                                                BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
@@ -69,7 +73,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable ("id") String id) {
+    public ResponseEntity<String> deleteUser(@PathVariable ("id") Long id) {
         userService.deleteUser(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
