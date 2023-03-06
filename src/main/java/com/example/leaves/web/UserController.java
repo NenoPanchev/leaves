@@ -30,24 +30,6 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@Valid @RequestBody LoginDto dto,
-                                                   BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult
-                    .getFieldErrors()
-                    .forEach(e -> sb.append(e.getField()).append(": ").append(e.getDefaultMessage()));
-            return new ResponseEntity<>(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
-
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                dto.getEmail(), dto.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User signed-in successfully!", HttpStatus.OK);
-    }
-
     @PostMapping
     public ResponseEntity<UserView> create(
             @Valid
@@ -63,7 +45,7 @@ public class UserController {
 
     }
 
-    @PreAuthorize("hasPermission(#id, 'READ')")
+    @PreAuthorize("hasAuthority('WRITE')")
     @GetMapping("/{id}")
     public ResponseEntity<UserView> getUser(@PathVariable ("id") String id) {
         return ResponseEntity
