@@ -1,4 +1,4 @@
-package com.example.leaves.service.impl;
+package com.example.leaves.config.services;
 
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.UserRepository;
@@ -10,7 +10,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,6 +39,17 @@ public class AppUserDetailService implements UserDetailsService {
                         .stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRole()))
                         .collect(Collectors.toList());
+
+//        Set<GrantedAuthority> newAuthorities = new HashSet<>();
+//
+//        Set<GrantedAuthority> authorities = new HashSet<>();
+//
+//        for (UserToRole userToRole : userAccount.getUserToRoles()) {
+//            authorities.add(new SimpleGrantedAuthority("ROLE_" + userToRole.getRole().getRoleName()));
+//            for (UserRoleToPrivilege userRoleToPrivilege : userToRole.getRole().getUserRoleToPrivileges()) {
+//                authorities.add(new SimpleGrantedAuthority(userRoleToPrivilege.getPrivilege().getPrivilegeName()));
+//            }
+//        }
 
         return new org.springframework.security.core.userdetails.User(
                 userEntity.getEmail(),

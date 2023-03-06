@@ -8,6 +8,7 @@ import com.example.leaves.model.view.UserView;
 import com.example.leaves.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -62,12 +63,14 @@ public class UserController {
 
     }
 
+    @PreAuthorize("hasPermission(#id, 'READ')")
     @GetMapping("/{id}")
     public ResponseEntity<UserView> getUser(@PathVariable ("id") String id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.findViewById(id));
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<UserView> updateUser(@Valid @RequestBody UserUpdateDto dto,

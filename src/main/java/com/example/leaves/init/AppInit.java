@@ -26,7 +26,7 @@ public class AppInit implements CommandLineRunner {
         permissionService.seedPermissions();
         roleService.seedRoles();
         departmentService.seedDepartments();
-        userService.seedAdmin();
+        userService.seedUsers();
 
     }
 }

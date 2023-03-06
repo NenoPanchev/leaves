@@ -23,7 +23,7 @@ public class UserEntity extends BaseEntity{
     public UserEntity() {
     }
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     public String getEmail() {
         return email;
     }

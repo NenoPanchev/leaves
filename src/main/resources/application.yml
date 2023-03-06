@@ -19,3 +19,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         generate_statistics: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
