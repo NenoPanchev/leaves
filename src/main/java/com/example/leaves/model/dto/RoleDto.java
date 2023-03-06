@@ -45,17 +45,4 @@ public class RoleDto {
         this.permissions = permissions;
         return this;
     }
-
-    public RoleEntity toEntity(RoleDto dto) {
-        RoleEntity entity = new RoleEntity()
-                .setName(dto.getName().toUpperCase())
-                .setPermissions(new ArrayList<>());
-        if (permissions != null) {
-            entity.setPermissions(dto.permissions
-                    .stream()
-                    .map(permissionDto -> permissionDto.toEntity(permissionDto))
-                    .collect(Collectors.toList()));
-        }
-        return entity;
-    }
 }

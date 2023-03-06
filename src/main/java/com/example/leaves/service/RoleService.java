@@ -2,7 +2,6 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.RoleEntity;
-import com.example.leaves.model.entity.enums.RoleEnum;
 
 import java.util.List;
 
@@ -16,4 +15,10 @@ public interface RoleService {
     boolean existsByName(String name);
 
     RoleDto findRoleById(Long id);
+
+    void deleteRole(Long id);
+
+    RoleDto updateRoleById(Long id, RoleDto dto);
+
+    boolean isSame(Long id, String name);
 }

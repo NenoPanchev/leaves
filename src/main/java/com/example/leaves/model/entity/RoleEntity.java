@@ -4,6 +4,7 @@ import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,15 +36,26 @@ public class RoleEntity extends BaseEntity{
         return this;
     }
 
-    public RoleDto toDto() {
-        List<PermissionDto> permissionDtos = permissions
-                .stream()
-                .map(PermissionEntity::toDto)
-                .collect(Collectors.toList());
+    public void toDto(RoleDto dto) {
+        if (dto == null) {
+            return;
+        }
+        dto.setName(this.getName());
+    }
 
-        return new RoleDto()
-                .setId(getId())
-                .setName(name)
-                .setPermissions(permissionDtos);
+    public void toEntity(RoleDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.setName(dto.getName());
+        RoleEntity entity = new RoleEntity()
+                .setName(dto.getName().toUpperCase())
+                .setPermissions(new ArrayList<>());
+//        if (permissions != null) {
+//            entity.setPermissions(dto.permissions
+//                    .stream()
+//                    .map(permissionDto -> permissionDto.toEntity(permissionDto))
+//                    .collect(Collectors.toList()));
+//        }
     }
 }

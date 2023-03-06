@@ -1,6 +1,7 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.PermissionEntity;
@@ -69,7 +70,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleDto createRole(RoleDto dto) {
-        RoleEntity roleEntity = dto.toEntity(dto);
+        RoleEntity roleEntity = new RoleEntity();
+        roleEntity.toEntity(dto);
         List<String> permissionNames = dto.getPermissions()
                         .stream()
                                 .map(PermissionDto::getName)
@@ -77,7 +79,9 @@ public class RoleServiceImpl implements RoleService {
         List<PermissionEntity> permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         roleEntity.setPermissions(permissionEntities);
         roleEntity = roleRepository.save(roleEntity);
-        return  roleEntity.toDto();
+        RoleDto roleDto = new RoleDto();
+        roleEntity.toDto(roleDto);
+        return  roleDto;
     }
 
     @Override
@@ -102,5 +106,36 @@ public class RoleServiceImpl implements RoleService {
                 .findById(id)
                 .map(RoleEntity::toDto)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+    }
+
+
+
+    @Override
+    @Transactional
+    public RoleDto updateRoleById(Long id, RoleDto dto) {
+        RoleEntity roleEntity = roleRepository
+                .findById(id)
+                .orElseThrow(() -> new  ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+        List<String> permissionNames = dto.getPermissions()
+                .stream()
+                .map(PermissionDto::getName)
+                .collect(Collectors.toList());
+        List<PermissionEntity> permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
+        roleEntity.setName(dto.getName().toUpperCase());
+        roleEntity.setPermissions(permissionEntities);
+        return roleRepository.save(roleEntity).toDto();
+    }
+
+    @Override
+    public boolean isSame(Long id, String name) {
+        return roleRepository.findNameById(id).equals(name);
+    }
+
+    @Override
+    public void deleteRole(Long id) {
+        if (!roleRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
+        }
+        roleRepository.deleteById(id);
     }
 }

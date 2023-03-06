@@ -1,10 +1,9 @@
-package com.example.leaves.web;
+package com.example.leaves.controller;
 
 import com.example.leaves.config.jwt.JwtUtil;
 import com.example.leaves.config.services.AppUserDetailService;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.payload.request.AuthenticationRequest;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

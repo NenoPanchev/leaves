@@ -1,4 +1,4 @@
-package com.example.leaves.web;
+package com.example.leaves.controller;
 
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
@@ -45,7 +45,7 @@ public class UserController {
             throw new ResourceAlreadyExistsException("This email is already in use");
         }
 
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(userService.createUserFromDto(dto));
 
     }

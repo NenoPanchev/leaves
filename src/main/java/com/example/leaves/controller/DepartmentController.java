@@ -1,4 +1,4 @@
-package com.example.leaves.web;
+package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.DepartmentCreateDto;
 import com.example.leaves.model.dto.DepartmentDto;

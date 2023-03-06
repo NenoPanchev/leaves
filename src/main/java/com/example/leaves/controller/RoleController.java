@@ -1,4 +1,4 @@
-package com.example.leaves.web;
+package com.example.leaves.controller;
 
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
@@ -6,6 +6,7 @@ import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class RoleController {
         }
 
         return ResponseEntity
-                .status(HttpStatus.OK)
+                .status(HttpStatus.CREATED)
                 .body(roleService.createRole(dto));
     }
     
@@ -48,5 +49,31 @@ public class RoleController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(roleService.findRoleById(id));
+    }
+
+    @PreAuthorize("hasAuthority('WRITE')")
+    @PutMapping("/{id}")
+    public ResponseEntity<RoleDto> updateRole(@PathVariable("id") Long id,
+                                              @Valid @RequestBody RoleDto dto,
+                                              BindingResult bindingResult) {
+        if (bindingResult.hasErrors()){
+            throw new ValidationException(bindingResult);
+        }
+
+        if (roleService.existsByName(dto.getName()) && !roleService.isSame(id, dto.getName())) {
+            throw new ResourceAlreadyExistsException(String.format("Role %s already exists", dto.getName().toUpperCase()));
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.updateRoleById(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRole(@PathVariable("id") Long id) {
+        roleService.deleteRole(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Role deleted");
     }
 }
