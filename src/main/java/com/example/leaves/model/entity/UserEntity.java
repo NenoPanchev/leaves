@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 public class UserEntity extends BaseEntity{
+    private String name;
     private String email;
     private String password;
     private List<RoleEntity> roles;
@@ -67,6 +68,15 @@ public class UserEntity extends BaseEntity{
     public UserEntity setDepartment(DepartmentEntity department) {
         this.department = department;
         return this;
+    }
+
+    @Column
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public UserDto toDto() {

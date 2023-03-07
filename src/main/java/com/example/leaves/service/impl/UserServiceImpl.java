@@ -44,25 +44,28 @@ public class UserServiceImpl implements UserService {
         if (userRepository.count() > 0) {
             return;
         }
-        UserEntity superAdmin = new UserEntity()
-                .setEmail("super@admin.com")
-                .setPassword(passwordEncoder.encode("1234"))
-                .setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"))
-                .setDepartment(departmentService.findByDepartment("Administration"));
+        UserEntity superAdmin = new UserEntity();
+                superAdmin.setName("Super Admin");
+                superAdmin.setEmail("super@admin.com");
+                superAdmin.setPassword(passwordEncoder.encode("1234"));
+                superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
+                superAdmin.setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(superAdmin);
 
-        UserEntity admin = new UserEntity()
-                .setEmail("admin@admin.com")
-                .setPassword(passwordEncoder.encode("1234"))
-                .setRoles(roleService.findAllByRoleIn("ADMIN", "USER"))
-                .setDepartment(departmentService.findByDepartment("Administration"));
+        UserEntity admin = new UserEntity();
+        admin.setName("Admin Admin");
+                admin.setEmail("admin@admin.com");
+                admin.setPassword(passwordEncoder.encode("1234"));
+                admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
+                admin.setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(admin);
 
-        UserEntity user = new UserEntity()
-                .setEmail("user@user.com")
-                .setPassword(passwordEncoder.encode("1234"))
-                .setRoles(roleService.findAllByRoleIn("USER"))
-                .setDepartment(departmentService.findByDepartment("IT"));
+        UserEntity user = new UserEntity();
+                user.setName("User User");
+                user.setEmail("user@user.com");
+                user.setPassword(passwordEncoder.encode("1234"));
+                user.setRoles(roleService.findAllByRoleIn("USER"));
+                user.setDepartment(departmentService.findByDepartment("IT"));
         userRepository.save(user);
     }
 

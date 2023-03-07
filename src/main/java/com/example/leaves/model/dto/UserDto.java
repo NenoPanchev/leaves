@@ -11,6 +11,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private Long id;
+    private String username;
     private String email;
     private String password;
     private List<RoleDto> roles;
@@ -26,6 +27,14 @@ public class UserDto {
     public UserDto setId(Long id) {
         this.id = id;
         return this;
+    }
+    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @NotEmpty(message = "Field cannot be empty")
