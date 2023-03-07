@@ -7,11 +7,9 @@ import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -57,7 +55,7 @@ public class RoleControllerImpl implements RoleController {
             throw new ValidationException(bindingResult);
         }
 
-        if (roleService.existsByName(dto.getName()) && !roleService.isSame(id, dto.getName())) {
+        if (roleService.existsByName(dto.getName().toUpperCase()) && !roleService.isTheSame(id, dto.getName().toUpperCase())) {
             throw new ResourceAlreadyExistsException(String.format("Role %s already exists", dto.getName().toUpperCase()));
         }
 

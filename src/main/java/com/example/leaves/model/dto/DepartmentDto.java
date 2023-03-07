@@ -35,7 +35,6 @@ public class DepartmentDto {
         this.name = name;
     }
 
-    @NotEmpty(message = "Field cannot be empty")
     @Email(message = "Enter valid email address")
     public String getAdminEmail() {
         return adminEmail;

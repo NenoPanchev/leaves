@@ -60,14 +60,5 @@ public class RoleEntity extends BaseEntity{
             return;
         }
         this.setName(dto.getName().toUpperCase());
-//        RoleEntity entity = new RoleEntity()
-//                .setName(dto.getName().toUpperCase())
-//                .setPermissions(new ArrayList<>());
-//        if (permissions != null) {
-//            entity.setPermissions(dto.permissions
-//                    .stream()
-//                    .map(permissionDto -> permissionDto.toEntity(permissionDto))
-//                    .collect(Collectors.toList()));
-//        }
     }
 }

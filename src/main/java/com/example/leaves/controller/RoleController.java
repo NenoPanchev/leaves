@@ -22,12 +22,14 @@ public interface RoleController {
     @GetMapping("/{id}")
     ResponseEntity<RoleDto> getRole(@PathVariable("id") Long id);
 
-    @PreAuthorize("hasAuthority('WRITE')")
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('WRITE')")
     public ResponseEntity<RoleDto> updateRole(@PathVariable("id") Long id,
                                               @Valid @RequestBody RoleDto dto,
                                               BindingResult bindingResult);
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DELETE')")
     ResponseEntity<String> deleteRole(@PathVariable("id") Long id);
 }

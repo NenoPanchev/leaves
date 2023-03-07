@@ -137,7 +137,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public boolean isSame(Long id, String name) {
+    public boolean isTheSame(Long id, String name) {
         return roleRepository.findNameById(id).equals(name);
     }
 

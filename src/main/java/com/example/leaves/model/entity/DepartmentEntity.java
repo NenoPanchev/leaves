@@ -3,6 +3,7 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.DepartmentDto;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ public class DepartmentEntity extends BaseEntity{
     private List<UserEntity> employees;
 
     public DepartmentEntity() {
+        this.employees = new ArrayList<>();
     }
 
     public DepartmentEntity(String department) {
@@ -69,7 +71,7 @@ public class DepartmentEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
-        this.setName(dto.getName());
+        this.setName(dto.getName().toUpperCase());
     }
 
 }

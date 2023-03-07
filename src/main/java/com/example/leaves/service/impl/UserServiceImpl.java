@@ -14,6 +14,7 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, DepartmentService departmentService, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
@@ -93,9 +94,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findByEmail(String email) {
-        UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(ObjectNotFoundException::new);
-        return userEntity;
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with email %s does not exist", email)));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto findUserDtoById(Long id) {
         UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(ObjectNotFoundException::new);
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
 //        UserView view = new UserView()
 //                .setUser(mapUserEntityToServiceModel(userEntity));
         return userEntity.toDto();

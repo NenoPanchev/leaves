@@ -20,5 +20,5 @@ public interface RoleService {
 
     RoleDto updateRoleById(Long id, RoleDto dto);
 
-    boolean isSame(Long id, String name);
+    boolean isTheSame(Long id, String name);
 }

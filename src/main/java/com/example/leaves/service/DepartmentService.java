@@ -10,4 +10,16 @@ public interface DepartmentService {
     public DepartmentEntity findByDepartment(String department);
 
     List<DepartmentDto> getAllDepartmentDtos();
+
+    DepartmentDto createDepartment(DepartmentDto dto);
+
+    DepartmentDto findDepartmentById(Long id);
+
+    boolean existsByName(String name);
+
+    void deleteDepartment(Long id);
+
+    boolean isTheSame(Long id, String toUpperCase);
+
+    DepartmentDto updateDepartmentById(Long id, DepartmentDto dto);
 }
