@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "departments")
 public class DepartmentEntity extends BaseEntity{
-    private String department;
+    private String name;
     private UserEntity admin;
     private List<UserEntity> employees;
 
@@ -17,16 +17,16 @@ public class DepartmentEntity extends BaseEntity{
     }
 
     public DepartmentEntity(String department) {
-        this.department = department;
+        this.name = department;
     }
 
     @Column
-    public String getDepartment() {
-        return department;
+    public String getName() {
+        return name;
     }
 
-    public void setDepartment(String department) {
-        this.department = department;
+    public void setName(String department) {
+        this.name = department;
     }
 
     @ManyToOne
@@ -52,7 +52,7 @@ public class DepartmentEntity extends BaseEntity{
             return;
         }
         dto.setId(this.getId());
-        dto.setDepartment(this.department);
+        dto.setName(this.name);
         dto.setAdminEmail(null);
         dto.setEmployeeEmails(null);
         if (admin != null) {
@@ -65,20 +65,11 @@ public class DepartmentEntity extends BaseEntity{
         }
     }
 
-//    public DepartmentDto toDtoReturn() {
-//        DepartmentDto dto = new DepartmentDto();
-//                dto.setId(getId());
-//                dto.setDepartment(department);
-//                dto.setAdminEmail(null);
-//                dto.setEmployeeEmails(null);
-//        if (admin != null) {
-//            dto.setAdminEmail(admin.getEmail());
-//        }
-//        if (employees.size() != 0) {
-//            dto.setEmployeeEmails(employees.stream()
-//                    .map(UserEntity::getEmail)
-//                    .collect(Collectors.toList()));
-//        }
-//        return dto;
-//    }
+    public void toEntity(DepartmentDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.setName(dto.getName());
+    }
+
 }

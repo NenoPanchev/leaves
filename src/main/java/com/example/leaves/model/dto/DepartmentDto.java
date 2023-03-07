@@ -2,13 +2,15 @@ package com.example.leaves.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DepartmentDto {
     private Long id;
-    private String department;
+    private String name;
     private String adminEmail;
     private List<String> employeeEmails;
 
@@ -25,30 +27,29 @@ public class DepartmentDto {
     }
 
     @Size(min = 2, max = 20, message = "Department name must be between 2 and 20 characters")
-    public String getDepartment() {
-        return department;
+    public String getName() {
+        return name;
     }
 
-    public DepartmentDto setDepartment(String department) {
-        this.department = department;
-        return this;
+    public void setName(String name) {
+        this.name = name;
     }
 
+    @NotEmpty(message = "Field cannot be empty")
+    @Email(message = "Enter valid email address")
     public String getAdminEmail() {
         return adminEmail;
     }
 
-    public DepartmentDto setAdminEmail(String adminEmail) {
+    public void setAdminEmail(String adminEmail) {
         this.adminEmail = adminEmail;
-        return this;
     }
 
     public List<String> getEmployeeEmails() {
         return employeeEmails;
     }
 
-    public DepartmentDto setEmployeeEmails(List<String> employeeEmails) {
+    public void setEmployeeEmails(List<String> employeeEmails) {
         this.employeeEmails = employeeEmails;
-        return this;
     }
 }

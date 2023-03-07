@@ -1,46 +1,22 @@
 package com.example.leaves.controller;
 
-import com.example.leaves.model.dto.DepartmentCreateDto;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.service.DepartmentService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@RestController
-@RequestMapping("/departments")
-public class DepartmentController {
-    private final DepartmentService departmentService;
-
-    public DepartmentController(DepartmentService departmentService) {
-        this.departmentService = departmentService;
-    }
-
+public interface DepartmentController {
     @GetMapping
-    public ResponseEntity<List<DepartmentDto>> getAllDepartments() {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(departmentService.getAllDepartmentDtos());
-    }
+    ResponseEntity<List<DepartmentDto>> getAllDepartments();
 
     @PostMapping
-    public ResponseEntity<String> create(@Valid @RequestBody DepartmentCreateDto dto,
-                                         BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            StringBuilder sb = new StringBuilder();
-            bindingResult
-                    .getFieldErrors()
-                    .forEach(e -> sb.append(e.getField()).append(": ").append(e.getDefaultMessage()).append(System.lineSeparator()));
-            return new ResponseEntity<>(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
-//        departmentService.createDepartment(dto.getName());
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(String.format("You've successfully created %s department", dto.getName()));
-    }
-
-
+    @PreAuthorize("hasAuthority('WRITE')")
+    ResponseEntity<String> create(@Valid @RequestBody DepartmentDto dto,
+                                         BindingResult bindingResult);
 }

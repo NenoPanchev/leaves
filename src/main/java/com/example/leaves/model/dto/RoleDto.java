@@ -22,9 +22,8 @@ public class RoleDto {
         return id;
     }
 
-    public RoleDto setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
-        return this;
     }
 
     @Size(min = 4, max = 20, message = "Role must be between 4 and 20 characters")
@@ -32,17 +31,15 @@ public class RoleDto {
         return name;
     }
 
-    public RoleDto setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
     public List<@Valid PermissionDto> getPermissions() {
         return permissions;
     }
 
-    public RoleDto setPermissions(List<PermissionDto> permissions) {
+    public void setPermissions(List<PermissionDto> permissions) {
         this.permissions = permissions;
-        return this;
     }
 }
