@@ -57,6 +57,10 @@ public class DepartmentEntity extends BaseEntity{
         dto.setName(this.name);
         dto.setAdminEmail(null);
         dto.setEmployeeEmails(null);
+        dto.setCreatedAt(this.getCreatedAt());
+        dto.setCreatedBy(this.getCreatedBy());
+        dto.setLastModifiedAt(this.getLastModifiedAt());
+        dto.setLastModifiedBy(this.getLastModifiedBy());
         if (admin != null) {
             dto.setAdminEmail(admin.getEmail());
         }

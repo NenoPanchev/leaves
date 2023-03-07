@@ -44,6 +44,10 @@ public class RoleEntity extends BaseEntity{
         }
         dto.setId(this.getId());
         dto.setName(this.getName());
+        dto.setCreatedAt(this.getCreatedAt());
+        dto.setCreatedBy(this.getCreatedBy());
+        dto.setLastModifiedAt(this.getLastModifiedAt());
+        dto.setLastModifiedBy(this.getLastModifiedBy());
 
         List<PermissionDto> permissionDtos = new ArrayList<>();
 

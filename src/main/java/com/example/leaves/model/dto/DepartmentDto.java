@@ -3,8 +3,8 @@ package com.example.leaves.model.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -13,6 +13,10 @@ public class DepartmentDto {
     private String name;
     private String adminEmail;
     private List<String> employeeEmails;
+    private String createdBy;
+    private LocalDateTime createdAt;
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedAt;
 
     public DepartmentDto() {
     }
@@ -50,5 +54,37 @@ public class DepartmentDto {
 
     public void setEmployeeEmails(List<String> employeeEmails) {
         this.employeeEmails = employeeEmails;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedAt() {
+        return lastModifiedAt;
+    }
+
+    public void setLastModifiedAt(LocalDateTime lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
     }
 }

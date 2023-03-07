@@ -2,12 +2,11 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.service.UserServiceModel;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @NamedEntityGraph(
         name = "full",
@@ -27,6 +26,7 @@ public class UserEntity extends BaseEntity{
     private DepartmentEntity department;
 
     public UserEntity() {
+        this.roles = new ArrayList<>();
     }
 
     @Column(nullable = false, unique = true)
@@ -79,17 +79,38 @@ public class UserEntity extends BaseEntity{
         this.name = name;
     }
 
-    public UserDto toDto() {
-        return null;
-//        List<RoleDto> roleDtos = roles.stream()
-//                .map(RoleEntity::toDto)
-//                .collect(Collectors.toList());
-//
-//        return new UserDto()
-//                .setId(getId())
-//                .setEmail(email)
-//                .setPassword(password)
-//                .setRoles(roleDtos)
-//                .setDepartment(department.getDepartment());
+    public void toDto(UserDto dto) {
+        if (dto == null) {
+            return;
+        }
+        dto.setId(this.getId());
+        dto.setName(this.getName());
+        dto.setPassword(this.getPassword());
+        dto.setEmail(this.getEmail());
+        dto.setCreatedAt(this.getCreatedAt());
+        dto.setCreatedBy(this.getCreatedBy());
+        dto.setLastModifiedAt(this.getLastModifiedAt());
+        dto.setLastModifiedBy(this.getLastModifiedBy());
+
+        if (this.getDepartment() != null) {
+            dto.setDepartment(this.getDepartment().getName());
+        }
+        List<RoleDto> roleDtoList = new ArrayList<>();
+
+        for (RoleEntity role : this.roles) {
+            RoleDto roleDto = new RoleDto();
+            role.toDto(roleDto);
+            roleDtoList.add(roleDto);
+        }
+        dto.setRoles(roleDtoList);
+    }
+
+    public void toEntity(UserDto dto) {
+        if (dto == null) {
+            return;
+        }
+        this.setName(dto.getName());
+        this.setPassword(dto.getPassword());
+        this.setEmail(dto.getEmail());
     }
 }

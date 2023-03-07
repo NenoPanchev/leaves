@@ -6,16 +6,21 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto {
     private Long id;
-    private String username;
+    private String name;
     private String email;
     private String password;
     private List<RoleDto> roles;
     private String department;
+    private String createdBy;
+    private LocalDateTime createdAt;
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedAt;
 
     public UserDto() {
     }
@@ -29,12 +34,12 @@ public class UserDto {
         return this;
     }
     @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
-    public String getUsername() {
-        return username;
+    public String getName() {
+        return name;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setName(String name) {
+        this.name = name;
     }
 
     @NotEmpty(message = "Field cannot be empty")
@@ -75,5 +80,37 @@ public class UserDto {
     public UserDto setDepartment(String department) {
         this.department = department;
         return this;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedAt() {
+        return lastModifiedAt;
+    }
+
+    public void setLastModifiedAt(LocalDateTime lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
     }
 }

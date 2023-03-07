@@ -10,17 +10,18 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 public interface UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<UserView> getAllUsers();
+    ResponseEntity<List<UserDto>> getAllUsers();
 
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<UserView> create(
+    ResponseEntity<UserDto> create(
             @Valid
-            @RequestBody UserCreateDto dto,
+            @RequestBody UserDto dto,
             BindingResult bindingResult);
 
     @GetMapping("/{id}")
@@ -29,7 +30,7 @@ public interface UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<UserView> updateUser(@Valid @RequestBody UserUpdateDto dto,
+    ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto dto,
                                                @PathVariable ("id") Long id,
                                                BindingResult bindingResult);
 

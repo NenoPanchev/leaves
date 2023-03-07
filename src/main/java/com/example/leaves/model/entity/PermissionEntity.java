@@ -36,6 +36,10 @@ public class PermissionEntity extends BaseEntity{
 
         dto.setId(this.getId());
         dto.setName(this.permissionEnum.name());
+        dto.setCreatedAt(this.getCreatedAt());
+        dto.setCreatedBy(this.getCreatedBy());
+        dto.setLastModifiedAt(this.getLastModifiedAt());
+        dto.setLastModifiedBy(this.getLastModifiedBy());
     }
 
     public void toEntity(PermissionDto dto) {

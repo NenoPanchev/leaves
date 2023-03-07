@@ -6,19 +6,15 @@ import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.view.UserView;
 
+import java.util.List;
+
 public interface UserService {
-    public void seedUsers();
-    public UserEntity createUser(UserEntity user);
-    public UserView createUserFromDto(UserCreateDto dto);
-    public UserEntity findByEmail(String email);
-
-    UserView findViewByEmail(String email);
-
+    void seedUsers();
+    UserDto createUser(UserDto dto);
+    UserEntity findByEmail(String email);
     UserDto findUserDtoById(Long id);
-
     void deleteUser(Long id);
-
-    UserView updateUser(Long id, UserUpdateDto dto);
-
+    UserDto updateUser(Long id, UserDto dto);
     boolean existsByEmail(String email);
+    List<UserDto> getAllUserDtos();
 }

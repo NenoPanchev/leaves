@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestController
@@ -27,12 +28,14 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserView> getAllUsers() {
-        return null;
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getAllUserDtos());
     }
 
     @Override
-    public ResponseEntity<UserView> create(UserCreateDto dto, BindingResult bindingResult) {
+    public ResponseEntity<UserDto> create(UserDto dto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
@@ -41,7 +44,7 @@ public class UserControllerImpl implements UserController {
         }
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.createUserFromDto(dto));
+                .body(userService.createUser(dto));
     }
 
     @Override
@@ -52,15 +55,14 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserView> updateUser(UserUpdateDto dto, Long id, BindingResult bindingResult) {
+    public ResponseEntity<UserDto> updateUser(UserDto dto, Long id, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
-        UserView userView = userService.updateUser(id, dto);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userView);
+                .body(userService.updateUser(id, dto));
     }
 
     @Override

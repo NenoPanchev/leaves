@@ -1,6 +1,7 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.dto.UserUpdateDto;
@@ -15,10 +16,15 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import javax.xml.ws.http.HTTPException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,29 +76,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserEntity createUser(UserEntity user) {
-        return userRepository.save(user);
-    }
-
-    @Override
-    public UserView createUserFromDto(UserCreateDto dto) {
-        DepartmentEntity department = departmentService
-                .findByDepartment(dto.getDepartment());
-        List<RoleEntity> roles = roleService.findAllByRoleIn("USER");
-
-        UserEntity user = new UserEntity()
-                .setEmail(dto.getEmail())
-                .setPassword(passwordEncoder.encode(dto.getPassword()))
-                .setDepartment(department)
-                .setRoles(roles);
-        user = userRepository.save(user);
-        UserServiceModel serviceModel = mapUserEntityToServiceModel(user);
-                UserView view = new UserView();
-
-            view.setUser(serviceModel);
-            view.setMessages(Arrays.asList("You've created a user"));
-
-        return view;
+    @Transactional
+    public UserDto createUser(UserDto dto) {
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+        UserEntity entity = new UserEntity();
+        entity.toEntity(dto);
+        if (dto.getDepartment() != null) {
+            DepartmentEntity department = departmentService
+                    .findByDepartment(dto.getDepartment());
+            entity.setDepartment(department);
+        }
+        List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
+        entity.setRoles(roles);
+        entity = userRepository.save(entity);
+        entity.toDto(dto);
+        return dto;
     }
 
     @Override
@@ -101,22 +99,31 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with email %s does not exist", email)));
     }
 
-    @Override
-    public UserView findViewByEmail(String email) {
-        UserEntity user = findByEmail(email);
-        UserView view = new UserView()
-                 .setUser(mapUserEntityToServiceModel(user));
-         return view;
-    }
 
     @Override
     @Transactional
     public UserDto findUserDtoById(Long id) {
-        UserEntity userEntity = userRepository.findById(id)
+        return userRepository.findById(id)
+                .map(entity -> {
+                    UserDto dto = new UserDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
-//        UserView view = new UserView()
-//                .setUser(mapUserEntityToServiceModel(userEntity));
-        return userEntity.toDto();
+    }
+
+    @Override
+    @Transactional
+    public List<UserDto> getAllUserDtos() {
+        return userRepository
+                .findAll()
+                .stream()
+                .map(entity -> {
+                    UserDto dto = new UserDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -125,18 +132,56 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserView updateUser(Long id, UserUpdateDto dto) {
+    @Transactional
+    public UserDto updateUser(Long id, UserDto dto) {
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(ObjectNotFoundException::new);
-        String[] roles = dto.getRoles().toArray(new String[0]);
-        entity
-                .setEmail(dto.getEmail())
-                .setDepartment(departmentService.findByDepartment(dto.getDepartment()))
-                .setPassword(passwordEncoder.encode(dto.getPassword()))
-                .setRoles(roleService.findAllByRoleIn(roles));
-        UserView userView = new UserView()
-                .setUser(mapUserEntityToServiceModel(userRepository.save(entity)));
-        return userView;
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+        entity.toEntity(dto);
+        DepartmentEntity departmentEntity = null;
+        if (dto.getDepartment() != null) {
+            departmentEntity = departmentService
+                    .findByDepartment(dto.getDepartment());
+        }
+        entity.setDepartment(departmentEntity);
+        List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
+        entity.setRoles(roles);
+        entity = userRepository.save(entity);
+        entity.toDto(dto);
+        return dto;
+    }
+
+    private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
+        List<RoleEntity> roles;
+        if (dto != null) {
+            /// TODO: 7.03.23 г.  filter  User (name, department)/ jpa specification executors, predicate builder
+
+            for (RoleDto roleDto : dto) {
+                if (roleDto.getName().equalsIgnoreCase("ADMIN")) {
+                    checkIfSuperAdmin();
+                } else if (roleDto.getName().equalsIgnoreCase("SUPER_ADMIN")) {
+                    throw new AccessDeniedException("You cannot promote SUPER_ADMIN");
+                }
+            }
+            String[] roleNames = dto
+                    .stream()
+                    .map(roleDto -> {
+                        String name = roleDto.getName().toUpperCase();
+                        if (name.equals("ADMIN")) {
+                            checkIfSuperAdmin();
+                        } else if (name.equals("SUPER_ADMIN")) {
+                            throw new AccessDeniedException("You cannot promote SUPER_ADMIN");
+                        }
+                        return name;
+                    }).toArray(String[]::new);
+            roles = roleService.findAllByRoleIn(roleNames);
+        } else {
+            roles = roleService.findAllByRoleIn("USER");
+        }
+        return roles;
+    }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    private void checkIfSuperAdmin() {
     }
 
     @Override
@@ -144,11 +189,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
-    private UserServiceModel mapUserEntityToServiceModel(UserEntity entity) {
-        return modelMapper.map(entity, UserServiceModel.class)
-                .setRoles(entity.getRoles()
-                        .stream()
-                        .map(RoleEntity::getName)
-                        .collect(Collectors.toList()));
-    }
 }

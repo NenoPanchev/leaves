@@ -5,11 +5,16 @@ import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.Pattern;
+import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PermissionDto {
     private Long id;
     private String name;
+    private String createdBy;
+    private LocalDateTime createdAt;
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedAt;
 
     public PermissionDto() {
     }
@@ -38,5 +43,37 @@ public class PermissionDto {
             }
         }
         return false;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
+    }
+
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
+    }
+
+    public LocalDateTime getLastModifiedAt() {
+        return lastModifiedAt;
+    }
+
+    public void setLastModifiedAt(LocalDateTime lastModifiedAt) {
+        this.lastModifiedAt = lastModifiedAt;
     }
 }
