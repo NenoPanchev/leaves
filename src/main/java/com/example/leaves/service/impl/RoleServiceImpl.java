@@ -90,7 +90,11 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository
                 .findAll()
                 .stream()
-                .map(RoleEntity::toDto)
+                .map(entity -> {
+                    RoleDto dto = new RoleDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -104,7 +108,11 @@ public class RoleServiceImpl implements RoleService {
     public RoleDto findRoleById(Long id) {
         return roleRepository
                 .findById(id)
-                .map(RoleEntity::toDto)
+                .map(entity -> {
+                    RoleDto dto = new RoleDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
     }
 
@@ -123,7 +131,9 @@ public class RoleServiceImpl implements RoleService {
         List<PermissionEntity> permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         roleEntity.setName(dto.getName().toUpperCase());
         roleEntity.setPermissions(permissionEntities);
-        return roleRepository.save(roleEntity).toDto();
+        roleEntity = roleRepository.save(roleEntity);
+        roleEntity.toDto(dto);
+        return dto;
     }
 
     @Override

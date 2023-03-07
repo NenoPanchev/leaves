@@ -2,6 +2,7 @@ package com.example.leaves.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -48,7 +49,7 @@ public class UserDto {
         return this;
     }
 
-    public List<RoleDto> getRoles() {
+    public List<@Valid RoleDto> getRoles() {
         return roles;
     }
 

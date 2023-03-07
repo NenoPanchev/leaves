@@ -2,6 +2,7 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
+import org.springframework.security.core.parameters.P;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class RoleEntity extends BaseEntity{
     private List<PermissionEntity> permissions;
 
     public RoleEntity() {
+        this.setPermissions(new ArrayList<>());
     }
     @Column
     public String getName() {
@@ -40,17 +42,27 @@ public class RoleEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+        dto.setId(this.getId());
         dto.setName(this.getName());
+
+        List<PermissionDto> permissionDtos = new ArrayList<>();
+
+        for (PermissionEntity permission : this.permissions) {
+            PermissionDto permissionDto = new PermissionDto();
+            permission.toDto(permissionDto);
+            permissionDtos.add(permissionDto);
+        }
+        dto.setPermissions(permissionDtos);
     }
 
     public void toEntity(RoleDto dto) {
         if (dto == null) {
             return;
         }
-        this.setName(dto.getName());
-        RoleEntity entity = new RoleEntity()
-                .setName(dto.getName().toUpperCase())
-                .setPermissions(new ArrayList<>());
+        this.setName(dto.getName().toUpperCase());
+//        RoleEntity entity = new RoleEntity()
+//                .setName(dto.getName().toUpperCase())
+//                .setPermissions(new ArrayList<>());
 //        if (permissions != null) {
 //            entity.setPermissions(dto.permissions
 //                    .stream()

@@ -70,15 +70,16 @@ public class UserEntity extends BaseEntity{
     }
 
     public UserDto toDto() {
-        List<RoleDto> roleDtos = roles.stream()
-                .map(RoleEntity::toDto)
-                .collect(Collectors.toList());
-
-        return new UserDto()
-                .setId(getId())
-                .setEmail(email)
-                .setPassword(password)
-                .setRoles(roleDtos)
-                .setDepartment(department.getDepartment());
+        return null;
+//        List<RoleDto> roleDtos = roles.stream()
+//                .map(RoleEntity::toDto)
+//                .collect(Collectors.toList());
+//
+//        return new UserDto()
+//                .setId(getId())
+//                .setEmail(email)
+//                .setPassword(password)
+//                .setRoles(roleDtos)
+//                .setDepartment(department.getDepartment());
     }
 }

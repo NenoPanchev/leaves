@@ -18,9 +18,8 @@ public class PermissionDto {
         return id;
     }
 
-    public PermissionDto setId(Long id) {
+    public void setId(Long id) {
         this.id = id;
-        return this;
     }
 
     @Pattern(regexp = "(?i)^(READ|WRITE|DELETE)$", message = "You must enter valid Permission")
@@ -28,14 +27,8 @@ public class PermissionDto {
         return name;
     }
 
-    public PermissionDto setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
-    }
-
-    public PermissionEntity toEntity(PermissionDto dto) {
-        return new PermissionEntity()
-                .setPermissionEnum(PermissionEnum.valueOf(dto.name.toUpperCase()));
     }
 
     private boolean permissionExists(String permission) {

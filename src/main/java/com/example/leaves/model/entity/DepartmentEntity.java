@@ -16,14 +16,17 @@ public class DepartmentEntity extends BaseEntity{
     public DepartmentEntity() {
     }
 
+    public DepartmentEntity(String department) {
+        this.department = department;
+    }
+
     @Column
     public String getDepartment() {
         return department;
     }
 
-    public DepartmentEntity setDepartment(String department) {
+    public void setDepartment(String department) {
         this.department = department;
-        return this;
     }
 
     @ManyToOne
@@ -31,9 +34,8 @@ public class DepartmentEntity extends BaseEntity{
         return admin;
     }
 
-    public DepartmentEntity setAdmin(UserEntity admin) {
+    public void setAdmin(UserEntity admin) {
         this.admin = admin;
-        return this;
     }
 
     @OneToMany
@@ -41,17 +43,18 @@ public class DepartmentEntity extends BaseEntity{
         return employees;
     }
 
-    public DepartmentEntity setEmployees(List<UserEntity> employees) {
+    public void setEmployees(List<UserEntity> employees) {
         this.employees = employees;
-        return this;
     }
 
-    public DepartmentDto toDto() {
-        DepartmentDto dto = new DepartmentDto()
-                .setId(getId())
-                .setDepartment(department)
-                .setAdminEmail(null)
-                .setEmployeeEmails(null);
+    public void toDto(DepartmentDto dto) {
+        if (dto == null) {
+            return;
+        }
+        dto.setId(this.getId());
+        dto.setDepartment(this.department);
+        dto.setAdminEmail(null);
+        dto.setEmployeeEmails(null);
         if (admin != null) {
             dto.setAdminEmail(admin.getEmail());
         }
@@ -60,6 +63,22 @@ public class DepartmentEntity extends BaseEntity{
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
         }
-        return dto;
     }
+
+//    public DepartmentDto toDtoReturn() {
+//        DepartmentDto dto = new DepartmentDto();
+//                dto.setId(getId());
+//                dto.setDepartment(department);
+//                dto.setAdminEmail(null);
+//                dto.setEmployeeEmails(null);
+//        if (admin != null) {
+//            dto.setAdminEmail(admin.getEmail());
+//        }
+//        if (employees.size() != 0) {
+//            dto.setEmployeeEmails(employees.stream()
+//                    .map(UserEntity::getEmail)
+//                    .collect(Collectors.toList()));
+//        }
+//        return dto;
+//    }
 }

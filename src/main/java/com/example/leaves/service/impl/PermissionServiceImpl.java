@@ -26,8 +26,7 @@ public class PermissionServiceImpl implements PermissionService {
         }
         Arrays.stream(PermissionEnum.values())
                 .forEach(enm -> {
-                    PermissionEntity permissionEntity = new PermissionEntity()
-                            .setPermissionEnum(enm);
+                    PermissionEntity permissionEntity = new PermissionEntity(enm);
                     permissionRepository.save(permissionEntity);
                 });
     }

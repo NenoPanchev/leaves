@@ -28,8 +28,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
         Arrays.stream(DepartmentEnum.values())
                 .forEach(enm -> {
-                    DepartmentEntity departmentEntity = new DepartmentEntity()
-                            .setDepartment(enm.name());
+                    DepartmentEntity departmentEntity = new DepartmentEntity(enm.name());
                     departmentRepository.save(departmentEntity);
                 });
     }
@@ -46,7 +45,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository
                 .findAll()
                 .stream()
-                .map(DepartmentEntity::toDto)
+                .map(entity -> {
+                    DepartmentDto dto = new DepartmentDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
