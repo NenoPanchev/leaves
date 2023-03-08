@@ -2,6 +2,7 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.service.filter.SearchCriteria;
 
 import java.util.List;
 
@@ -14,4 +15,6 @@ public interface UserService {
     UserDto updateUser(Long id, UserDto dto);
     boolean existsByEmail(String email);
     List<UserDto> getAllUserDtos();
+
+    List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);
 }

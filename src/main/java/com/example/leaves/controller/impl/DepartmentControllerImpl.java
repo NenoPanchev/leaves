@@ -4,7 +4,9 @@ import com.example.leaves.controller.DepartmentController;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.DepartmentDto;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.DepartmentService;
+import com.example.leaves.service.filter.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,6 +28,13 @@ public class DepartmentControllerImpl implements DepartmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departmentService.getAllDepartmentDtos());
+    }
+
+    @Override
+    public ResponseEntity<List<DepartmentDto>> getFilteredUsers(List<SearchCriteria> searchCriteria) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(departmentService.getAllDepartmentsFiltered(searchCriteria));
     }
 
     @Override

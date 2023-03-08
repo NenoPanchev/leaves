@@ -2,12 +2,17 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.DepartmentSpecification;
+import com.example.leaves.service.filter.RoleSpecification;
+import com.example.leaves.service.filter.SearchCriteria;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -136,6 +141,26 @@ public class DepartmentServiceImpl implements DepartmentService {
         entity = departmentRepository.save(entity);
         entity.toDto(dto);
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public List<DepartmentDto> getAllDepartmentsFiltered(List<SearchCriteria> searchCriteria) {
+        DepartmentSpecification departmentSpecification = new DepartmentSpecification();
+        searchCriteria
+                .stream()
+                .map(criteria ->
+                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
+                .forEach(departmentSpecification::add);
+        List<DepartmentEntity> entities = departmentRepository.findAll(departmentSpecification);
+        return entities
+                .stream()
+                .map(entity -> {
+                    DepartmentDto dto = new DepartmentDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
 }

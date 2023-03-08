@@ -1,20 +1,23 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
+import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.PermissionEntity;
 import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
 import com.example.leaves.repository.RoleRepository;
 import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
+import com.example.leaves.service.filter.RoleSpecification;
+import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.filter.UserSpecification;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -142,10 +145,32 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
+    public List<RoleDto> getAllRolesFiltered(List<SearchCriteria> searchCriteria) {
+        RoleSpecification roleSpecification = new RoleSpecification();
+        searchCriteria
+                .stream()
+                .map(criteria ->
+                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
+                .forEach(roleSpecification::add);
+        List<RoleEntity> entities = roleRepository.findAll(roleSpecification);
+        return entities
+                .stream()
+                .map(entity -> {
+                    RoleDto dto = new RoleDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+    }
+
+    @Override
     public void deleteRole(Long id) {
         if (!roleRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
         }
         roleRepository.deleteById(id);
     }
+
 }

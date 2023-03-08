@@ -5,9 +5,11 @@ import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.UserRepository;
+import com.example.leaves.service.filter.SearchCriteria;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.UserSpecification;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,6 +125,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria) {
+        UserSpecification userSpecification = new UserSpecification();
+        searchCriteria
+                .stream()
+                .map(criteria ->
+                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
+                .forEach(userSpecification::add);
+        List<UserEntity> entities = userRepository.findAll(userSpecification);
+        return entities
+                .stream()
+                .map(entity -> {
+                    UserDto dto = new UserDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
@@ -207,4 +230,6 @@ public class UserServiceImpl implements UserService {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get(UserEntity_.EMAIL), "%" + email + "%"));
     }
+
+
 }

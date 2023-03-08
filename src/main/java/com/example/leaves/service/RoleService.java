@@ -2,6 +2,7 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.service.filter.SearchCriteria;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface RoleService {
     RoleDto updateRoleById(Long id, RoleDto dto);
 
     boolean isTheSame(Long id, String name);
+
+    List<RoleDto> getAllRolesFiltered(List<SearchCriteria> searchCriteria);
 }

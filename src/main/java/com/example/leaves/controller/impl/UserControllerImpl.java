@@ -5,6 +5,7 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,6 +29,14 @@ public class UserControllerImpl implements UserController {
                 .status(HttpStatus.OK)
                 .body(userService.getAllUserDtos());
     }
+
+    @Override
+    public ResponseEntity<List<UserDto>> getFilteredUsers(List<SearchCriteria> searchCriteria) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getAllUsersFiltered(searchCriteria));
+    }
+
 
     @Override
     public ResponseEntity<UserDto> create(UserDto dto, BindingResult bindingResult) {

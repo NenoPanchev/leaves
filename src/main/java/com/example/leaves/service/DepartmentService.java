@@ -2,6 +2,7 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.service.filter.SearchCriteria;
 
 import java.util.List;
 
@@ -22,4 +23,6 @@ public interface DepartmentService {
     boolean isTheSame(Long id, String toUpperCase);
 
     DepartmentDto updateDepartmentById(Long id, DepartmentDto dto);
+
+    List<DepartmentDto> getAllDepartmentsFiltered(List<SearchCriteria> searchCriteria);
 }
