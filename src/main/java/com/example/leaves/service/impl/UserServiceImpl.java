@@ -147,7 +147,6 @@ public class UserServiceImpl implements UserService {
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
         List<RoleEntity> roles;
         if (dto != null) {
-            /// TODO: 7.03.23 г.  filter  User (name, department)/ jpa specification executors, predicate builder
 
             String[] roleNames = dto
                     .stream()
