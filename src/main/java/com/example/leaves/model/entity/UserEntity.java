@@ -22,8 +22,8 @@ public class UserEntity extends BaseEntity{
     private String name;
     private String email;
     private String password;
-    private List<RoleEntity> roles;
     private DepartmentEntity department;
+    private List<RoleEntity> roles;
 
     public UserEntity() {
         this.roles = new ArrayList<>();
@@ -83,6 +83,7 @@ public class UserEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+        super.toDto(dto);
         dto.setId(this.getId());
         dto.setName(this.getName());
         dto.setPassword(this.getPassword());
@@ -109,8 +110,10 @@ public class UserEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+        super.toEntity(dto);
         this.setName(dto.getName());
         this.setPassword(dto.getPassword());
         this.setEmail(dto.getEmail());
     }
+
 }

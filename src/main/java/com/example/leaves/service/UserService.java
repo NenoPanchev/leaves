@@ -9,7 +9,7 @@ public interface UserService {
     void seedUsers();
     UserDto createUser(UserDto dto);
     UserEntity findByEmail(String email);
-    UserDto findUserDtoById(Long id);
+    UserDto getUserById(Long id);
     void deleteUser(Long id);
     UserDto updateUser(Long id, UserDto dto);
     boolean existsByEmail(String email);

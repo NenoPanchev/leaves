@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto {
-    private Long id;
+public class UserDto extends BaseDto{
     private String name;
     private String email;
     private String password;
@@ -25,14 +24,6 @@ public class UserDto {
     public UserDto() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public UserDto setId(Long id) {
-        this.id = id;
-        return this;
-    }
     @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
     public String getName() {
         return name;
@@ -48,9 +39,8 @@ public class UserDto {
         return email;
     }
 
-    public UserDto setEmail(String email) {
+    public void setEmail(String email) {
         this.email = email;
-        return this;
     }
 
     @Size(min = 4, max = 20, message = "Password must be between 4 and 20 characters")
@@ -58,18 +48,16 @@ public class UserDto {
         return password;
     }
 
-    public UserDto setPassword(String password) {
+    public void setPassword(String password) {
         this.password = password;
-        return this;
     }
 
     public List<@Valid RoleDto> getRoles() {
         return roles;
     }
 
-    public UserDto setRoles(List<RoleDto> roles) {
+    public void setRoles(List<RoleDto> roles) {
         this.roles = roles;
-        return this;
     }
 
     @Size(min = 2, max = 20, message = "Department must be between 2 and 20 characters")
@@ -77,9 +65,8 @@ public class UserDto {
         return department;
     }
 
-    public UserDto setDepartment(String department) {
+    public void setDepartment(String department) {
         this.department = department;
-        return this;
     }
 
     public String getCreatedBy() {

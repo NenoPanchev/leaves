@@ -33,28 +33,17 @@ public class PermissionEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
-
-        dto.setId(this.getId());
+        super.toDto(dto);
         dto.setName(this.permissionEnum.name());
-        dto.setCreatedAt(this.getCreatedAt());
-        dto.setCreatedBy(this.getCreatedBy());
-        dto.setLastModifiedAt(this.getLastModifiedAt());
-        dto.setLastModifiedBy(this.getLastModifiedBy());
+
     }
 
     public void toEntity(PermissionDto dto) {
         if (dto == null) {
             return;
         }
+        super.toEntity(dto);
         this.setPermissionEnum(PermissionEnum.valueOf(dto.getName().toUpperCase()));
     }
-
-    public PermissionDto toDtoReturns() {
-        PermissionDto dto = new PermissionDto();
-        dto.setId(this.getId());
-        dto.setName(this.permissionEnum.name());
-        return dto;
-    }
-
 
 }

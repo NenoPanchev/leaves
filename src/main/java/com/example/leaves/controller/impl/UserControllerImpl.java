@@ -46,7 +46,7 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<UserDto> getUser(Long id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.findUserDtoById(id));
+                .body(userService.getUserById(id));
     }
 
     @Override

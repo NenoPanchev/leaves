@@ -63,6 +63,7 @@ public class RoleEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+        super.toEntity(dto);
         this.setName(dto.getName().toUpperCase());
     }
 }

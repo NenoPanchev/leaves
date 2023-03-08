@@ -53,14 +53,11 @@ public class DepartmentEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
-        dto.setId(this.getId());
+        super.toDto(dto);
         dto.setName(this.name);
         dto.setAdminEmail(null);
         dto.setEmployeeEmails(null);
-        dto.setCreatedAt(this.getCreatedAt());
-        dto.setCreatedBy(this.getCreatedBy());
-        dto.setLastModifiedAt(this.getLastModifiedAt());
-        dto.setLastModifiedBy(this.getLastModifiedBy());
+
         if (admin != null) {
             dto.setAdminEmail(admin.getEmail());
         }
@@ -75,6 +72,7 @@ public class DepartmentEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+        super.toEntity(dto);
         this.setName(dto.getName().toUpperCase());
     }
 

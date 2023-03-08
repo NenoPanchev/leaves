@@ -3,15 +3,13 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.RoleEntity;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
-import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,9 +17,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.jpa.domain.Specification.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -29,14 +30,12 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final DepartmentService departmentService;
     private final PasswordEncoder passwordEncoder;
-    private final ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
         this.passwordEncoder = passwordEncoder;
-        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -45,27 +44,27 @@ public class UserServiceImpl implements UserService {
             return;
         }
         UserEntity superAdmin = new UserEntity();
-                superAdmin.setName("Super Admin");
-                superAdmin.setEmail("super@admin.com");
-                superAdmin.setPassword(passwordEncoder.encode("1234"));
-                superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
-                superAdmin.setDepartment(departmentService.findByDepartment("Administration"));
+        superAdmin.setName("Super Admin");
+        superAdmin.setEmail("super@admin.com");
+        superAdmin.setPassword(passwordEncoder.encode("1234"));
+        superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
+        superAdmin.setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(superAdmin);
 
         UserEntity admin = new UserEntity();
         admin.setName("Admin Admin");
-                admin.setEmail("admin@admin.com");
-                admin.setPassword(passwordEncoder.encode("1234"));
-                admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
-                admin.setDepartment(departmentService.findByDepartment("Administration"));
+        admin.setEmail("admin@admin.com");
+        admin.setPassword(passwordEncoder.encode("1234"));
+        admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
+        admin.setDepartment(departmentService.findByDepartment("Administration"));
         userRepository.save(admin);
 
         UserEntity user = new UserEntity();
-                user.setName("User User");
-                user.setEmail("user@user.com");
-                user.setPassword(passwordEncoder.encode("1234"));
-                user.setRoles(roleService.findAllByRoleIn("USER"));
-                user.setDepartment(departmentService.findByDepartment("IT"));
+        user.setName("User User");
+        user.setEmail("user@user.com");
+        user.setPassword(passwordEncoder.encode("1234"));
+        user.setRoles(roleService.findAllByRoleIn("USER"));
+        user.setDepartment(departmentService.findByDepartment("IT"));
         userRepository.save(user);
     }
 
@@ -96,7 +95,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto findUserDtoById(Long id) {
+    public UserDto getUserById(Long id) {
+        List<UserEntity> specificUsers = getUserByNameAndEmail("Admin", "admin");
+        List<UserEntity> nameAndDept = getSpecificUser("User", "IT");
         return userRepository.findById(id)
                 .map(entity -> {
                     UserDto dto = new UserDto();
@@ -179,4 +180,31 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    private List<UserEntity> getSpecificUser(String name, String departmentName) {
+        return userRepository.findAll(
+                where(nameLike(name))
+                        .and(belongsToDepartment(departmentName)));
+    }
+
+    private List<UserEntity> getUserByNameAndEmail(String name, String email) {
+        return userRepository.findAll(
+                where(nameLike(name))
+                        .and(emailLike(email)));
+    }
+
+
+    private Specification<UserEntity> nameLike(String name) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.like(root.get(UserEntity_.NAME), "%" + name + "%"));
+    }
+
+    private Specification<UserEntity> belongsToDepartment(String departmentName) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.like(root.get(UserEntity_.DEPARTMENT).get(DepartmentEntity_.NAME), "%"+departmentName+"%"));
+    }
+
+    private Specification<UserEntity> emailLike(String email) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.like(root.get(UserEntity_.EMAIL), "%" + email + "%"));
+    }
 }
