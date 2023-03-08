@@ -3,18 +3,13 @@ package com.example.leaves.controller.impl;
 import com.example.leaves.controller.UserController;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
-import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.dto.UserUpdateDto;
-import com.example.leaves.model.view.UserView;
 import com.example.leaves.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 

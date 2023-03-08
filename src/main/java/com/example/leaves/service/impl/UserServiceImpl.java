@@ -2,14 +2,10 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
-import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.model.service.UserServiceModel;
-import com.example.leaves.model.view.UserView;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
@@ -17,15 +13,13 @@ import com.example.leaves.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import javax.xml.ws.http.HTTPException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -155,19 +149,20 @@ public class UserServiceImpl implements UserService {
         if (dto != null) {
             /// TODO: 7.03.23 г.  filter  User (name, department)/ jpa specification executors, predicate builder
 
-            for (RoleDto roleDto : dto) {
-                if (roleDto.getName().equalsIgnoreCase("ADMIN")) {
-                    checkIfSuperAdmin();
-                } else if (roleDto.getName().equalsIgnoreCase("SUPER_ADMIN")) {
-                    throw new AccessDeniedException("You cannot promote SUPER_ADMIN");
-                }
-            }
             String[] roleNames = dto
                     .stream()
                     .map(roleDto -> {
                         String name = roleDto.getName().toUpperCase();
                         if (name.equals("ADMIN")) {
-                            checkIfSuperAdmin();
+                            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                            boolean isSuperAdmin = authentication
+                                    .getAuthorities()
+                                    .stream()
+                                    .map(GrantedAuthority::getAuthority)
+                                    .anyMatch(authority -> authority.equals("ROLE_SUPER_ADMIN"));
+                            if (!isSuperAdmin) {
+                                throw new AccessDeniedException("Only SUPER_ADMIN can promote ADMIN");
+                            }
                         } else if (name.equals("SUPER_ADMIN")) {
                             throw new AccessDeniedException("You cannot promote SUPER_ADMIN");
                         }
@@ -178,10 +173,6 @@ public class UserServiceImpl implements UserService {
             roles = roleService.findAllByRoleIn("USER");
         }
         return roles;
-    }
-
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
-    private void checkIfSuperAdmin() {
     }
 
     @Override

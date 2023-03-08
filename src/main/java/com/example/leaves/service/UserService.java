@@ -1,10 +1,7 @@
 package com.example.leaves.service;
 
-import com.example.leaves.model.dto.UserCreateDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.dto.UserUpdateDto;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.model.view.UserView;
 
 import java.util.List;
 
