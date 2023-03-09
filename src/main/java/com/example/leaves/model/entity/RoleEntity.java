@@ -42,12 +42,8 @@ public class RoleEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
-        dto.setId(this.getId());
+        super.toDto(dto);
         dto.setName(this.getName());
-        dto.setCreatedAt(this.getCreatedAt());
-        dto.setCreatedBy(this.getCreatedBy());
-        dto.setLastModifiedAt(this.getLastModifiedAt());
-        dto.setLastModifiedBy(this.getLastModifiedBy());
 
         List<PermissionDto> permissionDtos = new ArrayList<>();
 
@@ -64,6 +60,6 @@ public class RoleEntity extends BaseEntity{
             return;
         }
         super.toEntity(dto);
-        this.setName(dto.getName().toUpperCase());
+        this.setName(dto.getName() == null ? this.getName() : dto.getName());
     }
 }

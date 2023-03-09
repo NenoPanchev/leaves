@@ -14,8 +14,8 @@ public class UserDto extends BaseDto{
     private String name;
     private String email;
     private String password;
-    private List<RoleDto> roles;
     private String department;
+    private List<RoleDto> roles;
 
     public UserDto() {
     }

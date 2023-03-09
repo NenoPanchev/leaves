@@ -73,7 +73,7 @@ public class DepartmentEntity extends BaseEntity{
             return;
         }
         super.toEntity(dto);
-        this.setName(dto.getName().toUpperCase());
+        this.setName(dto.getName() == null ? this.getName() : dto.getName().toUpperCase());
     }
 
 }

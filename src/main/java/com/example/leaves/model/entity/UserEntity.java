@@ -84,14 +84,9 @@ public class UserEntity extends BaseEntity{
             return;
         }
         super.toDto(dto);
-        dto.setId(this.getId());
         dto.setName(this.getName());
         dto.setPassword(this.getPassword());
         dto.setEmail(this.getEmail());
-        dto.setCreatedAt(this.getCreatedAt());
-        dto.setCreatedBy(this.getCreatedBy());
-        dto.setLastModifiedAt(this.getLastModifiedAt());
-        dto.setLastModifiedBy(this.getLastModifiedBy());
 
         if (this.getDepartment() != null) {
             dto.setDepartment(this.getDepartment().getName());
@@ -111,9 +106,9 @@ public class UserEntity extends BaseEntity{
             return;
         }
         super.toEntity(dto);
-        this.setName(dto.getName());
-        this.setPassword(dto.getPassword());
-        this.setEmail(dto.getEmail());
+        this.setName(dto.getName() == null ? this.getName() : dto.getName());
+        this.setPassword(dto.getPassword() == null ? this.getPassword() : dto.getPassword());
+        this.setEmail(dto.getEmail() == null ? this.getEmail() : dto.getEmail());
     }
 
 }

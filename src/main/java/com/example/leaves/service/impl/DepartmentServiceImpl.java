@@ -122,9 +122,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         DepartmentEntity entity = departmentRepository
                 .findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
-        if (dto.getName() != null) {
-            entity.setName(dto.getName());
-        }
+        entity.toEntity(dto);
         if (dto.getAdminEmail() == null) {
             entity.setAdmin(null);
         } else {

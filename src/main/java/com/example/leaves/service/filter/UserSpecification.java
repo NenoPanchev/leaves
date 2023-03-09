@@ -3,6 +3,7 @@ package com.example.leaves.service.filter;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.UserEntity_;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
@@ -42,8 +43,8 @@ public class UserSpecification implements Specification<UserEntity> {
     @Override
     public Predicate toPredicate(Root<UserEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         List<Predicate> predicates = new ArrayList<>();
-        Join<UserEntity, DepartmentEntity> departmentJoin = root.join("department");
-        Join<UserEntity, RoleEntity> roleJoin = root.joinList("roles");
+        Join<UserEntity, DepartmentEntity> departmentJoin = root.join(UserEntity_.DEPARTMENT);
+        Join<UserEntity, RoleEntity> roleJoin = root.joinList(UserEntity_.ROLES);
         Map<String, From<?, ?>> mapFieldToFrom = new HashMap<>();
         mapFieldToFrom.put("user", root);
         mapFieldToFrom.put("user.department", departmentJoin);

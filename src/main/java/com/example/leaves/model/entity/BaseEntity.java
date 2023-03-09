@@ -80,11 +80,11 @@ public abstract class BaseEntity <T extends BaseDto> {
     }
 
     public void toEntity(T baseDto) {
-        this.setId(baseDto.getId());
-        this.setCreatedAt(baseDto.getCreatedAt());
-        this.setCreatedBy(baseDto.getCreatedBy());
-        this.setLastModifiedAt(baseDto.getLastModifiedAt());
-        this.setLastModifiedBy(baseDto.getLastModifiedBy());
+        this.setId(baseDto.getId() == null ? this.getId() : baseDto.getId());
+        this.setCreatedAt(baseDto.getCreatedAt() == null ? this.getCreatedAt() : baseDto.getCreatedAt());
+        this.setCreatedBy(baseDto.getCreatedBy() == null ? this.getCreatedBy() : baseDto.getCreatedBy());
+        this.setLastModifiedAt(baseDto.getLastModifiedAt() == null ? this.getLastModifiedAt() : baseDto.getLastModifiedAt());
+        this.setLastModifiedBy(baseDto.getLastModifiedBy() == null ? this.lastModifiedBy : baseDto.getLastModifiedBy());
     }
 }
 

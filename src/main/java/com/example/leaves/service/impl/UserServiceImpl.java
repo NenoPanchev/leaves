@@ -153,6 +153,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto updateUser(Long id, UserDto dto) {
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
         entity.toEntity(dto);
