@@ -117,12 +117,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public DepartmentDto updateDepartmentById(Long id, DepartmentDto dto) {
         DepartmentEntity entity = departmentRepository
                 .findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
-        entity.toEntity(dto);
-
+        if (dto.getName() != null) {
+            entity.setName(dto.getName());
+        }
         if (dto.getAdminEmail() == null) {
             entity.setAdmin(null);
         } else {

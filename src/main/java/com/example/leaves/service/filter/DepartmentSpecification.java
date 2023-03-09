@@ -32,12 +32,12 @@ public class DepartmentSpecification implements Specification<DepartmentEntity> 
     @Override
     public Predicate toPredicate(Root<DepartmentEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         List<Predicate> predicates = new ArrayList<>();
-//        Join<DepartmentEntity, UserEntity> adminJoin = root.join(DepartmentEntity_.ADMIN);
-//        Join<DepartmentEntity, UserEntity> employeesJoin = root.joinList("employees");
+        Join<DepartmentEntity, UserEntity> adminJoin = root.join(DepartmentEntity_.ADMIN, JoinType.LEFT);
+        Join<DepartmentEntity, UserEntity> employeesJoin = root.joinList(DepartmentEntity_.EMPLOYEES, JoinType.LEFT);
         Map<String, From<?, ?>> mapFieldToFrom = new HashMap<>();
         mapFieldToFrom.put("department", root);
-//        mapFieldToFrom.put("department.admin", adminJoin);
-//        mapFieldToFrom.put("department.employees", employeesJoin);
+        mapFieldToFrom.put("department.admin", adminJoin);
+        mapFieldToFrom.put("department.employees", employeesJoin);
 
         for (SearchCriteria criteria : list) {
             switch (criteria.getOperation()) {
