@@ -9,6 +9,7 @@ import com.example.leaves.service.filter.SearchCriteria;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.UserFilter;
 import com.example.leaves.service.filter.UserSpecification;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
@@ -206,7 +207,7 @@ public class UserServiceImpl implements UserService {
     private List<UserEntity> getSpecificUser(String name, String departmentName) {
         return userRepository.findAll(
                 where(nameLike(name))
-                        .and(belongsToDepartment(departmentName)));
+                        .and(departmentLike(departmentName)));
     }
 
     private List<UserEntity> getUserByNameAndEmail(String name, String email) {
@@ -215,13 +216,17 @@ public class UserServiceImpl implements UserService {
                         .and(emailLike(email)));
     }
 
+    private Specification<UserEntity> roleLike(String name) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.like(root.get(UserEntity_.ROLES).get(RoleEntity_.NAME), "%"+name+"%"));
+    }
 
     private Specification<UserEntity> nameLike(String name) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get(UserEntity_.NAME), "%" + name + "%"));
     }
 
-    private Specification<UserEntity> belongsToDepartment(String departmentName) {
+    private Specification<UserEntity> departmentLike(String departmentName) {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get(UserEntity_.DEPARTMENT).get(DepartmentEntity_.NAME), "%"+departmentName+"%"));
     }
@@ -230,6 +235,101 @@ public class UserServiceImpl implements UserService {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.like(root.get(UserEntity_.EMAIL), "%" + email + "%"));
     }
+    private Specification<UserEntity> emailEquals(String email) {
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get(UserEntity_.EMAIL), email));
+    }
 
+    @Override
+    @Transactional
+    public List<UserDto> getFilteredUsers(UserFilter filter) {
+        return userRepository
+                .findAll(where(nameLike(filter.getName()))
+                        .and(emailLike(filter.getEmail()))
+                        .and(departmentLike(filter.getDepartment()))
+                        .and(roleLike(filter.getRole())))
+                .stream()
+                .map(entity -> {
+                    UserDto dto = new UserDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private Specification<UserEntity> createSpecification(UserFilter filter) {
+//        return
+//        switch (input.getOperation()){
+//
+//            case EQUAL:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.equal(root.get(input.getKey()),
+//                                castToRequiredType(root.get(input.getKey()).getJavaType(),
+//                                        input.getValue()));
+//            case NOT_EQUAL:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.notEqual(root.get(input.getKey()),
+//                                castToRequiredType(root.get(input.getKey()).getJavaType(),
+//                                        input.getValue()));
+//
+//            case GREATER_THAN:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.gt(root.get(input.getKey()),
+//                                (Number) castToRequiredType(
+//                                        root.get(input.getKey()).getJavaType(),
+//                                        input.getValue()));
+//
+//            case LESS_THAN:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.lt(root.get(input.getKey()),
+//                                (Number) castToRequiredType(
+//                                        root.get(input.getKey()).getJavaType(),
+//                                        input.getValue()));
+//
+//            case LIKE:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.like(root.get(input.getKey()),
+//                                "%"+input.getValue()+"%");
+//
+//            case IN:
+//                return (root, query, criteriaBuilder) ->
+//                        criteriaBuilder.in(root.get(input.getKey()))
+//                                .value(castToRequiredType(
+//                                        root.get(input.getKey()).getJavaType(),
+//                                        input.getValues()));
+//
+//            default:
+//                throw new RuntimeException("Operation not supported yet");
+//        }
+        return null;
+    }
+
+//    private Object castToRequiredType(Class fieldType, String value) {
+//        if(fieldType.isAssignableFrom(Double.class)) {
+//            return Double.valueOf(value);
+//        } else if(fieldType.isAssignableFrom(Integer.class)) {
+//            return Integer.valueOf(value);
+//        } else if(Enum.class.isAssignableFrom(fieldType)) {
+//            return Enum.valueOf(fieldType, value);
+//        }
+//        return null;
+//    }
+//
+//    private Object castToRequiredType(Class fieldType, List<String> value) {
+//        List<Object> lists = new ArrayList<>();
+//        for (String s : value) {
+//            lists.add(castToRequiredType(fieldType, s));
+//        }
+//        return lists;
+//    }
+//
+//    private Specification<UserEntity> getSpecificationFromFilters(List<SearchCriteria> filter){
+//        Specification<UserEntity> specification =
+//                where(createSpecification(filter.remove(0)));
+//        for (SearchCriteria input : filter) {
+//            specification = specification.and(createSpecification(input));
+//        }
+//        return specification;
+//    }
 
 }

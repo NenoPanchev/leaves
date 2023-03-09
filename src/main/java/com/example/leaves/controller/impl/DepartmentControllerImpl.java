@@ -31,7 +31,7 @@ public class DepartmentControllerImpl implements DepartmentController {
     }
 
     @Override
-    public ResponseEntity<List<DepartmentDto>> getFilteredUsers(List<SearchCriteria> searchCriteria) {
+    public ResponseEntity<List<DepartmentDto>> getFilteredDepartments(List<SearchCriteria> searchCriteria) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departmentService.getAllDepartmentsFiltered(searchCriteria));

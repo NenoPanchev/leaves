@@ -1,14 +1,15 @@
 package com.example.leaves.service.filter;
 
+import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserSpecification implements Specification<UserEntity> {
     private List<SearchCriteria> list = new ArrayList<>();
@@ -41,34 +42,60 @@ public class UserSpecification implements Specification<UserEntity> {
     @Override
     public Predicate toPredicate(Root<UserEntity> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         List<Predicate> predicates = new ArrayList<>();
+        Join<UserEntity, DepartmentEntity> departmentJoin = root.join("department");
+        Join<UserEntity, RoleEntity> roleJoin = root.joinList("roles");
+        Map<String, From<?, ?>> mapFieldToFrom = new HashMap<>();
+        mapFieldToFrom.put("user", root);
+        mapFieldToFrom.put("user.department", departmentJoin);
+        mapFieldToFrom.put("user.role", roleJoin);
+
+
         for (SearchCriteria criteria : list) {
             switch (criteria.getOperation()) {
                 case GREATER_THAN:
-                    predicates.add(builder.greaterThan(root.get(criteria.getKey()), criteria.getValue().toString()));
+                    query.distinct(true);
+                    predicates.add(builder.greaterThan(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case LESS_THAN:
-                    predicates.add(builder.lessThan(root.get(criteria.getKey()), criteria.getValue().toString()));
+                    query.distinct(true);
+                    predicates.add(builder.lessThan(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case GREATER_THAN_EQUAL:
-                    predicates.add(builder.greaterThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString()));
+                    query.distinct(true);
+                    predicates.add(builder.greaterThanOrEqualTo(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case LESS_THAN_EQUAL:
-                    predicates.add(builder.lessThanOrEqualTo(root.get(criteria.getKey()), criteria.getValue().toString()));
+                    query.distinct(true);
+                    predicates.add(builder.lessThanOrEqualTo(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case NOT_EQUAL:
-                    predicates.add(builder.notEqual(root.get(criteria.getKey()), criteria.getValue()));
+                    query.distinct(true);
+                    predicates.add(builder.notEqual(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case EQUAL:
-                    predicates.add(builder.equal(root.get(criteria.getKey()), criteria.getValue()));
+                    query.distinct(true);
+                    predicates.add(builder.equal(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue().toString()))));
                     break;
                 case LIKE:
-                    predicates.add(builder.like(builder.lower(root.get(criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase() + "%"));
+                    query.distinct(true);
+                    predicates.add(builder.like(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal("%" + criteria.getValue() + "%"))));
                     break;
                 case LIKE_END:
-                    predicates.add(builder.like(builder.lower(root.get(criteria.getKey())), criteria.getValue().toString().toLowerCase() + "%"));
+                    query.distinct(true);
+                    predicates.add(builder.like(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal(criteria.getValue() + "%"))));
                     break;
                 case LIKE_START:
-                    predicates.add(builder.like(builder.lower(root.get(criteria.getKey())), "%" + criteria.getValue().toString().toLowerCase()));
+                    query.distinct(true);
+                    predicates.add(builder.like(builder.lower(getStringPath(criteria.getKey(), mapFieldToFrom)),
+                            builder.lower(builder.literal("%" + criteria.getValue()))));
                     break;
                 case IN:
                     predicates.add(builder.in(root.get(criteria.getKey())).value(criteria.getValue()));
@@ -76,9 +103,26 @@ public class UserSpecification implements Specification<UserEntity> {
                 case NOT_IN:
                     predicates.add(builder.not(root.get(criteria.getKey())).in(criteria.getValue()));
                     break;
+                default: throw new UnsupportedOperationException("Operation not supported yet");
             }
         }
         return builder.and(predicates.toArray(new Predicate[0]));
+    }
+    private Path<String> getStringPath(String field, Map<String, From<?, ?>> mapFieldToFrom)
+    {
+        if(!field.matches(".+\\..+"))
+        {
+            throw new IllegalArgumentException("field '" + field + "' needs to be a dotted path (i. e. customer.address.city.zipcode)");
+        }
+        String fromPart = field.substring(0, field.lastIndexOf('.'));
+        String fieldPart = field.substring(field.lastIndexOf('.') + 1);
+
+        From<?, ?> actualFrom = mapFieldToFrom.get(fromPart);
+        if(actualFrom == null)
+        {
+            throw new IllegalStateException("the given map does not contain a from or for the value '" + fromPart + "' or is null");
+        }
+        return actualFrom.get(fieldPart);
     }
 }
 

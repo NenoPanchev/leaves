@@ -6,6 +6,7 @@ public class SearchCriteria {
     private String key;
     private Object value;
     private SearchOperation operation;
+    private List<String> values;
 
     public SearchCriteria() {
     }
@@ -38,5 +39,13 @@ public class SearchCriteria {
 
     public void setOperation(SearchOperation operation) {
         this.operation = operation;
+    }
+
+    public List<String> getValues() {
+        return values;
+    }
+
+    public void setValues(List<String> values) {
+        this.values = values;
     }
 }
