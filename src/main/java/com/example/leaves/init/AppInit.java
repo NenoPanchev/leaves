@@ -27,6 +27,6 @@ public class AppInit implements CommandLineRunner {
         roleService.seedRoles();
         departmentService.seedDepartments();
         userService.seedUsers();
-
+        departmentService.assignDepartmentAdmins();
     }
 }

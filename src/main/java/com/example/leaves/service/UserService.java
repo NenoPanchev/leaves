@@ -1,6 +1,7 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
@@ -23,4 +24,7 @@ public interface UserService {
 
     Specification<UserEntity> getSpecification(final UserFilter filter);
 
+    boolean isTheSame(Long id, String email);
+
+    void detachRoleFromUsers(RoleEntity role);
 }

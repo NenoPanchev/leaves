@@ -60,7 +60,7 @@ public class UserEntity extends BaseEntity{
     }
 
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     public DepartmentEntity getDepartment() {
         return department;
     }
@@ -111,4 +111,7 @@ public class UserEntity extends BaseEntity{
         this.setEmail(dto.getEmail() == null ? this.getEmail() : dto.getEmail());
     }
 
+    public void removeRole(RoleEntity role) {
+        this.roles.remove(role);
+    }
 }

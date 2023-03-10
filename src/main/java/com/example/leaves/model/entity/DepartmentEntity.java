@@ -75,5 +75,7 @@ public class DepartmentEntity extends BaseEntity{
         super.toEntity(dto);
         this.setName(dto.getName() == null ? this.getName() : dto.getName().toUpperCase());
     }
-
+    public void addEmployee(UserEntity userEntity) {
+        this.employees.add(userEntity);
+    }
 }

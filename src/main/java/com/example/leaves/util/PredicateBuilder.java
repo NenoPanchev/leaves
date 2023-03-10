@@ -65,7 +65,11 @@ public class PredicateBuilder<ENTITY> {
                                                   final String fieldName) {
         if (list != null && !list.isEmpty()) {
             final ListJoin<ENTITY, T> roleJoin = root.join((ListAttribute<? super ENTITY, T>) attribute);
+            for (D value : list) {
 
+                this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(roleJoin.get(fieldName))),
+                        "%"+ value.toString().toUpperCase().trim() + "%"));
+            }
 // todo            this.predicates.add(roleJoin.get(fieldName).in(list));
         }
         return this;

@@ -71,6 +71,11 @@ public class UserControllerImpl implements UserController {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
+        if (dto.getName() != null) {
+            if (userService.existsByEmail(dto.getEmail()) && !userService.isTheSame(id, dto.getEmail())) {
+                throw new ResourceAlreadyExistsException("This email is already in use");
+            }
+        }
 
         return ResponseEntity
                 .status(HttpStatus.OK)

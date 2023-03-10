@@ -9,9 +9,8 @@ import com.example.leaves.model.entity.enums.RoleEnum;
 import com.example.leaves.repository.RoleRepository;
 import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
+import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
-import com.example.leaves.service.specification.RoleSpecification;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -27,10 +26,12 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
     private final PermissionService permissionService;
+    private final UserService userService;
 
-    public RoleServiceImpl(RoleRepository roleRepository, PermissionService permissionService) {
+    public RoleServiceImpl(RoleRepository roleRepository, PermissionService permissionService, UserService userService) {
         this.roleRepository = roleRepository;
         this.permissionService = permissionService;
+        this.userService = userService;
     }
 
     @Override
@@ -177,10 +178,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void deleteRole(Long id) {
         if (!roleRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
         }
+        userService.detachRoleFromUsers(roleRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id))));
         roleRepository.deleteById(id);
     }
 

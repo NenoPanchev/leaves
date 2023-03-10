@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final DepartmentService departmentService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
@@ -44,33 +44,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void seedUsers() {
         if (userRepository.count() > 0) {
             return;
         }
+        DepartmentEntity administration = departmentService.findByDepartment("Administration");
         UserEntity superAdmin = new UserEntity();
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
         superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
-        superAdmin.setDepartment(departmentService.findByDepartment("Administration"));
+        superAdmin.setDepartment(administration);
         userRepository.save(superAdmin);
+        departmentService.addEmployeeToDepartment(superAdmin, administration);
 
         UserEntity admin = new UserEntity();
         admin.setName("Admin Admin");
         admin.setEmail("admin@admin.com");
         admin.setPassword(passwordEncoder.encode("1234"));
         admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
-        admin.setDepartment(departmentService.findByDepartment("Administration"));
+        admin.setDepartment(administration);
         userRepository.save(admin);
+        departmentService.addEmployeeToDepartment(admin, administration);
 
+        DepartmentEntity it = departmentService.findByDepartment("IT");
         UserEntity user = new UserEntity();
         user.setName("User User");
         user.setEmail("user@user.com");
         user.setPassword(passwordEncoder.encode("1234"));
         user.setRoles(roleService.findAllByRoleIn("USER"));
-        user.setDepartment(departmentService.findByDepartment("IT"));
+        user.setDepartment(it);
         userRepository.save(user);
+        departmentService.addEmployeeToDepartment(user, it);
     }
 
     @Override
@@ -79,14 +85,19 @@ public class UserServiceImpl implements UserService {
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         UserEntity entity = new UserEntity();
         entity.toEntity(dto);
+        DepartmentEntity department = null;
         if (dto.getDepartment() != null) {
-            DepartmentEntity department = departmentService
+            department = departmentService
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(department);
         }
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
         entity = userRepository.save(entity);
+        if (dto.getDepartment() != null) {
+            departmentService.addEmployeeToDepartment(entity, department);
+
+        }
         entity.toDto(dto);
         return dto;
     }
@@ -167,6 +178,9 @@ public class UserServiceImpl implements UserService {
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
         entity = userRepository.save(entity);
+        if (dto.getDepartment() != null) {
+            departmentService.addEmployeeToDepartment(entity, departmentEntity);
+        }
         entity.toDto(dto);
         return dto;
     }
@@ -233,14 +247,31 @@ public class UserServiceImpl implements UserService {
                     .like(UserEntity_.name, filter.getName())
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
-                    .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
+                    .joinInLike(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
                     .build()
                     .toArray(new Predicate[0]);
 
             return query.where(predicates)
+                    .distinct(true)
                     .orderBy(criteriaBuilder.asc(root.get(UserEntity_.ID)))
                     .getGroupRestriction();
         };
+    }
+
+    @Override
+    public boolean isTheSame(Long id, String email) {
+        return userRepository.findEmailById(id).equals(email);
+    }
+
+    @Override
+    @Transactional
+    public void detachRoleFromUsers(RoleEntity role) {
+        List<UserEntity> entities = userRepository.findAllByRoleId(role.getId());
+        for (UserEntity entity : entities) {
+            entity.removeRole(role);
+            userRepository.save(entity);
+        }
+
     }
 
     private List<UserEntity> getSpecificUser(String name, String departmentName) {

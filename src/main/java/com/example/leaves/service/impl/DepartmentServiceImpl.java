@@ -44,6 +44,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public DepartmentEntity findByDepartment(String department) {
         return departmentRepository.findByName(department.toUpperCase())
                 .orElseThrow(ObjectNotFoundException::new);
@@ -174,6 +175,34 @@ public class DepartmentServiceImpl implements DepartmentService {
                     .orderBy(criteriaBuilder.asc(root.get(DepartmentEntity_.ID)))
                     .getGroupRestriction();
         };
+    }
+
+    @Override
+    public void assignDepartmentAdmins() {
+        departmentRepository
+                .findAll()
+                .forEach(entity -> {
+                    switch (entity.getName()) {
+                        case "ADMINISTRATION":
+                            entity.setAdmin(userService.findByEmail("super@admin.com"));
+                            break;
+                        case "IT":
+                            entity.setAdmin(userService.findByEmail("admin@admin.com"));
+                            break;
+                        case "ACCOUNTING":
+                            entity.setAdmin(userService.findByEmail("user@user.com"));
+                            break;
+                    }
+                    departmentRepository.save(entity);
+                });
+
+    }
+
+    @Override
+    @Transactional
+    public void addEmployeeToDepartment(UserEntity userEntity, DepartmentEntity departmentEntity) {
+        departmentEntity.addEmployee(userEntity);
+        departmentRepository.saveAndFlush(departmentEntity);
     }
 
 }
