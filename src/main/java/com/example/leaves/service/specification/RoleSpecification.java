@@ -1,4 +1,4 @@
-package com.example.leaves.service.filter;
+package com.example.leaves.service.specification;
 
 import com.example.leaves.model.entity.RoleEntity;
 import org.springframework.data.jpa.domain.Specification;

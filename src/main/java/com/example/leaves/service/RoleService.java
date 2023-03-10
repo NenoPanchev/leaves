@@ -2,7 +2,9 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.RoleEntity;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.service.specification.SearchCriteria;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -23,5 +25,7 @@ public interface RoleService {
 
     boolean isTheSame(Long id, String name);
 
-    List<RoleDto> getAllRolesFiltered(List<SearchCriteria> searchCriteria);
+    List<RoleDto> getAllRolesFiltered(RoleFilter roleFilter);
+
+    Specification<RoleEntity> getSpecification(final RoleFilter filter);
 }

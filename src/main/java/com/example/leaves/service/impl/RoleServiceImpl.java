@@ -3,20 +3,20 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
-import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.PermissionEntity;
-import com.example.leaves.model.entity.RoleEntity;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
 import com.example.leaves.repository.RoleRepository;
 import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
-import com.example.leaves.service.filter.RoleSpecification;
-import com.example.leaves.service.filter.SearchCriteria;
-import com.example.leaves.service.filter.UserSpecification;
+import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.service.specification.RoleSpecification;
+import com.example.leaves.service.specification.SearchCriteria;
+import com.example.leaves.util.PredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,14 +146,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional
-    public List<RoleDto> getAllRolesFiltered(List<SearchCriteria> searchCriteria) {
-        RoleSpecification roleSpecification = new RoleSpecification();
-        searchCriteria
-                .stream()
-                .map(criteria ->
-                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
-                .forEach(roleSpecification::add);
-        List<RoleEntity> entities = roleRepository.findAll(roleSpecification);
+    public List<RoleDto> getAllRolesFiltered(RoleFilter roleFilter) {
+        List<RoleEntity> entities = roleRepository.findAll(getSpecification(roleFilter));
         return entities
                 .stream()
                 .map(entity -> {
@@ -166,6 +160,23 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public Specification<RoleEntity> getSpecification(RoleFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                    .in(RoleEntity_.id, filter.getIds())
+                    .like(RoleEntity_.name, filter.getName())
+                    .joinIn(RoleEntity_.permissions, filter.getPermissions(), PermissionEntity_.PERMISSION_ENUM)
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return query.where(predicates)
+                    .orderBy(criteriaBuilder.asc(root.get(RoleEntity_.ID)))
+                    .getGroupRestriction();
+        };
+    }
+
+    @Override
     public void deleteRole(Long id) {
         if (!roleRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
@@ -173,4 +184,31 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.deleteById(id);
     }
 
+    private Specification<RoleEntity> getSpecificationExample(RoleFilter filter) {
+        return null;
+//            return (root, query, criteriaBuilder) ->
+//            {
+//                Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+//                        .in(RoleEntity_.id, filter.getIds())
+//                        .startWithIgnoreCase(RoleEntity_.name, filter.getName())
+//                        .containsIgnoreCase(RoleEntity_.description, filter.getDescription())
+//                        .equal(RoleEntity_.deleted, filter.getDeleted())
+//                        .equalDateHib(RoleEntity_.createdAt, filter.getCreateTimestamp())
+//                        .equalDateHib(RoleEntity_.lastModifiedAt, filter.getUpdateTimestamp())
+//                        .compare(RoleEntity_.level, filter.getLevelOperation(), filter.getLevel())
+//                        .joinIn(RoleEntity_.permissions, filter.getPermissions(), FilterUtility
+//                                .getAnnotatedFilterableFieldName(PermissionEntity.class))
+//                        .build()
+//                        .toArray(new Predicate[0]);
+//                final List<Order> orders = new OrderBuilder<>(root, criteriaBuilder)
+//                        .order(RoleEntity_.name, filter.getNameOrder())
+//                        .order(RoleEntity_.description, filter.getDescription())
+//                        .build();
+//                return query.where(predicates)
+//                        .orderBy(orders)
+//                        .groupBy(root.get(RoleEntity_.id))
+//                        .getGroupRestriction();
+//            };
+
+    }
 }

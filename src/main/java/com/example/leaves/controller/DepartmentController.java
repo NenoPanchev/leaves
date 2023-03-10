@@ -1,7 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;

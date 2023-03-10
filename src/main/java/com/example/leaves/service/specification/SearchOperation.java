@@ -1,4 +1,4 @@
-package com.example.leaves.service.filter;
+package com.example.leaves.service.specification;
 
 public enum SearchOperation {
     GREATER_THAN,

@@ -1,17 +1,13 @@
 package com.example.leaves.service.filter;
 
-import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.RoleEntity;
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import java.util.List;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserFilter {
+    private List<Long> ids;
     private String name;
     private String email;
     private String department;
-    private String role;
+    private List<String> roles;
 
     public UserFilter() {
     }
@@ -40,11 +36,20 @@ public class UserFilter {
         this.department = department;
     }
 
-    public String getRole() {
-        return role;
+
+    public List<Long> getIds() {
+        return ids;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setIds(List<Long> ids) {
+        this.ids = ids;
+    }
+
+    public List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<String> roles) {
+        this.roles = roles;
     }
 }

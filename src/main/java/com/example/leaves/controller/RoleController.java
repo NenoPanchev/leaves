@@ -1,8 +1,8 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.RoleDto;
-import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -17,9 +17,9 @@ public interface RoleController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<RoleDto>> getAllRoles();
 
-    @PostMapping("/filter")
+    @GetMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<List<RoleDto>> getFilteredUsers(@RequestBody List<SearchCriteria> searchCriteria);
+    ResponseEntity<List<RoleDto>> getFilteredRoles(@RequestBody RoleFilter roleFilter);
 
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")

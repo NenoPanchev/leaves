@@ -1,4 +1,4 @@
-package com.example.leaves.service.filter;
+package com.example.leaves.service.specification;
 
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
@@ -125,5 +125,7 @@ public class UserSpecification implements Specification<UserEntity> {
         }
         return actualFrom.get(fieldPart);
     }
+
+
 }
 

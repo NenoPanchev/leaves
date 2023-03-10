@@ -1,7 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,11 +16,11 @@ public interface UserController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getAllUsers();
 
-    @PostMapping("/filter")
+    @GetMapping("/userfilter")
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody List<SearchCriteria> searchCriteria);
 
-    @PostMapping("/userfilter")
+    @GetMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 

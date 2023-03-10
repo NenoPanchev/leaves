@@ -2,7 +2,7 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.specification.SearchCriteria;
 
 import java.util.List;
 

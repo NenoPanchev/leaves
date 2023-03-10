@@ -5,7 +5,8 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("/default")
 @RequestMapping("/roles")
 public class RoleControllerImpl implements RoleController {
     private final RoleService roleService;
@@ -30,10 +31,10 @@ public class RoleControllerImpl implements RoleController {
     }
 
     @Override
-    public ResponseEntity<List<RoleDto>> getFilteredUsers(List<SearchCriteria> searchCriteria) {
+    public ResponseEntity<List<RoleDto>> getFilteredRoles(RoleFilter roleFilter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(roleService.getAllRolesFiltered(searchCriteria));
+                .body(roleService.getAllRolesFiltered(roleFilter));
     }
 
     @Override

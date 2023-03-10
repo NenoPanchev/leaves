@@ -5,12 +5,13 @@ import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.service.filter.UserSpecification;
+import com.example.leaves.service.specification.UserSpecification;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,8 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import javax.persistence.criteria.*;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -205,6 +206,43 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+
+
+    @Override
+    @Transactional
+    public List<UserDto> getFilteredUsers(UserFilter filter) {
+        return userRepository
+                .findAll(getSpecification(filter))
+                .stream()
+                .map(entity -> {
+                    UserDto dto = new UserDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Specification<UserEntity> getSpecification(UserFilter filter) {
+
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                    .in(UserEntity_.id, filter.getIds())
+                    .like(UserEntity_.email, filter.getEmail())
+                    .like(UserEntity_.name, filter.getName())
+                    .joinLike(UserEntity_.department, filter.getDepartment(),
+                            DepartmentEntity_.NAME)
+                    .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return query.where(predicates)
+                    .orderBy(criteriaBuilder.asc(root.get(UserEntity_.ID)))
+                    .getGroupRestriction();
+        };
+    }
+
     private List<UserEntity> getSpecificUser(String name, String departmentName) {
         return userRepository.findAll(
                 where(nameLike(name))
@@ -240,97 +278,5 @@ public class UserServiceImpl implements UserService {
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get(UserEntity_.EMAIL), email));
     }
-
-    @Override
-    @Transactional
-    public List<UserDto> getFilteredUsers(UserFilter filter) {
-        return userRepository
-                .findAll(where(nameLike(filter.getName()))
-                        .and(emailLike(filter.getEmail()))
-                        .and(departmentLike(filter.getDepartment()))
-                        .and(roleLike(filter.getRole())))
-                .stream()
-                .map(entity -> {
-                    UserDto dto = new UserDto();
-                    entity.toDto(dto);
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    private Specification<UserEntity> createSpecification(UserFilter filter) {
-//        return
-//        switch (input.getOperation()){
-//
-//            case EQUAL:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.equal(root.get(input.getKey()),
-//                                castToRequiredType(root.get(input.getKey()).getJavaType(),
-//                                        input.getValue()));
-//            case NOT_EQUAL:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.notEqual(root.get(input.getKey()),
-//                                castToRequiredType(root.get(input.getKey()).getJavaType(),
-//                                        input.getValue()));
-//
-//            case GREATER_THAN:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.gt(root.get(input.getKey()),
-//                                (Number) castToRequiredType(
-//                                        root.get(input.getKey()).getJavaType(),
-//                                        input.getValue()));
-//
-//            case LESS_THAN:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.lt(root.get(input.getKey()),
-//                                (Number) castToRequiredType(
-//                                        root.get(input.getKey()).getJavaType(),
-//                                        input.getValue()));
-//
-//            case LIKE:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.like(root.get(input.getKey()),
-//                                "%"+input.getValue()+"%");
-//
-//            case IN:
-//                return (root, query, criteriaBuilder) ->
-//                        criteriaBuilder.in(root.get(input.getKey()))
-//                                .value(castToRequiredType(
-//                                        root.get(input.getKey()).getJavaType(),
-//                                        input.getValues()));
-//
-//            default:
-//                throw new RuntimeException("Operation not supported yet");
-//        }
-        return null;
-    }
-
-//    private Object castToRequiredType(Class fieldType, String value) {
-//        if(fieldType.isAssignableFrom(Double.class)) {
-//            return Double.valueOf(value);
-//        } else if(fieldType.isAssignableFrom(Integer.class)) {
-//            return Integer.valueOf(value);
-//        } else if(Enum.class.isAssignableFrom(fieldType)) {
-//            return Enum.valueOf(fieldType, value);
-//        }
-//        return null;
-//    }
-//
-//    private Object castToRequiredType(Class fieldType, List<String> value) {
-//        List<Object> lists = new ArrayList<>();
-//        for (String s : value) {
-//            lists.add(castToRequiredType(fieldType, s));
-//        }
-//        return lists;
-//    }
-//
-//    private Specification<UserEntity> getSpecificationFromFilters(List<SearchCriteria> filter){
-//        Specification<UserEntity> specification =
-//                where(createSpecification(filter.remove(0)));
-//        for (SearchCriteria input : filter) {
-//            specification = specification.and(createSpecification(input));
-//        }
-//        return specification;
-//    }
 
 }

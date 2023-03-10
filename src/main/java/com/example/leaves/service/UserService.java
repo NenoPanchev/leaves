@@ -2,8 +2,9 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.service.filter.SearchCriteria;
+import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -19,4 +20,7 @@ public interface UserService {
 
     List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);
     List<UserDto> getFilteredUsers(UserFilter filter);
+
+    Specification<UserEntity> getSpecification(final UserFilter filter);
+
 }
