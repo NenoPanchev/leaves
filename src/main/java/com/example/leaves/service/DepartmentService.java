@@ -2,7 +2,9 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.service.specification.SearchCriteria;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
@@ -24,5 +26,7 @@ public interface DepartmentService {
 
     DepartmentDto updateDepartmentById(Long id, DepartmentDto dto);
 
-    List<DepartmentDto> getAllDepartmentsFiltered(List<SearchCriteria> searchCriteria);
+    List<DepartmentDto> getAllDepartmentsFiltered(DepartmentFilter filter);
+
+    Specification<DepartmentEntity> getSpecification(final DepartmentFilter filter);
 }

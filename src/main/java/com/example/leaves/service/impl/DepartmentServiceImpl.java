@@ -2,16 +2,19 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.service.specification.DepartmentSpecification;
 import com.example.leaves.service.specification.SearchCriteria;
+import com.example.leaves.util.PredicateBuilder;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,14 +145,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
-    public List<DepartmentDto> getAllDepartmentsFiltered(List<SearchCriteria> searchCriteria) {
-        DepartmentSpecification departmentSpecification = new DepartmentSpecification();
-        searchCriteria
-                .stream()
-                .map(criteria ->
-                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
-                .forEach(departmentSpecification::add);
-        List<DepartmentEntity> entities = departmentRepository.findAll(departmentSpecification);
+    public List<DepartmentDto> getAllDepartmentsFiltered(DepartmentFilter filter) {
+
+        List<DepartmentEntity> entities = departmentRepository.findAll(getSpecification(filter));
         return entities
                 .stream()
                 .map(entity -> {
@@ -158,6 +156,24 @@ public class DepartmentServiceImpl implements DepartmentService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Specification<DepartmentEntity> getSpecification(DepartmentFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                    .in(DepartmentEntity_.id, filter.getIds())
+                    .like(DepartmentEntity_.name, filter.getName())
+                    .joinLike(DepartmentEntity_.admin, filter.getAdmin(), UserEntity_.EMAIL)
+                    .joinIn(DepartmentEntity_.employees, filter.getEmployees(), UserEntity_.EMAIL)
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return query.where(predicates)
+                    .orderBy(criteriaBuilder.asc(root.get(DepartmentEntity_.ID)))
+                    .getGroupRestriction();
+        };
     }
 
 }

@@ -1,6 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.DepartmentDto;
+import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,9 +17,9 @@ public interface DepartmentController {
     ResponseEntity<List<DepartmentDto>> getAllDepartments();
 
 
-    @PostMapping("/filter")
+    @GetMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<List<DepartmentDto>> getFilteredDepartments(@RequestBody List<SearchCriteria> searchCriteria);
+    ResponseEntity<List<DepartmentDto>> getFilteredDepartments(@RequestBody DepartmentFilter filter);
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<DepartmentDto> create(@Valid @RequestBody DepartmentDto dto,

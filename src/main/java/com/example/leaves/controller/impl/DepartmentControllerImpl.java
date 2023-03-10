@@ -5,6 +5,7 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.DepartmentService;
+import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +31,10 @@ public class DepartmentControllerImpl implements DepartmentController {
     }
 
     @Override
-    public ResponseEntity<List<DepartmentDto>> getFilteredDepartments(List<SearchCriteria> searchCriteria) {
+    public ResponseEntity<List<DepartmentDto>> getFilteredDepartments(DepartmentFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(departmentService.getAllDepartmentsFiltered(searchCriteria));
+                .body(departmentService.getAllDepartmentsFiltered(filter));
     }
 
     @Override
