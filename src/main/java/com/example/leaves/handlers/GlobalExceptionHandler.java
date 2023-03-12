@@ -47,13 +47,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
-//    @ExceptionHandler(value
-//            = { IllegalArgumentException.class, IllegalStateException.class })
-//    protected ResponseEntity<Object> handleConflict(
-//            RuntimeException ex, WebRequest request) {
-//        String bodyOfResponse = "This should be application specific";
-//        return handleExceptionInternal(ex, bodyOfResponse,
-//                new HttpHeaders(), HttpStatus.CONFLICT, request);
-//    }
+    @ExceptionHandler(value
+            = { IllegalArgumentException.class, IllegalStateException.class })
+    protected ResponseEntity<Object> handleConflict(
+            RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = ex.getMessage();
+        return handleExceptionInternal(ex, bodyOfResponse,
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
 
 }

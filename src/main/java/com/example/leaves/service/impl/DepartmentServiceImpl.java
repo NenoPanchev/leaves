@@ -3,13 +3,13 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity_;
+import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
-import com.example.leaves.service.specification.DepartmentSpecification;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -105,10 +105,13 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public void deleteDepartment(Long id) {
         if (!departmentRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Department with id: %d does not exist", id));
         }
+
+        userService.detachDepartmentFromUsers(id);
         departmentRepository.deleteById(id);
     }
 
@@ -203,6 +206,23 @@ public class DepartmentServiceImpl implements DepartmentService {
     public void addEmployeeToDepartment(UserEntity userEntity, DepartmentEntity departmentEntity) {
         departmentEntity.addEmployee(userEntity);
         departmentRepository.saveAndFlush(departmentEntity);
+    }
+
+    @Override
+    @Transactional
+    public void detachAdminFromDepartment(Long id) {
+        departmentRepository.setAdminNullById(id);
+    }
+
+    @Override
+    @Transactional
+    public void detachEmployeeFromDepartment(UserEntity userEntity) {
+        List<DepartmentEntity> departments = departmentRepository.findAllByEmployeeId(userEntity.getId());
+        for (DepartmentEntity department : departments) {
+            department.removeEmployee(userEntity);
+            departmentRepository.save(department);
+        }
+
     }
 
 }

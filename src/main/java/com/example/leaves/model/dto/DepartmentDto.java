@@ -4,6 +4,7 @@ import com.example.leaves.model.entity.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,7 @@ public class DepartmentDto extends BaseDto {
     }
 
     @Size(min = 2, max = 20, message = "Department name must be between 2 and 20 characters")
+    @NotEmpty
     public String getName() {
         return name;
     }

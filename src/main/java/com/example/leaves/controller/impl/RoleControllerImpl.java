@@ -42,8 +42,11 @@ public class RoleControllerImpl implements RoleController {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
-        if (roleService.existsByName(dto.getName())) {
-            throw new ResourceAlreadyExistsException(String.format("Role %s already exists", dto.getName().toUpperCase()));
+
+        if (dto.getName() != null) {
+            if (roleService.existsByName(dto.getName())) {
+                throw new ResourceAlreadyExistsException(String.format("Role %s already exists", dto.getName().toUpperCase()));
+            }
         }
 
         return ResponseEntity

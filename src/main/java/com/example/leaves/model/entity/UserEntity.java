@@ -60,7 +60,7 @@ public class UserEntity extends BaseEntity{
     }
 
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     public DepartmentEntity getDepartment() {
         return department;
     }

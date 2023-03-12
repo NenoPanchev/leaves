@@ -5,6 +5,7 @@ import com.example.leaves.model.entity.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class RoleDto extends BaseDto {
     }
 
     @Size(min = 4, max = 20, message = "Role must be between 4 and 20 characters")
+    @NotEmpty
     public String getName() {
         return name;
     }

@@ -27,4 +27,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
             "JOIN u.roles AS r " +
             "WHERE r.id = :id ")
     List<UserEntity> findAllByRoleId(@Param("id") Long id);
+
+    @Query("SELECT u FROM UserEntity u " +
+            "JOIN u.department AS d " +
+            "WHERE d.id = :id ")
+    List<UserEntity> findAllByDepartmentId(@Param("id") Long id);
 }

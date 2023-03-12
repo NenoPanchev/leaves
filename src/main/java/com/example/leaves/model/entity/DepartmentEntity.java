@@ -22,7 +22,7 @@ public class DepartmentEntity extends BaseEntity{
         this.name = department;
     }
 
-    @Column
+    @Column(unique = true, nullable = false)
     public String getName() {
         return name;
     }
@@ -77,5 +77,9 @@ public class DepartmentEntity extends BaseEntity{
     }
     public void addEmployee(UserEntity userEntity) {
         this.employees.add(userEntity);
+    }
+
+    public void removeEmployee(UserEntity userEntity) {
+        this.employees.remove(userEntity);
     }
 }

@@ -4,6 +4,8 @@ import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.PermissionEntity_;
+import com.example.leaves.model.entity.RoleEntity_;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
 import com.example.leaves.repository.RoleRepository;
@@ -125,6 +127,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public RoleDto updateRoleById(Long id, RoleDto dto) {
+        if (id == 1L) {
+            throw new IllegalArgumentException("You cannot modify SUPER_ADMIN role");
+        }
         RoleEntity roleEntity = roleRepository
                 .findById(id)
                 .orElseThrow(() -> new  ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
@@ -180,6 +185,9 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public void deleteRole(Long id) {
+        if (id == 1L) {
+            throw new IllegalArgumentException("You cannot delete SUPER_ADMIN role");
+        }
         if (!roleRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
         }

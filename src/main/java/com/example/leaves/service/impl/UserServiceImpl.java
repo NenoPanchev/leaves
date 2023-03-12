@@ -4,6 +4,9 @@ import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity_;
+import com.example.leaves.model.entity.RoleEntity_;
+import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.DepartmentService;
@@ -158,13 +161,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
+        if (id == 1) {
+            throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
+        }
+        if (!userRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+        }
+        UserEntity userEntity = userRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+        departmentService.detachAdminFromDepartment(id);
+        departmentService.detachEmployeeFromDepartment(userEntity);
         userRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public UserDto updateUser(Long id, UserDto dto) {
+        if (id == 1) {
+            throw new IllegalArgumentException("You cannot modify SUPER_ADMIN");
+        }
+        if (!userRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+        }
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
@@ -272,6 +292,16 @@ public class UserServiceImpl implements UserService {
             userRepository.save(entity);
         }
 
+    }
+
+    @Override
+    @Transactional
+    public void detachDepartmentFromUsers(Long id) {
+        List<UserEntity> entities = userRepository.findAllByDepartmentId(id);
+        for (UserEntity entity : entities) {
+            entity.setDepartment(null);
+            userRepository.save(entity);
+        }
     }
 
     private List<UserEntity> getSpecificUser(String name, String departmentName) {

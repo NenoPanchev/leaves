@@ -33,4 +33,8 @@ public interface DepartmentService {
     void assignDepartmentAdmins();
 
     void addEmployeeToDepartment(UserEntity userEntity, DepartmentEntity departmentEntity);
+
+    void detachAdminFromDepartment(Long id);
+
+    void detachEmployeeFromDepartment(UserEntity userEntity);
 }

@@ -1,6 +1,7 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.specification.SearchCriteria;
@@ -27,4 +28,6 @@ public interface UserService {
     boolean isTheSame(Long id, String email);
 
     void detachRoleFromUsers(RoleEntity role);
+
+    void detachDepartmentFromUsers(Long id);
 }
