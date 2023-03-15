@@ -1,10 +1,8 @@
 package com.example.leaves.repository;
 
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -14,13 +12,14 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity> {
     @EntityGraph(value = "full")
-    Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByEmailAndDeletedIsFalse(String email);
     @EntityGraph(value = "full")
-    Optional<UserEntity> findById(Long id);
-    boolean existsByEmail(String email);
+    Optional<UserEntity> findByIdAndDeletedIsFalse(Long id);
+    boolean existsByEmailAndDeletedIsFalse(String email);
 
     @Query("SELECT u.email FROM UserEntity u " +
-            "WHERE u.id = :id")
+            "WHERE u.id = :id " +
+            "AND u.deleted = false ")
     String findEmailById(Long id);
 
     @Query("SELECT u FROM UserEntity u " +
@@ -32,4 +31,13 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
             "JOIN u.department AS d " +
             "WHERE d.id = :id ")
     List<UserEntity> findAllByDepartmentId(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE UserEntity u " +
+            "SET u.deleted = true " +
+            "WHERE u.id = :id")
+    void softDeleteById(@Param("id") Long id);
+
+    List<UserEntity> findAllByDeletedIsFalse();
+
 }

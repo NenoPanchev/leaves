@@ -79,7 +79,7 @@ public class RoleControllerImpl implements RoleController {
 
     @Override
     public ResponseEntity<String> deleteRole(Long id) {
-        roleService.deleteRole(id);
+        roleService.softDeleteRole(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Role deleted");

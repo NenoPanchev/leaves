@@ -4,7 +4,7 @@ import com.example.leaves.model.entity.PermissionEntity;
 
 import java.util.List;
 
-public class RoleFilter {
+public class RoleFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
     private List<String> permissions;
@@ -35,4 +35,5 @@ public class RoleFilter {
     public void setIds(List<Long> ids) {
         this.ids = ids;
     }
+
 }

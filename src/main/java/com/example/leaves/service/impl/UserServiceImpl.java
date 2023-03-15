@@ -14,8 +14,10 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
 import com.example.leaves.service.specification.UserSpecification;
+import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -107,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findByEmail(String email) {
-        return userRepository.findByEmail(email)
+        return userRepository.findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with email %s does not exist", email)));
     }
 
@@ -115,9 +117,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto getUserById(Long id) {
-        List<UserEntity> specificUsers = getUserByNameAndEmail("Admin", "admin");
-        List<UserEntity> nameAndDept = getSpecificUser("User", "IT");
-        return userRepository.findById(id)
+        return userRepository.findByIdAndDeletedIsFalse(id)
                 .map(entity -> {
                     UserDto dto = new UserDto();
                     entity.toDto(dto);
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public List<UserDto> getAllUserDtos() {
         return userRepository
-                .findAll()
+                .findAllByDeletedIsFalse()
                 .stream()
                 .map(entity -> {
                     UserDto dto = new UserDto();
@@ -174,6 +174,18 @@ public class UserServiceImpl implements UserService {
         departmentService.detachAdminFromDepartment(id);
         departmentService.detachEmployeeFromDepartment(userEntity);
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void softDeleteUser(Long id) {
+        if (id == 1) {
+            throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
+        }
+        if (!userRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+        }
+        userRepository.softDeleteById(id);
     }
 
     @Override
@@ -237,7 +249,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
+        return userRepository.existsByEmailAndDeletedIsFalse(email);
     }
 
 
@@ -245,8 +257,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<UserDto> getFilteredUsers(UserFilter filter) {
-        return userRepository
-                .findAll(getSpecification(filter))
+        List<UserEntity> entities;
+
+        if (filter.getLimit() != null && filter.getLimit() > 0) {
+            int offset = filter.getOffset() == null ? 0 : filter.getOffset();
+            int limit = filter.getLimit();
+            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            Page<UserEntity> page = userRepository.findAll(getSpecification(filter), pageable);
+            entities = page.getContent();
+        } else {
+            entities = userRepository.findAll(getSpecification(filter));
+        }
+        return entities
                 .stream()
                 .map(entity -> {
                     UserDto dto = new UserDto();

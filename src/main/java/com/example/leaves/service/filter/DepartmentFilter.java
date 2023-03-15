@@ -4,7 +4,7 @@ import com.example.leaves.model.entity.UserEntity;
 
 import java.util.List;
 
-public class DepartmentFilter {
+public class DepartmentFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
     private String admin;

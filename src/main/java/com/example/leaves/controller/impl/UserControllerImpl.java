@@ -84,7 +84,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public ResponseEntity<String> deleteUser(Long id) {
-        userService.deleteUser(id);
+        userService.softDeleteUser(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("User deleted");

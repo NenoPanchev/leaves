@@ -31,7 +31,7 @@ public class AppUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository
-                .findByEmail(email)
+                .findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " was not found."));
 
         return mapToUserDetails(userEntity);

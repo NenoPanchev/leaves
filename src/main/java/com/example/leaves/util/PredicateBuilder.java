@@ -96,11 +96,20 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
-    public PredicateBuilder<?> equals(final SingularAttribute<?, String> attribute,
-                                      final String value) {
+    public PredicateBuilder<?> equalsIgnoreCase(final SingularAttribute<?, String> attribute,
+                                                final String value) {
         if (value != null) {
             this.predicates.add(this.builder.equal(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
                             value.toUpperCase().trim()));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<?> equals(final SingularAttribute<?, T> attribute,
+                                                final T value) {
+        if (value != null) {
+            this.predicates.add(this.builder.equal(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
+                    value));
         }
         return this;
     }

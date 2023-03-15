@@ -2,6 +2,7 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.DepartmentDto;
 
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,16 +54,18 @@ public class DepartmentEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+
         super.toDto(dto);
         dto.setName(this.name);
         dto.setAdminEmail(null);
         dto.setEmployeeEmails(null);
 
-        if (admin != null) {
+        if (this.admin != null && !this.admin.isDeleted()) {
             dto.setAdminEmail(admin.getEmail());
         }
         if (employees.size() != 0) {
             dto.setEmployeeEmails(employees.stream()
+                            .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
         }

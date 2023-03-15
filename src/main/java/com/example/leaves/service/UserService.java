@@ -16,6 +16,7 @@ public interface UserService {
     UserEntity findByEmail(String email);
     UserDto getUserById(Long id);
     void deleteUser(Long id);
+    void softDeleteUser(Long id);
     UserDto updateUser(Long id, UserDto dto);
     boolean existsByEmail(String email);
     List<UserDto> getAllUserDtos();

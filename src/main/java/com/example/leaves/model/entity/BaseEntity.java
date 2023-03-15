@@ -8,7 +8,6 @@ import com.example.leaves.model.listener.MyEntityListener;
 import java.time.LocalDateTime;
 
 @EntityListeners(MyEntityListener.class)
-//@EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 public abstract class BaseEntity <T extends BaseDto> {
     private Long id;
@@ -16,6 +15,8 @@ public abstract class BaseEntity <T extends BaseDto> {
     private LocalDateTime createdAt;
     private String lastModifiedBy;
     private LocalDateTime lastModifiedAt;
+    private boolean deleted = Boolean.FALSE;
+
 
     public BaseEntity() {
     }
@@ -85,6 +86,15 @@ public abstract class BaseEntity <T extends BaseDto> {
         this.setCreatedBy(baseDto.getCreatedBy() == null ? this.getCreatedBy() : baseDto.getCreatedBy());
         this.setLastModifiedAt(baseDto.getLastModifiedAt() == null ? this.getLastModifiedAt() : baseDto.getLastModifiedAt());
         this.setLastModifiedBy(baseDto.getLastModifiedBy() == null ? this.lastModifiedBy : baseDto.getLastModifiedBy());
+    }
+
+    @Column
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }
 

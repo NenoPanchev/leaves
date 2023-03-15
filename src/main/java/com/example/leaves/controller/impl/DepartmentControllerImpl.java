@@ -75,7 +75,7 @@ public class DepartmentControllerImpl implements DepartmentController {
 
     @Override
     public ResponseEntity<String> deleteDepartment(Long id) {
-        departmentService.deleteDepartment(id);
+        departmentService.softDeleteDepartment(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Department deleted");

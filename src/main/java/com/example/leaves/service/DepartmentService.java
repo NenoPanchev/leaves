@@ -22,6 +22,8 @@ public interface DepartmentService {
 
     void deleteDepartment(Long id);
 
+    void softDeleteDepartment(Long id);
+
     boolean isTheSame(Long id, String toUpperCase);
 
     DepartmentDto updateDepartmentById(Long id, DepartmentDto dto);

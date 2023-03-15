@@ -2,6 +2,8 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.parameters.P;
 
 import javax.persistence.*;
@@ -42,6 +44,7 @@ public class RoleEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+
         super.toDto(dto);
         dto.setName(this.getName());
 

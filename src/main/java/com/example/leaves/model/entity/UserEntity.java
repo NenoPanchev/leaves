@@ -2,6 +2,8 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
@@ -83,6 +85,7 @@ public class UserEntity extends BaseEntity{
         if (dto == null) {
             return;
         }
+
         super.toDto(dto);
         dto.setName(this.getName());
         dto.setPassword(this.getPassword());

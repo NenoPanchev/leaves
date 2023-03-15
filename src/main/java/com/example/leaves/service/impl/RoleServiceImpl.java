@@ -13,7 +13,12 @@ import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
+import javafx.scene.control.Pagination;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -70,7 +75,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public List<RoleEntity> findAllByRoleIn(String... roles) {
-        return roleRepository.findAllByNameIn(roles);
+        return roleRepository.findAllByNameInAndDeletedIsFalse(roles);
     }
 
     @Override
@@ -94,7 +99,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public List<RoleDto> getAllRoleDtos() {
         return roleRepository
-                .findAll()
+                .findAllByDeletedIsFalse()
                 .stream()
                 .map(entity -> {
                     RoleDto dto = new RoleDto();
@@ -106,14 +111,14 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean existsByName(String name) {
-        return roleRepository.existsByName(name.toUpperCase());
+        return roleRepository.existsByNameAndDeletedIsFalse(name.toUpperCase());
     }
 
     @Override
     @Transactional
     public RoleDto findRoleById(Long id) {
         return roleRepository
-                .findById(id)
+                .findByIdAndDeletedIsFalse(id)
                 .map(entity -> {
                     RoleDto dto = new RoleDto();
                     entity.toDto(dto);
@@ -153,7 +158,17 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public List<RoleDto> getAllRolesFiltered(RoleFilter roleFilter) {
-        List<RoleEntity> entities = roleRepository.findAll(getSpecification(roleFilter));
+        List<RoleEntity> entities;
+
+        if (roleFilter.getLimit() != null && roleFilter.getLimit() > 0) {
+            int offset = roleFilter.getOffset() == null ? 0 : roleFilter.getOffset();
+            int limit = roleFilter.getLimit();
+            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            Page<RoleEntity> page = roleRepository.findAll(getSpecification(roleFilter), pageable);
+            entities = page.getContent();
+        } else {
+            entities = roleRepository.findAll(getSpecification(roleFilter));
+        }
         return entities
                 .stream()
                 .map(entity -> {
@@ -173,6 +188,7 @@ public class RoleServiceImpl implements RoleService {
                     .in(RoleEntity_.id, filter.getIds())
                     .like(RoleEntity_.name, filter.getName())
                     .joinIn(RoleEntity_.permissions, filter.getPermissions(), PermissionEntity_.PERMISSION_ENUM)
+                    .equals(RoleEntity_.deleted, filter.isDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -194,6 +210,19 @@ public class RoleServiceImpl implements RoleService {
         userService.detachRoleFromUsers(roleRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id))));
         roleRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void softDeleteRole(Long id) {
+        if (id == 1L) {
+            throw new IllegalArgumentException("You cannot delete SUPER_ADMIN role");
+        }
+        if (!roleRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
+        }
+
+        roleRepository.softDeleteById(id);
     }
 
     private Specification<RoleEntity> getSpecificationExample(RoleFilter filter) {

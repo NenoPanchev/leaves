@@ -10,7 +10,9 @@ import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
+import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -46,7 +48,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentEntity findByDepartment(String department) {
-        return departmentRepository.findByName(department.toUpperCase())
+        return departmentRepository.findByDeletedIsFalseAndName(department.toUpperCase())
                 .orElseThrow(ObjectNotFoundException::new);
     }
 
@@ -54,7 +56,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Transactional
     public List<DepartmentDto> getAllDepartmentDtos() {
         return departmentRepository
-                .findAll()
+                .findAllByDeletedIsFalse()
                 .stream()
                 .map(entity -> {
                     DepartmentDto dto = new DepartmentDto();
@@ -90,7 +92,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Transactional
     public DepartmentDto findDepartmentById(Long id) {
         return departmentRepository
-                .findById(id)
+                .findByIdAndDeletedIsFalse(id)
                 .map(entity -> {
                     DepartmentDto dto = new DepartmentDto();
                     entity.toDto(dto);
@@ -101,7 +103,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public boolean existsByName(String name) {
-        return departmentRepository.existsByName(name.toUpperCase());
+        return departmentRepository.existsByNameAndDeletedIsFalse(name.toUpperCase());
     }
 
     @Override
@@ -113,6 +115,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         userService.detachDepartmentFromUsers(id);
         departmentRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void softDeleteDepartment(Long id) {
+        if (!departmentRepository.existsById(id)) {
+            throw new ObjectNotFoundException(String.format("Department with id: %d does not exist", id));
+        }
+        departmentRepository.softDeleteById(id);
     }
 
     @Override
@@ -150,8 +161,17 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public List<DepartmentDto> getAllDepartmentsFiltered(DepartmentFilter filter) {
+        List<DepartmentEntity> entities;
 
-        List<DepartmentEntity> entities = departmentRepository.findAll(getSpecification(filter));
+        if (filter.getLimit() != null && filter.getLimit() > 0) {
+            int offset = filter.getOffset() == null ? 0 : filter.getOffset();
+            int limit = filter.getLimit();
+            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            Page<DepartmentEntity> page = departmentRepository.findAll(getSpecification(filter), pageable);
+            entities = page.getContent();
+        } else {
+            entities = departmentRepository.findAll(getSpecification(filter));
+        }
         return entities
                 .stream()
                 .map(entity -> {
@@ -183,7 +203,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void assignDepartmentAdmins() {
         departmentRepository
-                .findAll()
+                .findAllByDeletedIsFalse()
                 .forEach(entity -> {
                     switch (entity.getName()) {
                         case "ADMINISTRATION":

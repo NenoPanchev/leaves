@@ -1,6 +1,7 @@
 package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,11 +14,15 @@ import java.util.Optional;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Long>, JpaSpecificationExecutor<DepartmentEntity> {
-    Optional<DepartmentEntity> findByName(String name);
-    boolean existsByName(String name);
+    Optional<DepartmentEntity> findByDeletedIsFalseAndName(String name);
+    boolean existsByNameAndDeletedIsFalse(String name);
     @Query("SELECT d.name FROM DepartmentEntity d " +
-            "WHERE d.id = :id")
+            "WHERE d.id = :id " +
+            "AND d.deleted = false ")
     String findNameById(@Param("id") Long id);
+
+    Optional<DepartmentEntity> findByIdAndDeletedIsFalse(Long id);
+
 
     @Modifying
     @Query("UPDATE DepartmentEntity d " +
@@ -29,4 +34,12 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
             "JOIN d.employees u " +
             "WHERE u.id = :id")
     List<DepartmentEntity> findAllByEmployeeId(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE DepartmentEntity d " +
+            "SET d.deleted = true " +
+            "WHERE d.id = :id")
+    void softDeleteById(@Param("id") Long id);
+
+    List<DepartmentEntity> findAllByDeletedIsFalse();
 }
