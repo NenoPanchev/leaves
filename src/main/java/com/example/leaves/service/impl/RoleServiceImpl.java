@@ -187,6 +187,7 @@ public class RoleServiceImpl implements RoleService {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(RoleEntity_.id, filter.getIds())
                     .like(RoleEntity_.name, filter.getName())
+                    .equals(RoleEntity_.deleted, filter.isDeleted())
                     .joinIn(RoleEntity_.permissions, filter.getPermissions(), PermissionEntity_.PERMISSION_ENUM)
                     .equals(RoleEntity_.deleted, filter.isDeleted())
                     .build()

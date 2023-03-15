@@ -189,6 +189,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(DepartmentEntity_.id, filter.getIds())
                     .like(DepartmentEntity_.name, filter.getName())
+                    .equals(DepartmentEntity_.deleted, filter.isDeleted())
                     .joinLike(DepartmentEntity_.admin, filter.getAdmin(), UserEntity_.EMAIL)
                     .joinIn(DepartmentEntity_.employees, filter.getEmployees(), UserEntity_.EMAIL)
                     .build()

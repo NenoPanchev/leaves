@@ -287,6 +287,7 @@ public class UserServiceImpl implements UserService {
                     .in(UserEntity_.id, filter.getIds())
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())
+                    .equals(UserEntity_.deleted, filter.isDeleted())
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
                     .joinInLike(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
