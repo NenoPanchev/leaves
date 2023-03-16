@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.DoubleStream;
 
 @Repository
-public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpecificationExecutor<RoleEntity> {
+public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpecificationExecutor<RoleEntity>, SoftDeleteRepository {
     List<RoleEntity> findAllByNameInAndDeletedIsFalse(String... roles);
     boolean existsByNameAndDeletedIsFalse(String name);
 

@@ -185,7 +185,8 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
         }
-        userRepository.softDeleteById(id);
+        userRepository.markAsDeleted(id);
+//        userRepository.softDeleteById(id);
     }
 
     @Override

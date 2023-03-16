@@ -223,7 +223,7 @@ public class RoleServiceImpl implements RoleService {
             throw new ObjectNotFoundException(String.format("Role with id: %d does not exist", id));
         }
 
-        roleRepository.softDeleteById(id);
+        roleRepository.markAsDeleted(id);
     }
 
     private Specification<RoleEntity> getSpecificationExample(RoleFilter filter) {

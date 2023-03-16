@@ -68,6 +68,9 @@ public class DepartmentEntity extends BaseEntity{
                             .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
+            if (dto.getEmployeeEmails().size() == 0) {
+                dto.setEmployeeEmails(null);
+            }
         }
     }
 

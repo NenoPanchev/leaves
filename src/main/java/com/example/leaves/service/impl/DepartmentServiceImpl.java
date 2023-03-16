@@ -123,7 +123,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (!departmentRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Department with id: %d does not exist", id));
         }
-        departmentRepository.softDeleteById(id);
+        departmentRepository.markAsDeleted(id);
     }
 
     @Override
