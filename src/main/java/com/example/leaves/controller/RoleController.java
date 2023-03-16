@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-
+@CrossOrigin
+@RequestMapping("/roles")
 public interface RoleController {
 
     @GetMapping

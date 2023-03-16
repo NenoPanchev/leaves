@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController("/default")
-@RequestMapping("/roles")
 public class RoleControllerImpl implements RoleController {
     private final RoleService roleService;
 

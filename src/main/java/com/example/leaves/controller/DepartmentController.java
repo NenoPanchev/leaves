@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+@CrossOrigin
+@RequestMapping("/departments")
 public interface DepartmentController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
