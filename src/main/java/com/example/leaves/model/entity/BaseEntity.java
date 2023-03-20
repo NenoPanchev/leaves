@@ -6,6 +6,7 @@ import com.example.leaves.model.dto.BaseDto;
 import com.example.leaves.model.listener.MyEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @EntityListeners(MyEntityListener.class)
 @MappedSuperclass
@@ -33,7 +34,6 @@ public abstract class BaseEntity <T extends BaseDto> {
 
 
     @Column
-//    @CreatedBy
     public String getCreatedBy() {
         return createdBy;
     }
@@ -43,7 +43,6 @@ public abstract class BaseEntity <T extends BaseDto> {
     }
 
     @Column
-//    @CreatedDate
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -53,7 +52,6 @@ public abstract class BaseEntity <T extends BaseDto> {
     }
 
     @Column
-//    @LastModifiedBy
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -63,7 +61,6 @@ public abstract class BaseEntity <T extends BaseDto> {
     }
 
     @Column
-//    @LastModifiedDate
     public LocalDateTime getLastModifiedAt() {
         return lastModifiedAt;
     }
@@ -95,6 +92,19 @@ public abstract class BaseEntity <T extends BaseDto> {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseEntity<?> that = (BaseEntity<?>) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
 
