@@ -232,7 +232,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public void detachAdminFromDepartment(Long id) {
-        departmentRepository.setAdminNullById(id);
+        departmentRepository.setAdminNullByAdminId(id);
     }
 
     @Override

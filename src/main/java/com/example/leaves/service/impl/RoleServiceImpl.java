@@ -225,32 +225,4 @@ public class RoleServiceImpl implements RoleService {
 
         roleRepository.markAsDeleted(id);
     }
-
-    private Specification<RoleEntity> getSpecificationExample(RoleFilter filter) {
-        return null;
-//            return (root, query, criteriaBuilder) ->
-//            {
-//                Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
-//                        .in(RoleEntity_.id, filter.getIds())
-//                        .startWithIgnoreCase(RoleEntity_.name, filter.getName())
-//                        .containsIgnoreCase(RoleEntity_.description, filter.getDescription())
-//                        .equal(RoleEntity_.deleted, filter.getDeleted())
-//                        .equalDateHib(RoleEntity_.createdAt, filter.getCreateTimestamp())
-//                        .equalDateHib(RoleEntity_.lastModifiedAt, filter.getUpdateTimestamp())
-//                        .compare(RoleEntity_.level, filter.getLevelOperation(), filter.getLevel())
-//                        .joinIn(RoleEntity_.permissions, filter.getPermissions(), FilterUtility
-//                                .getAnnotatedFilterableFieldName(PermissionEntity.class))
-//                        .build()
-//                        .toArray(new Predicate[0]);
-//                final List<Order> orders = new OrderBuilder<>(root, criteriaBuilder)
-//                        .order(RoleEntity_.name, filter.getNameOrder())
-//                        .order(RoleEntity_.description, filter.getDescription())
-//                        .build();
-//                return query.where(predicates)
-//                        .orderBy(orders)
-//                        .groupBy(root.get(RoleEntity_.id))
-//                        .getGroupRestriction();
-//            };
-
-    }
 }

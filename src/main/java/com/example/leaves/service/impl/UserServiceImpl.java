@@ -327,41 +327,4 @@ public class UserServiceImpl implements UserService {
             userRepository.save(entity);
         }
     }
-
-    private List<UserEntity> getSpecificUser(String name, String departmentName) {
-        return userRepository.findAll(
-                where(nameLike(name))
-                        .and(departmentLike(departmentName)));
-    }
-
-    private List<UserEntity> getUserByNameAndEmail(String name, String email) {
-        return userRepository.findAll(
-                where(nameLike(name))
-                        .and(emailLike(email)));
-    }
-
-    private Specification<UserEntity> roleLike(String name) {
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(UserEntity_.ROLES).get(RoleEntity_.NAME), "%"+name+"%"));
-    }
-
-    private Specification<UserEntity> nameLike(String name) {
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(UserEntity_.NAME), "%" + name + "%"));
-    }
-
-    private Specification<UserEntity> departmentLike(String departmentName) {
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(UserEntity_.DEPARTMENT).get(DepartmentEntity_.NAME), "%"+departmentName+"%"));
-    }
-
-    private Specification<UserEntity> emailLike(String email) {
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.like(root.get(UserEntity_.EMAIL), "%" + email + "%"));
-    }
-    private Specification<UserEntity> emailEquals(String email) {
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get(UserEntity_.EMAIL), email));
-    }
-
 }

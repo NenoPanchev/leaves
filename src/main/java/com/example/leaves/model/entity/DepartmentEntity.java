@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class DepartmentEntity extends BaseEntity{
     private String name;
     private UserEntity admin;
-    private List<UserEntity> employees;
+    private List<UserEntity> employees = new ArrayList<>();
 
     public DepartmentEntity() {
         this.employees = new ArrayList<>();
@@ -63,7 +63,7 @@ public class DepartmentEntity extends BaseEntity{
         if (this.admin != null && !this.admin.isDeleted()) {
             dto.setAdminEmail(admin.getEmail());
         }
-        if (employees.size() != 0) {
+        if (this.employees != null && this.employees.size() != 0) {
             dto.setEmployeeEmails(employees.stream()
                             .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
@@ -82,6 +82,9 @@ public class DepartmentEntity extends BaseEntity{
         this.setName(dto.getName() == null ? this.getName() : dto.getName().toUpperCase());
     }
     public void addEmployee(UserEntity userEntity) {
+        if (this.employees == null) {
+            this.employees = new ArrayList<>();
+        }
         this.employees.add(userEntity);
     }
 

@@ -1,7 +1,6 @@
 package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.RoleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -28,7 +27,7 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
     @Query("UPDATE DepartmentEntity d " +
             "SET d.admin = null " +
             "WHERE d.admin.id = :id")
-    void setAdminNullById(@Param("id") Long id);
+    void setAdminNullByAdminId(@Param("id") Long id);
 
     @Query("SELECT d FROM DepartmentEntity d " +
             "JOIN d.employees u " +

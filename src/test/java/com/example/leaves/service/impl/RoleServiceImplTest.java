@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -36,6 +37,8 @@ import static org.mockito.Mockito.*;
 class RoleServiceImplTest {
     private RoleEntity user, admin, superAdmin;
     private RoleService serviceToTest;
+    @Autowired
+    private RoleService roleService;
 
     @Mock
     private RoleRepository mockRoleRepository;
@@ -46,6 +49,7 @@ class RoleServiceImplTest {
 
     @BeforeEach
     void setUp() {
+
         // Permissions
         PermissionEntity read = new PermissionEntity(PermissionEnum.READ);
         PermissionEntity write = new PermissionEntity(PermissionEnum.WRITE);
@@ -108,22 +112,22 @@ class RoleServiceImplTest {
     @Test
     void createRole() {
         RoleDto expected = new RoleDto();
-        admin.toDto(expected);
+        user.toDto(expected);
         RoleEntity entity = new RoleEntity();
         entity.toEntity(expected);
-        when(mockPermissionService.findAllByPermissionNameIn(admin
+        when(mockPermissionService.findAllByPermissionNameIn(user
                 .getPermissions()
                 .stream()
                 .map(p -> p.getPermissionEnum().name())
                 .collect(Collectors.toList())))
-                .thenReturn(admin.getPermissions());
-        when(mockRoleRepository.save(entity))
-                .thenReturn(entity);
+                .thenReturn(user.getPermissions());
+        when(mockRoleRepository.save(user))
+                .thenReturn(user);
 
         RoleDto actual = serviceToTest.createRole(expected);
 
-        assertNull(actual);
-//        assertEquals(expected.getPermissions().size(), actual.getPermissions().size());
+        assertEquals(expected.getPermissions().size(), actual.getPermissions().size());
+        assertEquals(expected.getName(), actual.getName());
     }
 
     @Test
@@ -165,9 +169,33 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void updateRoleByIdThrows() {
+    void updateRoleById() {
+        RoleDto dto = new RoleDto();
+        user.setName("Ivancho");
+        user.toDto(dto);
+        dto.setName("Pesho");
+        RoleEntity entity = new RoleEntity();
+        entity.toEntity(dto);
+        when(mockRoleRepository.findById(3L))
+                .thenReturn(Optional.of(user));
+        when(mockRoleRepository.save(user))
+                .thenReturn(user);
+
+        RoleDto actual = serviceToTest.updateRoleById(3L, dto);
+
+        assertEquals(dto.getName(), actual.getName());
+    }
+
+    @Test
+    void updateRoleByIdThrowsIfSuperAdmin() {
         RoleDto dto = new RoleDto();
         assertThrows(IllegalArgumentException.class, () -> serviceToTest.updateRoleById(1L, dto));
+    }
+
+    @Test
+    void updateRoleByIdThrowsIfNonExistentRole() {
+        RoleDto dto = new RoleDto();
+        assertThrows(ObjectNotFoundException.class, () -> serviceToTest.updateRoleById(99L, dto));
     }
 
     @Test
@@ -181,21 +209,28 @@ class RoleServiceImplTest {
 
     @Test
     void getAllRolesFiltered() {
+        roleService.seedRoles();
         RoleFilter filter = new RoleFilter();
-        filter.setName("Admin");
-        List<RoleEntity> entities = Arrays.asList(superAdmin);
-        Specification<RoleEntity> specification = serviceToTest.getSpecification(filter);
-//        when(serviceToTest.getSpecification(filter))
-//                .thenReturn(specification);
-        when(mockRoleRepository.findAll(specification))
-                .thenReturn(entities);
-        List<RoleDto> actual = serviceToTest.getAllRolesFiltered(filter);
-        assertEquals(entities.size(), actual.size());
+        filter.setName("ADMIN");
 
+        Specification<RoleEntity> specification = roleService.getSpecification(filter);
+
+        List<RoleDto> actual = roleService.getAllRolesFiltered(filter);
+        assertEquals(2, actual.size());
     }
 
     @Test
-    void getSpecification() {
+    void getAllRolesFilteredWithPage() {
+        roleService.seedRoles();
+        RoleFilter filter = new RoleFilter();
+        filter.setName("ADMIN");
+        filter.setLimit(5);
+        filter.setOffset(1);
+
+        Specification<RoleEntity> specification = roleService.getSpecification(filter);
+
+        List<RoleDto> actual = roleService.getAllRolesFiltered(filter);
+        assertEquals(1, actual.size());
 
     }
 

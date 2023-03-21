@@ -6,9 +6,10 @@ import com.example.leaves.repository.PermissionRepository;
 import com.example.leaves.service.PermissionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@RunWith(SpringRunner.class)
 class PermissionServiceImplTest {
     private PermissionEntity read, write, delete;
     private PermissionService serviceToTest;
@@ -27,8 +29,11 @@ class PermissionServiceImplTest {
     @BeforeEach
     void setUp() {
         read = new PermissionEntity(PermissionEnum.READ);
+        read.setId(1L);
         write = new PermissionEntity(PermissionEnum.WRITE);
+        write.setId(2L);
         delete = new PermissionEntity(PermissionEnum.DELETE);
+        delete.setId(3L);
         serviceToTest = new PermissionServiceImpl(mockPermissionRepository);
     }
 
@@ -36,6 +41,8 @@ class PermissionServiceImplTest {
     void seedPermissions() {
         when(mockPermissionRepository.save(delete))
                 .thenReturn(delete);
+
+
         PermissionEntity expected = mockPermissionRepository.save(delete);
         serviceToTest.seedPermissions();
         assertEquals(expected.getPermissionEnum().name(), delete.getPermissionEnum().name());
