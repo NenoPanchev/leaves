@@ -82,12 +82,18 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public RoleDto createRole(RoleDto dto) {
         RoleEntity roleEntity = new RoleEntity();
+        dto.setName(dto.getName().toUpperCase());
         roleEntity.toEntity(dto);
-        List<String> permissionNames = dto.getPermissions()
+        List<PermissionEntity> permissionEntities;
+        if (dto.getPermissions() != null) {
+            List<String> permissionNames = dto.getPermissions()
                         .stream()
                                 .map(PermissionDto::getName)
                                         .collect(Collectors.toList());
-        List<PermissionEntity> permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
+            permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
+        } else {
+            permissionEntities = permissionService.findAllByPermissionEnumIn(PermissionEnum.READ);
+        }
         roleEntity.setPermissions(permissionEntities);
         roleEntity = roleRepository.save(roleEntity);
         RoleDto roleDto = new RoleDto();
