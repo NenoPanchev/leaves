@@ -31,13 +31,6 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<List<UserDto>> getFilteredUsers(List<SearchCriteria> searchCriteria) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userService.getAllUsersFiltered(searchCriteria));
-    }
-
-    @Override
     public ResponseEntity<List<UserDto>> getFilteredUsers(UserFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)

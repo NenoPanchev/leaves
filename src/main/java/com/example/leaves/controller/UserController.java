@@ -18,11 +18,7 @@ public interface UserController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getAllUsers();
 
-    @GetMapping("/userfilter")
-    @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody List<SearchCriteria> searchCriteria);
-
-    @GetMapping("/filter")
+    @PostMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
