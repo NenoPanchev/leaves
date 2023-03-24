@@ -144,11 +144,17 @@ public class RoleServiceImpl implements RoleService {
         RoleEntity roleEntity = roleRepository
                 .findById(id)
                 .orElseThrow(() -> new  ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
-        List<String> permissionNames = dto.getPermissions()
-                .stream()
-                .map(PermissionDto::getName)
-                .collect(Collectors.toList());
-        List<PermissionEntity> permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
+
+        List<PermissionEntity> permissionEntities;
+        if (dto.getPermissions() != null) {
+            List<String> permissionNames = dto.getPermissions()
+                    .stream()
+                    .map(PermissionDto::getName)
+                    .collect(Collectors.toList());
+            permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
+        } else {
+            permissionEntities = permissionService.findAllByPermissionEnumIn(PermissionEnum.READ);
+        }
         roleEntity.setName(dto.getName().toUpperCase());
         roleEntity.setPermissions(permissionEntities);
         roleEntity = roleRepository.save(roleEntity);

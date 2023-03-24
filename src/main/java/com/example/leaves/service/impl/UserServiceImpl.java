@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
         UserEntity entity = new UserEntity();
         entity.toEntity(dto);
         DepartmentEntity department = null;
-        if (dto.getDepartment() != null) {
+        if (!isEmpty(dto.getDepartment())) {
             department = departmentService
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(department);
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
         entity = userRepository.save(entity);
-        if (dto.getDepartment() != null) {
+        if (!isEmpty(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
 
         }
@@ -195,24 +195,29 @@ public class UserServiceImpl implements UserService {
         if (id == 1) {
             throw new IllegalArgumentException("You cannot modify SUPER_ADMIN");
         }
-        if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
-        }
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+        String initialEntityDepartmentName = entity.getDepartment() == null ? "" : entity.getDepartment().getName();
+        boolean sameDepartment = true;
         entity.toEntity(dto);
-        DepartmentEntity departmentEntity = null;
-        if (dto.getDepartment() != null) {
-            departmentEntity = departmentService
-                    .findByDepartment(dto.getDepartment());
-        }
-        entity.setDepartment(departmentEntity);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
+        DepartmentEntity departmentEntity = null;
+
+        if (!isEmpty(dto.getDepartment()) && !initialEntityDepartmentName.equals(dto.getDepartment())) {
+            sameDepartment = false;
+            departmentEntity = departmentService
+                    .findByDepartment(dto.getDepartment());
+            entity.setDepartment(departmentEntity);
+        }
+
         entity = userRepository.save(entity);
-        if (dto.getDepartment() != null) {
-            departmentService.addEmployeeToDepartment(entity, departmentEntity);
+
+        sortEmployeeDepartmentRelation(entity, departmentEntity, initialEntityDepartmentName,
+                dto.getDepartment(), sameDepartment);
+        if (entity.getDepartment() == null) {
+            userRepository.save(entity);
         }
         entity.toDto(dto);
         return dto;
@@ -326,5 +331,24 @@ public class UserServiceImpl implements UserService {
             entity.setDepartment(null);
             userRepository.save(entity);
         }
+    }
+
+    private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,
+                                                String dtoDepartmentName, boolean sameDepartment) {
+        if (!isEmpty(dtoDepartmentName) && !sameDepartment) {
+            if (!initialEntityDepartmentName.equals("")) {
+                departmentService.detachEmployeeFromDepartment(entity);
+            }
+            departmentService.addEmployeeToDepartment(entity, departmentEntity);
+        }
+        if ((isEmpty(dtoDepartmentName)) && !initialEntityDepartmentName.equals("")) {
+            departmentService.detachEmployeeFromDepartment(entity);
+            entity.setDepartment(null);
+        }
+
+    }
+
+    private boolean isEmpty(String name) {
+        return name == null || name.equals("");
     }
 }

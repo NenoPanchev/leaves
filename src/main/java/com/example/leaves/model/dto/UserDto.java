@@ -56,7 +56,6 @@ public class UserDto extends BaseDto{
         this.roles = roles;
     }
 
-    @Size(min = 2, max = 20, message = "Department must be between 2 and 20 characters")
     public String getDepartment() {
         return department;
     }
