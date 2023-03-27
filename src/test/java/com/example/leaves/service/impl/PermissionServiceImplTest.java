@@ -55,7 +55,7 @@ class PermissionServiceImplTest {
                 .stream()
                 .map(PermissionEntity::getPermissionEnum)
                 .toArray(PermissionEnum[]::new);
-        when(mockPermissionRepository.findAllByPermissionEnumIn(enums))
+        when(mockPermissionRepository.findAllByPermissionIn(enums))
                 .thenReturn(expected);
         List<PermissionEntity> actual = serviceToTest.findAllByPermissionEnumIn(enums);
 
@@ -71,7 +71,7 @@ class PermissionServiceImplTest {
                 .stream()
                 .map(PermissionEntity::getPermissionEnum)
                 .collect(Collectors.toList());
-        when(mockPermissionRepository.findAllByPermissionEnumIn(enums))
+        when(mockPermissionRepository.findAllByNameIn(enums))
                 .thenReturn(expected);
 
         List<PermissionEntity> actual =  serviceToTest

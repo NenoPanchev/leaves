@@ -15,10 +15,7 @@ import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
-import javafx.scene.control.Pagination;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -54,15 +51,15 @@ public class RoleServiceImpl implements RoleService {
                     switch (roleEntity.getName()){
                         case "SUPER_ADMIN":
                             permissions = permissionService
-                                    .findAllByPermissionEnumIn(PermissionEnum.READ, PermissionEnum.WRITE, PermissionEnum.DELETE);
+                                    .findAllByNameIn(PermissionEnum.READ.name(), PermissionEnum.WRITE.name(), PermissionEnum.DELETE.name());
                             break;
                         case "ADMIN":
                             permissions = permissionService
-                                    .findAllByPermissionEnumIn(PermissionEnum.READ, PermissionEnum.WRITE);
+                                    .findAllByNameIn(PermissionEnum.READ.name(), PermissionEnum.WRITE.name());
                             break;
                         case "USER":
                             permissions = permissionService
-                                    .findAllByPermissionEnumIn(PermissionEnum.READ);
+                                    .findAllByNameIn(PermissionEnum.READ.name());
                             break;
 
                     }
@@ -92,7 +89,7 @@ public class RoleServiceImpl implements RoleService {
                                         .collect(Collectors.toList());
             permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         } else {
-            permissionEntities = permissionService.findAllByPermissionEnumIn(PermissionEnum.READ);
+            permissionEntities = permissionService.findAllByNameIn(PermissionEnum.READ.name());
         }
         roleEntity.setPermissions(permissionEntities);
         roleEntity = roleRepository.save(roleEntity);
@@ -153,7 +150,7 @@ public class RoleServiceImpl implements RoleService {
                     .collect(Collectors.toList());
             permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         } else {
-            permissionEntities = permissionService.findAllByPermissionEnumIn(PermissionEnum.READ);
+            permissionEntities = permissionService.findAllByNameIn(PermissionEnum.READ.name());
         }
         roleEntity.setName(dto.getName().toUpperCase());
         roleEntity.setPermissions(permissionEntities);
@@ -200,15 +197,21 @@ public class RoleServiceImpl implements RoleService {
                     .in(RoleEntity_.id, filter.getIds())
                     .like(RoleEntity_.name, filter.getName())
                     .equals(RoleEntity_.deleted, filter.isDeleted())
-                    .joinIn(RoleEntity_.permissions, filter.getPermissions(), PermissionEntity_.PERMISSION_ENUM)
+                    .joinIn(RoleEntity_.permissions, filter.getPermissions(), PermissionEntity_.NAME)
                     .equals(RoleEntity_.deleted, filter.isDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
             return query.where(predicates)
+                    .distinct(true)
                     .orderBy(criteriaBuilder.asc(root.get(RoleEntity_.ID)))
                     .getGroupRestriction();
         };
+    }
+
+    @Override
+    public List<String> getAllRoleNames() {
+        return roleRepository.findAllNamesByDeletedIsFalse();
     }
 
     @Override

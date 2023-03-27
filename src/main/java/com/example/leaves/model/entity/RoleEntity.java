@@ -20,7 +20,7 @@ public class RoleEntity extends BaseEntity{
     public RoleEntity() {
         this.setPermissions(new ArrayList<>());
     }
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     public String getName() {
         return name;
     }

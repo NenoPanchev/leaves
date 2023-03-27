@@ -26,14 +26,14 @@ public class PermissionServiceImpl implements PermissionService {
         }
         Arrays.stream(PermissionEnum.values())
                 .forEach(enm -> {
-                    PermissionEntity permissionEntity = new PermissionEntity(enm);
+                    PermissionEntity permissionEntity = new PermissionEntity(enm.name());
                     permissionRepository.save(permissionEntity);
                 });
     }
 
     @Override
-    public List<PermissionEntity> findAllByPermissionEnumIn(PermissionEnum... permissions) {
-        return permissionRepository.findAllByPermissionEnumIn(permissions);
+    public List<PermissionEntity> findAllByNameIn(String... permissions) {
+        return permissionRepository.findAllByNameIn(permissions);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .stream()
                 .map(str -> PermissionEnum.valueOf(str.toUpperCase()))
                 .collect(Collectors.toList());
-        return permissionRepository.findAllByPermissionEnumIn(permissionEnums);
+        return permissionRepository.findAllByNameIn(permissionEnums);
     }
 
     @Override

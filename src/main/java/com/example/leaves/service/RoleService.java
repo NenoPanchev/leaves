@@ -29,4 +29,6 @@ public interface RoleService {
     List<RoleDto> getAllRolesFiltered(RoleFilter roleFilter);
 
     Specification<RoleEntity> getSpecification(final RoleFilter filter);
+
+    List<String> getAllRoleNames();
 }

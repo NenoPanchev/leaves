@@ -3,30 +3,27 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "permissions")
 public class PermissionEntity extends BaseEntity{
-    private PermissionEnum permissionEnum;
+    private String name;
 
     public PermissionEntity() {
     }
 
-    public PermissionEntity(PermissionEnum permissionEnum) {
-        this.permissionEnum = permissionEnum;
+    public PermissionEntity(String name) {
+        this.name = name;
     }
 
-    @Enumerated(EnumType.STRING)
-    public PermissionEnum getPermissionEnum() {
-        return permissionEnum;
+    @Column()
+    public String getName() {
+        return name;
     }
 
-    public void setPermissionEnum(PermissionEnum permissionEnum) {
-        this.permissionEnum = permissionEnum;
+    public void setName(String name) {
+        this.name = name.toUpperCase();
     }
 
     public void toDto(PermissionDto dto){
@@ -34,7 +31,7 @@ public class PermissionEntity extends BaseEntity{
             return;
         }
         super.toDto(dto);
-        dto.setName(this.permissionEnum.name());
+        dto.setName(this.name);
 
     }
 
@@ -43,7 +40,7 @@ public class PermissionEntity extends BaseEntity{
             return;
         }
         super.toEntity(dto);
-        this.setPermissionEnum(PermissionEnum.valueOf(dto.getName().toUpperCase()));
+        this.setName(dto.getName().toUpperCase());
     }
 
 }

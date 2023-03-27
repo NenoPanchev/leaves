@@ -1,5 +1,8 @@
 package com.example.leaves.util;
 
+import com.example.leaves.model.entity.PermissionEntity;
+import com.example.leaves.model.entity.PermissionEntity_;
+import com.example.leaves.model.entity.enums.PermissionEnum;
 import org.springframework.expression.Operation;
 import org.springframework.util.CollectionUtils;
 

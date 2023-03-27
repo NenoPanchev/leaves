@@ -30,6 +30,13 @@ public class RoleControllerImpl implements RoleController {
     }
 
     @Override
+    public ResponseEntity<List<String>> getAllRoleNames() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.getAllRoleNames());
+    }
+
+    @Override
     public ResponseEntity<List<RoleDto>> getFilteredRoles(RoleFilter roleFilter) {
         return ResponseEntity
                 .status(HttpStatus.OK)

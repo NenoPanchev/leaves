@@ -196,6 +196,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                     .toArray(new Predicate[0]);
 
             return query.where(predicates)
+                    .distinct(true)
                     .orderBy(criteriaBuilder.asc(root.get(DepartmentEntity_.ID)))
                     .getGroupRestriction();
         };

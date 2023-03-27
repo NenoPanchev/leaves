@@ -33,4 +33,8 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
     List<RoleEntity> findAllByDeletedIsFalse();
 
     Optional<RoleEntity> findByIdAndDeletedIsFalse(Long id);
+
+    @Query("SELECT r.name from RoleEntity r " +
+            "WHERE r.deleted = false ")
+    List<String> findAllNamesByDeletedIsFalse();
 }
