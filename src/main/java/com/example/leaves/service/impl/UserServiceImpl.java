@@ -296,7 +296,7 @@ public class UserServiceImpl implements UserService {
                     .equals(UserEntity_.deleted, filter.isDeleted())
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
-                    .joinInLike(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
+                    .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -331,6 +331,11 @@ public class UserServiceImpl implements UserService {
             entity.setDepartment(null);
             userRepository.save(entity);
         }
+    }
+
+    @Override
+    public List<String> getAllEmails() {
+        return userRepository.findAllEmailsByDeletedIsFalse();
     }
 
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,

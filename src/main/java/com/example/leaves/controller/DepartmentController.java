@@ -18,6 +18,9 @@ public interface DepartmentController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<DepartmentDto>> getAllDepartments();
 
+    @GetMapping("/names")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<List<String>> getAllDepartmentNames();
 
     @PostMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")

@@ -38,11 +38,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public List<PermissionEntity> findAllByPermissionNameIn(List<String> permissions) {
-        List<PermissionEnum> permissionEnums = permissions
-                .stream()
-                .map(str -> PermissionEnum.valueOf(str.toUpperCase()))
-                .collect(Collectors.toList());
-        return permissionRepository.findAllByNameIn(permissionEnums);
+        return permissionRepository.findAllByNameInAndDeletedIsFalse(permissions);
     }
 
     @Override

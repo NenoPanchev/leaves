@@ -31,6 +31,13 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
+    public ResponseEntity<List<String>> getAllUserEmails() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getAllEmails());
+    }
+
+    @Override
     public ResponseEntity<List<UserDto>> getFilteredUsers(UserFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)

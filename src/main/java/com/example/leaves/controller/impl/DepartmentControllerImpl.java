@@ -30,6 +30,13 @@ public class DepartmentControllerImpl implements DepartmentController {
     }
 
     @Override
+    public ResponseEntity<List<String>> getAllDepartmentNames() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(departmentService.getAllNames());
+    }
+
+    @Override
     public ResponseEntity<List<DepartmentDto>> getFilteredDepartments(DepartmentFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)

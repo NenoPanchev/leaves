@@ -18,6 +18,10 @@ public interface UserController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getAllUsers();
 
+    @GetMapping("/emails")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<List<String>> getAllUserEmails();
+
     @PostMapping("/filter")
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);

@@ -31,4 +31,6 @@ public interface UserService {
     void detachRoleFromUsers(RoleEntity role);
 
     void detachDepartmentFromUsers(Long id);
+
+    List<String> getAllEmails();
 }

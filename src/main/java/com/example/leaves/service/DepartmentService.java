@@ -39,4 +39,6 @@ public interface DepartmentService {
     void detachAdminFromDepartment(Long id);
 
     void detachEmployeeFromDepartment(UserEntity userEntity);
+
+    List<String> getAllNames();
 }

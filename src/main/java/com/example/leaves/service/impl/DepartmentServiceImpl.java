@@ -247,4 +247,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     }
 
+    @Override
+    public List<String> getAllNames() {
+        return departmentRepository.findAllNamesByDeletedIsFalse();
+    }
+
 }

@@ -18,7 +18,7 @@ public interface RoleController {
     @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<List<RoleDto>> getAllRoles();
 
-    @GetMapping
+    @GetMapping("/names")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<String>> getAllRoleNames();
 
@@ -27,7 +27,7 @@ public interface RoleController {
     ResponseEntity<List<RoleDto>> getFilteredRoles(@RequestBody RoleFilter roleFilter);
 
     @PostMapping
-    @PreAuthorize("hasAuthority('WRITE')")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     ResponseEntity<RoleDto> create(@Valid @RequestBody RoleDto dto, BindingResult bindingResult);
 
     @GetMapping("/{id}")

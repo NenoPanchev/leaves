@@ -40,4 +40,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     List<UserEntity> findAllByDeletedIsFalse();
 
+    @Query("SELECT u.email from UserEntity u " +
+            "WHERE u.deleted = false ")
+    List<String> findAllEmailsByDeletedIsFalse();
 }
