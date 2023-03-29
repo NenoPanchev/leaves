@@ -102,7 +102,7 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     public List<RoleDto> getAllRoleDtos() {
         return roleRepository
-                .findAllByDeletedIsFalse()
+                .findAllByDeletedIsFalseOrderById()
                 .stream()
                 .map(entity -> {
                     RoleDto dto = new RoleDto();

@@ -38,7 +38,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
             "WHERE u.id = :id")
     void softDeleteById(@Param("id") Long id);
 
-    List<UserEntity> findAllByDeletedIsFalse();
+    List<UserEntity> findAllByDeletedIsFalseOrderById();
 
     @Query("SELECT u.email from UserEntity u " +
             "WHERE u.deleted = false ")

@@ -30,7 +30,7 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
             "WHERE r.id = :id")
     void softDeleteById(@Param("id") Long id);
 
-    List<RoleEntity> findAllByDeletedIsFalse();
+    List<RoleEntity> findAllByDeletedIsFalseOrderById();
 
     Optional<RoleEntity> findByIdAndDeletedIsFalse(Long id);
 

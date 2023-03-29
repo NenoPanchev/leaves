@@ -40,7 +40,7 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
             "WHERE d.id = :id")
     void softDeleteById(@Param("id") Long id);
 
-    List<DepartmentEntity> findAllByDeletedIsFalse();
+    List<DepartmentEntity> findAllByDeletedIsFalseOrderById();
 
     @Query("SELECT d.name from DepartmentEntity d " +
             "WHERE d.deleted = false ")

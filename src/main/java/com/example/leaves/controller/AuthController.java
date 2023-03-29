@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.validation.Valid;
 
-@CrossOrigin
+@CrossOrigin("*")
 public interface AuthController {
 
     @PostMapping("/authenticate")

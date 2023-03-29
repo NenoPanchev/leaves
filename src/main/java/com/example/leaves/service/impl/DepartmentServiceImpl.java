@@ -56,7 +56,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Transactional
     public List<DepartmentDto> getAllDepartmentDtos() {
         return departmentRepository
-                .findAllByDeletedIsFalse()
+                .findAllByDeletedIsFalseOrderById()
                 .stream()
                 .map(entity -> {
                     DepartmentDto dto = new DepartmentDto();
@@ -78,12 +78,17 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<UserEntity> employees = new ArrayList<>();
             dto.getEmployeeEmails()
                     .forEach(email -> {
-                        employees.add(userService.findByEmail(email));
+                        UserEntity employee = userService.findByEmail(email);
+                        employees.add(employee);
+                        detachEmployeeFromDepartment(employee);
                     });
             entity.setEmployees(employees);
         }
 
         entity = departmentRepository.save(entity);
+//        entity.getEmployees()
+//                        .stream()
+//                                .forEach(empl -> empl.setDepartment(entity));
         entity.toDto(dto);
         return dto;
     }
@@ -138,7 +143,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
         entity.toEntity(dto);
-        if (dto.getAdminEmail() == null) {
+        if (dto.getAdminEmail() == null || dto.getAdminEmail().equals("")) {
             entity.setAdmin(null);
         } else {
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
@@ -148,7 +153,9 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<UserEntity> employees = new ArrayList<>();
             dto.getEmployeeEmails()
                     .forEach(email -> {
-                        employees.add(userService.findByEmail(email));
+                        UserEntity employee = userService.findByEmail(email);
+                        employees.add(employee);
+                        detachEmployeeFromDepartment(employee);
                     });
             entity.setEmployees(employees);
         }
@@ -205,7 +212,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void assignDepartmentAdmins() {
         departmentRepository
-                .findAllByDeletedIsFalse()
+                .findAllByDeletedIsFalseOrderById()
                 .forEach(entity -> {
                     switch (entity.getName()) {
                         case "ADMINISTRATION":

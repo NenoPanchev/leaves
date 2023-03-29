@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public List<UserDto> getAllUserDtos() {
         return userRepository
-                .findAllByDeletedIsFalse()
+                .findAllByDeletedIsFalseOrderById()
                 .stream()
                 .map(entity -> {
                     UserDto dto = new UserDto();
