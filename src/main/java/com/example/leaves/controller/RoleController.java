@@ -15,7 +15,7 @@ import java.util.List;
 public interface RoleController {
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<RoleDto>> getAllRoles();
 
     @GetMapping("/names")
@@ -23,7 +23,7 @@ public interface RoleController {
     ResponseEntity<List<String>> getAllRoleNames();
 
     @PostMapping("/filter")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<RoleDto>> getFilteredRoles(@RequestBody RoleFilter roleFilter);
 
     @PostMapping
@@ -31,6 +31,7 @@ public interface RoleController {
     ResponseEntity<RoleDto> create(@Valid @RequestBody RoleDto dto, BindingResult bindingResult);
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<RoleDto> getRole(@PathVariable("id") Long id);
 
 

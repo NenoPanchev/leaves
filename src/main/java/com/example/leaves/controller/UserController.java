@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/users")
 public interface UserController {
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getAllUsers();
 
     @GetMapping("/emails")
@@ -23,7 +23,7 @@ public interface UserController {
     ResponseEntity<List<String>> getAllUserEmails();
 
     @PostMapping("/filter")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
     @PostMapping
@@ -44,5 +44,6 @@ public interface UserController {
                                                BindingResult bindingResult);
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('DELETE')")
     ResponseEntity<String> deleteUser(@PathVariable ("id") Long id);
 }
