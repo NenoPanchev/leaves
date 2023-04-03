@@ -28,11 +28,11 @@ class PermissionServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        read = new PermissionEntity(PermissionEnum.READ);
+        read = new PermissionEntity(PermissionEnum.READ.toString());
         read.setId(1L);
-        write = new PermissionEntity(PermissionEnum.WRITE);
+        write = new PermissionEntity(PermissionEnum.WRITE.toString());
         write.setId(2L);
-        delete = new PermissionEntity(PermissionEnum.DELETE);
+        delete = new PermissionEntity(PermissionEnum.DELETE.toString());
         delete.setId(3L);
         serviceToTest = new PermissionServiceImpl(mockPermissionRepository);
     }
