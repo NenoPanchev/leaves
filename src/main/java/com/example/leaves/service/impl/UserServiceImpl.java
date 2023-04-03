@@ -4,15 +4,12 @@ import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
-import com.example.leaves.model.entity.DepartmentEntity_;
-import com.example.leaves.model.entity.RoleEntity_;
-import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
+import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.specification.UserSpecification;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
@@ -26,13 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.jpa.domain.Specification.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -257,7 +251,6 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmailAndDeletedIsFalse(email);
     }
-
 
 
     @Override

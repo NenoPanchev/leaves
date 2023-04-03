@@ -3,8 +3,9 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.PermissionEntity;
 import com.example.leaves.model.entity.PermissionEntity_;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.RoleEntity_;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
@@ -48,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
                     RoleEntity roleEntity = new RoleEntity()
                             .setName(enm.name());
                     List<PermissionEntity> permissions = new ArrayList<>();
-                    switch (roleEntity.getName()){
+                    switch (roleEntity.getName()) {
                         case "SUPER_ADMIN":
                             permissions = permissionService
                                     .findAllByNameIn(PermissionEnum.READ.name(), PermissionEnum.WRITE.name(), PermissionEnum.DELETE.name());
@@ -84,9 +85,9 @@ public class RoleServiceImpl implements RoleService {
         List<PermissionEntity> permissionEntities;
         if (dto.getPermissions() != null) {
             List<String> permissionNames = dto.getPermissions()
-                        .stream()
-                                .map(PermissionDto::getName)
-                                        .collect(Collectors.toList());
+                    .stream()
+                    .map(PermissionDto::getName)
+                    .collect(Collectors.toList());
             permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         } else {
             permissionEntities = permissionService.findAllByNameIn(PermissionEnum.READ.name());
@@ -95,7 +96,7 @@ public class RoleServiceImpl implements RoleService {
         roleEntity = roleRepository.save(roleEntity);
         RoleDto roleDto = new RoleDto();
         roleEntity.toDto(roleDto);
-        return  roleDto;
+        return roleDto;
     }
 
     @Override
@@ -131,7 +132,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
 
-
     @Override
     @Transactional
     public RoleDto updateRoleById(Long id, RoleDto dto) {
@@ -140,7 +140,7 @@ public class RoleServiceImpl implements RoleService {
         }
         RoleEntity roleEntity = roleRepository
                 .findById(id)
-                .orElseThrow(() -> new  ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
 
         List<PermissionEntity> permissionEntities;
         if (dto.getPermissions() != null) {

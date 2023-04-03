@@ -2,7 +2,6 @@ package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.filter.RoleFilter;
-import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+
 @CrossOrigin
 @RequestMapping("/roles")
 public interface RoleController {

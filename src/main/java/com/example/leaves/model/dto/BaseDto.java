@@ -29,6 +29,7 @@ public abstract class BaseDto {
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -45,6 +46,7 @@ public abstract class BaseDto {
     public void setLastModifiedBy(String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
     }
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     public LocalDateTime getLastModifiedAt() {
         return lastModifiedAt;

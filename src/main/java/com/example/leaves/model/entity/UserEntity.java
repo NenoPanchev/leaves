@@ -3,11 +3,8 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +18,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-public class UserEntity extends BaseEntity{
+public class UserEntity extends BaseEntity {
     private String name;
     private String email;
     private String password;

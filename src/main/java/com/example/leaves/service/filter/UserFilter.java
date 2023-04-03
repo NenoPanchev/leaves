@@ -2,7 +2,7 @@ package com.example.leaves.service.filter;
 
 import java.util.List;
 
-public class UserFilter extends BaseFilter{
+public class UserFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
     private String email;

@@ -10,8 +10,8 @@ import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,6 +142,7 @@ class DepartmentServiceImplTest {
         verify(mockDepartmentRepository, times(1)).deleteById(it.getId());
 
     }
+
     @Test
     void deleteDepartmentThrowsWhenNonExistentDepartment() {
         assertThrows(ObjectNotFoundException.class, () -> serviceToTest.deleteDepartment(99L));

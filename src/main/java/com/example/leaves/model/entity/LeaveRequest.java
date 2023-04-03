@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+
 @Entity
 @Table(name = "leave_requests", schema = "leave_manager")
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})

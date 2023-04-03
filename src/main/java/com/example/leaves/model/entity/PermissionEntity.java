@@ -1,13 +1,14 @@
 package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
-import com.example.leaves.model.entity.enums.PermissionEnum;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "permissions")
-public class PermissionEntity extends BaseEntity{
+public class PermissionEntity extends BaseEntity {
     private String name;
 
     public PermissionEntity() {
@@ -26,7 +27,7 @@ public class PermissionEntity extends BaseEntity{
         this.name = name.toUpperCase();
     }
 
-    public void toDto(PermissionDto dto){
+    public void toDto(PermissionDto dto) {
         if (dto == null) {
             return;
         }

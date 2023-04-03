@@ -1,16 +1,15 @@
 package com.example.leaves.model.entity;
 
-import javax.persistence.*;
-
 import com.example.leaves.model.dto.BaseDto;
 import com.example.leaves.model.listener.EntityListener;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 @EntityListeners(EntityListener.class)
 @MappedSuperclass
-public abstract class BaseEntity <T extends BaseDto> {
+public abstract class BaseEntity<T extends BaseDto> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

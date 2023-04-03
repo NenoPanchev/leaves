@@ -3,7 +3,7 @@ package com.example.leaves.model.dto;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
-public class LeaveRequestDto extends BaseDto{
+public class LeaveRequestDto extends BaseDto {
 
     private LocalDate startDate;
     private LocalDate endDate;
@@ -40,6 +40,6 @@ public class LeaveRequestDto extends BaseDto{
     }
 
     public int getDaysRequested() {
-        return (int) ChronoUnit.DAYS.between(startDate, endDate)+1;
+        return (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
     }
 }

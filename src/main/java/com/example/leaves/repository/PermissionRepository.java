@@ -14,10 +14,13 @@ import java.util.Set;
 @Repository
 public interface PermissionRepository extends JpaRepository<PermissionEntity, Long>, JpaSpecificationExecutor<PermissionEntity> {
     List<PermissionEntity> findAllByNameIn(String... names);
+
     List<PermissionEntity> findAllByNameInAndDeletedIsFalse(List<String> names);
+
     @Query("SELECT p.name FROM RoleEntity r " +
-                  "LEFT JOIN r.permissions AS p " +
-                  "WHERE r.name IN (:roles)")
+            "LEFT JOIN r.permissions AS p " +
+            "WHERE r.name IN (:roles)")
     Set<PermissionEnum> findAllPermissionEnumsByRole(@Param("roles") List<String> roles);
+
     List<PermissionEntity> findAllByNameIn(List<PermissionEnum> permissions);
 }

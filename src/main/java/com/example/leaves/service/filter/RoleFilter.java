@@ -1,7 +1,5 @@
 package com.example.leaves.service.filter;
 
-import com.example.leaves.model.entity.PermissionEntity;
-
 import java.util.List;
 
 public class RoleFilter extends BaseFilter {

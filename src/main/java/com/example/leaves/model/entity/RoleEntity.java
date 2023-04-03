@@ -2,24 +2,24 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-import org.springframework.security.core.parameters.P;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "roles")
-public class RoleEntity extends BaseEntity{
+public class RoleEntity extends BaseEntity {
     private String name;
     private List<PermissionEntity> permissions;
 
     public RoleEntity() {
         this.setPermissions(new ArrayList<>());
     }
+
     @Column(nullable = false)
     public String getName() {
         return name;

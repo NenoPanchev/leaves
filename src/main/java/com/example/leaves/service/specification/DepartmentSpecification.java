@@ -1,6 +1,7 @@
 package com.example.leaves.service.specification;
 
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
@@ -92,7 +93,8 @@ public class DepartmentSpecification implements Specification<DepartmentEntity> 
                 case NOT_IN:
                     predicates.add(builder.not(root.get(criteria.getKey())).in(criteria.getValue()));
                     break;
-                default: throw new UnsupportedOperationException("Operation not supported yet");
+                default:
+                    throw new UnsupportedOperationException("Operation not supported yet");
             }
         }
         return builder.and(predicates.toArray(new Predicate[0]));
@@ -108,18 +110,15 @@ public class DepartmentSpecification implements Specification<DepartmentEntity> 
         return Specification.super.or(other);
     }
 
-    private Path<String> getStringPath(String field, Map<String, From<?, ?>> mapFieldToFrom)
-    {
-        if(!field.matches(".+\\..+"))
-        {
+    private Path<String> getStringPath(String field, Map<String, From<?, ?>> mapFieldToFrom) {
+        if (!field.matches(".+\\..+")) {
             throw new IllegalArgumentException("field '" + field + "' needs to be a dotted path (i. e. customer.address.city.zipcode)");
         }
         String fromPart = field.substring(0, field.lastIndexOf('.'));
         String fieldPart = field.substring(field.lastIndexOf('.') + 1);
 
         From<?, ?> actualFrom = mapFieldToFrom.get(fromPart);
-        if(actualFrom == null)
-        {
+        if (actualFrom == null) {
             throw new IllegalStateException("the given map does not contain a from or for the value '" + fromPart + "' or is null");
         }
         Path<String> objectPath = actualFrom.get(fieldPart);

@@ -1,13 +1,9 @@
 package com.example.leaves.service;
 
-import com.example.demo.models.Employee;
-import com.example.demo.models.LeaveRequest;
-import com.example.demo.models.dtos.LeaveRequestDto;
-import com.example.demo.models.filters.LeaveRequestFilter;
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.entity.LeaveRequest;
 import com.example.leaves.model.entity.UserEntity;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -32,6 +28,7 @@ public interface LeaveRequestService {
     Page<LeaveRequestDto> getLeaveRequestDtoFilteredPage(LeaveRequestFilter filter);
 
     void unMarkAsDelete(long id);
+
     LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto, UserEntity employee);
 
     List<LeaveRequestDto> getAllByEmployee(UserEntity employee);

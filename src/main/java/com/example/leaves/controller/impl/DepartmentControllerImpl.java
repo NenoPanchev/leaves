@@ -6,11 +6,10 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.filter.DepartmentFilter;
-import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -46,7 +45,7 @@ public class DepartmentControllerImpl implements DepartmentController {
     @Override
     public ResponseEntity<DepartmentDto> create(DepartmentDto dto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-           throw new ValidationException(bindingResult);
+            throw new ValidationException(bindingResult);
         }
         if (departmentService.existsByName(dto.getName())) {
             throw new ResourceAlreadyExistsException(String.format("%s department already exists", dto.getName().toUpperCase()));

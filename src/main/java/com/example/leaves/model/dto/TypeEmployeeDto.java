@@ -1,10 +1,8 @@
 package com.example.leaves.model.dto;
 
-import com.example.leaves.model.entity.EmployeeInfo;
-
 import java.util.List;
 
-public class TypeEmployeeDto extends BaseDto{
+public class TypeEmployeeDto extends BaseDto {
     private String typeName;
 
     private int daysLeave;

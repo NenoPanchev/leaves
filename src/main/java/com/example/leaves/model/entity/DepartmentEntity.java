@@ -2,7 +2,6 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.DepartmentDto;
 
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "departments")
-public class DepartmentEntity extends BaseEntity{
+public class DepartmentEntity extends BaseEntity {
     private String name;
     private UserEntity admin;
     private List<UserEntity> employees = new ArrayList<>();
@@ -65,7 +64,7 @@ public class DepartmentEntity extends BaseEntity{
         }
         if (this.employees != null && this.employees.size() != 0) {
             dto.setEmployeeEmails(employees.stream()
-                            .filter(userEntity -> !userEntity.isDeleted())
+                    .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
             if (dto.getEmployeeEmails().size() == 0) {
@@ -81,6 +80,7 @@ public class DepartmentEntity extends BaseEntity{
         super.toEntity(dto);
         this.setName(dto.getName() == null ? this.getName() : dto.getName().toUpperCase());
     }
+
     public void addEmployee(UserEntity userEntity) {
         if (this.employees == null) {
             this.employees = new ArrayList<>();

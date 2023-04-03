@@ -11,11 +11,14 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -74,11 +77,11 @@ class PermissionServiceImplTest {
         when(mockPermissionRepository.findAllByNameIn(enums))
                 .thenReturn(expected);
 
-        List<PermissionEntity> actual =  serviceToTest
+        List<PermissionEntity> actual = serviceToTest
                 .findAllByPermissionNameIn(enums
                         .stream()
                         .map(Enum::name)
-                .collect(Collectors.toList()));
+                        .collect(Collectors.toList()));
 
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0).getPermissionEnum(), actual.get(0).getPermissionEnum());

@@ -14,5 +14,5 @@ public interface AuthController {
 
     @PostMapping("/authenticate")
     ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserDto authenticationRequest,
-                                                       BindingResult bindingResult);
+                                                BindingResult bindingResult);
 }

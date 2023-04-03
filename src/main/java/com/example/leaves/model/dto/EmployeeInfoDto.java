@@ -1,6 +1,6 @@
 package com.example.leaves.model.dto;
 
-public class EmployeeInfoDto extends UserDto{
+public class EmployeeInfoDto extends UserDto {
     private long typeId;
 
     public EmployeeInfoDto() {

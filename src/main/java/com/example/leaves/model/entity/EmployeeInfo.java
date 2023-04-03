@@ -4,7 +4,6 @@ import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.List;
@@ -70,12 +69,13 @@ public class EmployeeInfo {
     public void setEmployeeType(TypeEmployee employeeType) {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
-       setPaidLeave(employeeType.getDaysLeave());
+        setPaidLeave(employeeType.getDaysLeave());
     }
 
     public void resetAnnualLeave() {
         setPaidLeave(employeeType.getDaysLeave());
     }
+
     public EmployeeInfoDto toDto() {
         EmployeeInfoDto dto = new EmployeeInfoDto();
         dto.setTypeId(this.getEmployeeType().getId());

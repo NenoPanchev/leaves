@@ -2,8 +2,9 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.DepartmentEntity_;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
@@ -103,7 +104,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                     entity.toDto(dto);
                     return dto;
                 })
-                .orElseThrow(() -> new  ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
     }
 
     @Override
