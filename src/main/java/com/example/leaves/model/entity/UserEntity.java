@@ -2,6 +2,7 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -26,6 +27,11 @@ public class UserEntity extends BaseEntity{
     private String password;
     private DepartmentEntity department;
     private List<RoleEntity> roles;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+    @JoinColumn(name = "employee_info_id")
+    private EmployeeInfo employeeInfo;
 
     public UserEntity() {
         this.roles = new ArrayList<>();

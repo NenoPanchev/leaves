@@ -11,6 +11,8 @@ import java.util.Objects;
 @EntityListeners(MyEntityListener.class)
 @MappedSuperclass
 public abstract class BaseEntity <T extends BaseDto> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String createdBy;
     private LocalDateTime createdAt;
