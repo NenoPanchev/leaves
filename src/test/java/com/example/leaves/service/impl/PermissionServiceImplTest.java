@@ -28,11 +28,11 @@ class PermissionServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        read = new PermissionEntity(PermissionEnum.READ);
+        read = new PermissionEntity(PermissionEnum.READ.name());
         read.setId(1L);
-        write = new PermissionEntity(PermissionEnum.WRITE);
+        write = new PermissionEntity(PermissionEnum.WRITE.name());
         write.setId(2L);
-        delete = new PermissionEntity(PermissionEnum.DELETE);
+        delete = new PermissionEntity(PermissionEnum.DELETE.name());
         delete.setId(3L);
         serviceToTest = new PermissionServiceImpl(mockPermissionRepository);
     }
@@ -45,44 +45,41 @@ class PermissionServiceImplTest {
 
         PermissionEntity expected = mockPermissionRepository.save(delete);
         serviceToTest.seedPermissions();
-        assertEquals(expected.getPermissionEnum().name(), delete.getPermissionEnum().name());
+        assertEquals(expected.getName(), delete.getName());
     }
 
     @Test
     void findAllByPermissionEnumInTest() {
         List<PermissionEntity> expected = Arrays.asList(read, write);
-        PermissionEnum[] enums = expected
+        List<String> names = expected
                 .stream()
-                .map(PermissionEntity::getPermissionEnum)
-                .toArray(PermissionEnum[]::new);
-        when(mockPermissionRepository.findAllByPermissionIn(enums))
+                .map(PermissionEntity::getName)
+                .collect(Collectors.toList());
+        when(mockPermissionRepository.findAllByNameInAndDeletedIsFalse(names))
                 .thenReturn(expected);
-        List<PermissionEntity> actual = serviceToTest.findAllByPermissionEnumIn(enums);
+        List<PermissionEntity> actual = serviceToTest.findAllByPermissionNameIn(names);
 
         assertEquals(expected.size(), actual.size());
-        assertEquals(expected.get(0).getPermissionEnum(), actual.get(0).getPermissionEnum());
-        assertEquals("READ", actual.get(0).getPermissionEnum().name());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals("READ", actual.get(0).getName());
     }
 
     @Test
     void findAllByPermissionNameInTest() {
         List<PermissionEntity> expected = Arrays.asList(delete, write);
-        List<PermissionEnum> enums = expected
+        List<String> names = expected
                 .stream()
-                .map(PermissionEntity::getPermissionEnum)
+                .map(PermissionEntity::getName)
                 .collect(Collectors.toList());
-        when(mockPermissionRepository.findAllByNameIn(enums))
+        when(mockPermissionRepository.findAllByNameInAndDeletedIsFalse(names))
                 .thenReturn(expected);
 
         List<PermissionEntity> actual =  serviceToTest
-                .findAllByPermissionNameIn(enums
-                        .stream()
-                        .map(Enum::name)
-                .collect(Collectors.toList()));
+                .findAllByPermissionNameIn(new ArrayList<>(names));
 
         assertEquals(expected.size(), actual.size());
-        assertEquals(expected.get(0).getPermissionEnum(), actual.get(0).getPermissionEnum());
-        assertEquals("DELETE", actual.get(0).getPermissionEnum().name());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals("DELETE", actual.get(0).getName());
 
     }
 

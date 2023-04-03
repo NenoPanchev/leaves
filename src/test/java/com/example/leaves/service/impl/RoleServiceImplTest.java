@@ -51,9 +51,9 @@ class RoleServiceImplTest {
     void setUp() {
 
         // Permissions
-        PermissionEntity read = new PermissionEntity(PermissionEnum.READ);
-        PermissionEntity write = new PermissionEntity(PermissionEnum.WRITE);
-        PermissionEntity delete = new PermissionEntity(PermissionEnum.DELETE);
+        PermissionEntity read = new PermissionEntity(PermissionEnum.READ.name());
+        PermissionEntity write = new PermissionEntity(PermissionEnum.WRITE.name());
+        PermissionEntity delete = new PermissionEntity(PermissionEnum.DELETE.name());
         List<PermissionEntity> permissions = new ArrayList<>();
 
         // Roles
@@ -118,7 +118,7 @@ class RoleServiceImplTest {
         when(mockPermissionService.findAllByPermissionNameIn(user
                 .getPermissions()
                 .stream()
-                .map(p -> p.getPermissionEnum().name())
+                .map(PermissionEntity::getName)
                 .collect(Collectors.toList())))
                 .thenReturn(user.getPermissions());
         when(mockRoleRepository.save(user))
@@ -141,7 +141,7 @@ class RoleServiceImplTest {
                     return dto;
                 })
                 .collect(Collectors.toList());
-        when(mockRoleRepository.findAllByDeletedIsFalse())
+        when(mockRoleRepository.findAllByDeletedIsFalseOrderById())
                 .thenReturn(entities);
 
         List<RoleDto> actual = serviceToTest.getAllRoleDtos();

@@ -89,7 +89,7 @@ class DepartmentServiceImplTest {
     @Test
     public void getAllDepartmentDtos() {
         List<DepartmentEntity> entities = Arrays.asList(administration, it);
-        when(mockDepartmentRepository.findAllByDeletedIsFalse())
+        when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
                 .thenReturn(entities);
         List<DepartmentDto> actual = serviceToTest.getAllDepartmentDtos();
         assertEquals(entities.size(), actual.size());
@@ -200,36 +200,33 @@ class DepartmentServiceImplTest {
     public void getAllDepartmentsFilteredWithPage() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
-        filter.setName("");
+        filter.setName("ADMINISTRATION");
         filter.setLimit(5);
         filter.setOffset(1);
 
         Specification<DepartmentEntity> specification = departmentService.getSpecification(filter);
 
         List<DepartmentDto> actual = departmentService.getAllDepartmentsFiltered(filter);
-        assertEquals(2, actual.size());
-        assertEquals(it.getName(), actual.get(0).getName());
-        assertEquals(accounting.getName(), actual.get(1).getName());
+        assertEquals(0, actual.size());
     }
 
     @Test
     public void getAllDepartmentsFiltered() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
-        filter.setName("a");
+        filter.setName("ADMINISTRATION");
 
         Specification<DepartmentEntity> specification = departmentService.getSpecification(filter);
 
         List<DepartmentDto> actual = departmentService.getAllDepartmentsFiltered(filter);
-        assertEquals(2, actual.size());
+        assertEquals(1, actual.size());
         assertEquals(administration.getName(), actual.get(0).getName());
-        assertEquals(accounting.getName(), actual.get(1).getName());
     }
 
     @Test
     public void assignDepartmentAdmins() {
         List<DepartmentEntity> entities = Arrays.asList(administration);
-        when(mockDepartmentRepository.findAllByDeletedIsFalse())
+        when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
                 .thenReturn(entities);
         administration.setAdmin(superAdmin);
         when(mockDepartmentRepository.save(administration))

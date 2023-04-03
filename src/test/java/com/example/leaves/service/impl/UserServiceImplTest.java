@@ -74,10 +74,10 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         // Permissions
-        read = new PermissionEntity(PermissionEnum.READ);
+        read = new PermissionEntity(PermissionEnum.READ.name());
         read.setId(1L);
 
-        write = new PermissionEntity(PermissionEnum.WRITE);
+        write = new PermissionEntity(PermissionEnum.WRITE.name());
         write.setId(2L);
 
         // Roles
@@ -137,10 +137,11 @@ class UserServiceImplTest {
         UserDto dto = new UserDto();
         dto.setName("Test Test");
         dto.setPassword("1234");
-        dto.setEmail("test@test.com");
+        dto.setEmail("testsdagasgas@testgasdfasdasd.com");
         dto.setDepartment("it");
         UserDto actual = userService.createUser(dto);
-        assertTrue(userRepository.existsByEmailAndDeletedIsFalse("test@test.com"));
+        assertTrue(userRepository.existsByEmailAndDeletedIsFalse("testsdagasgas@testgasdfasdasd.com"));
+        userService.deleteUser(actual.getId());
     }
 
     @Test
@@ -168,7 +169,7 @@ class UserServiceImplTest {
     @Test
     public void getAllUserDtos() {
         List<UserDto> actual = userService.getAllUserDtos();
-        assertEquals(userRepository.count(), actual.size());
+        assertEquals(userRepository.findAllByDeletedIsFalseOrderById().size(), actual.size());
     }
 
     @Test
@@ -198,8 +199,7 @@ class UserServiceImplTest {
         UserFilter filter = new UserFilter();
         filter.setName("a");
         filter.setEmail("a");
-        filter.setDepartment("");
-        filter.setRoles(Arrays.asList("Admin"));
+        filter.setRoles(Arrays.asList("ADMIN"));
         Specification<UserEntity> specification = userService.getSpecification(filter);
         List<UserDto> actual = userService.getFilteredUsers(filter);
 
@@ -247,16 +247,20 @@ class UserServiceImplTest {
 
     @Test
     public void updateUserThrowsIfNonExistent() {
-        assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, new UserDto()));
+        UserDto userDto = new UserDto();
+        userDto.setName("aaaaaaa");
+        userDto.setPassword("aaaaaaa");
+        assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, userDto));
     }
 
     @Test
     public void softDeleteUser() {
 
         testUser = userRepository.save(testUser);
-
-        userService.softDeleteUser(testUser.getId());
-        assertEquals(4 , userRepository.count());
+        long id = testUser.getId();
+        userService.softDeleteUser(id);
+        UserEntity expected = userRepository.findById(id).orElse(null);
+        assertTrue(expected.isDeleted());
         userRepository.delete(testUser);
     }
 
