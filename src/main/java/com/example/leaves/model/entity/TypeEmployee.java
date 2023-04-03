@@ -48,6 +48,14 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         this.employeeWithType.add(employeeWithType);
     }
 
+    public List<EmployeeInfo> getEmployeeWithType() {
+        return employeeWithType;
+    }
+
+    public void setEmployeeWithType(List<EmployeeInfo> employeeWithType) {
+        this.employeeWithType = employeeWithType;
+    }
+
     public TypeEmployeeDto toDto() {
         TypeEmployeeDto typeEmployeeDto = new TypeEmployeeDto();
         super.toDto(typeEmployeeDto);
