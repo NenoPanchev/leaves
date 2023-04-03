@@ -1,8 +1,6 @@
 package com.example.leaves.util;
 
-import com.example.leaves.model.entity.PermissionEntity;
-import com.example.leaves.model.entity.PermissionEntity_;
-import com.example.leaves.model.entity.enums.PermissionEnum;
+
 import org.springframework.expression.Operation;
 import org.springframework.util.CollectionUtils;
 
@@ -43,12 +41,12 @@ public class PredicateBuilder<ENTITY> {
     }
 
     public <T> PredicateBuilder<ENTITY> joinLike(final SingularAttribute<?, T> attribute,
-                                                  final String value,
-                                                  final String fieldName) {
+                                                 final String value,
+                                                 final String fieldName) {
         if (value != null) {
             final Join<ENTITY, T> departmentJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
             this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(departmentJoin.get(fieldName))),
-                    "%"+ value.toUpperCase().trim() + "%"));
+                    "%" + value.toUpperCase().trim() + "%"));
         }
         return this;
     }
@@ -64,14 +62,14 @@ public class PredicateBuilder<ENTITY> {
     }
 
     public <T, D> PredicateBuilder<ENTITY> joinInLike(final ListAttribute<?, T> attribute,
-                                                  final Collection<D> list,
-                                                  final String fieldName) {
+                                                      final Collection<D> list,
+                                                      final String fieldName) {
         if (list != null && !list.isEmpty()) {
             final ListJoin<ENTITY, T> roleJoin = root.join((ListAttribute<? super ENTITY, T>) attribute);
             for (D value : list) {
 
                 this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(roleJoin.get(fieldName))),
-                        "%"+ value.toString().toUpperCase().trim() + "%"));
+                        "%" + value.toString().toUpperCase().trim() + "%"));
             }
 // todo            this.predicates.add(roleJoin.get(fieldName).in(list));
         }
@@ -88,13 +86,13 @@ public class PredicateBuilder<ENTITY> {
     }
 
     public PredicateBuilder<?> like(final SingularAttribute<?, String> attribute,
-                                      final String value) {
+                                    final String value) {
 
         if (value != null && !value.isEmpty()) {
             Path<String> stringPath = this.root.get((SingularAttribute<? super ENTITY, String>) attribute);
             String val = value.toUpperCase().trim();
             this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
-                    "%"+ value.toUpperCase().trim() + "%"));
+                    "%" + value.toUpperCase().trim() + "%"));
         }
         return this;
     }
@@ -103,13 +101,13 @@ public class PredicateBuilder<ENTITY> {
                                                 final String value) {
         if (value != null) {
             this.predicates.add(this.builder.equal(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
-                            value.toUpperCase().trim()));
+                    value.toUpperCase().trim()));
         }
         return this;
     }
 
     public <T> PredicateBuilder<?> equals(final SingularAttribute<?, T> attribute,
-                                                final T value) {
+                                          final T value) {
         if (value != null) {
             this.predicates.add(this.builder.equal(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
                     value));
@@ -144,6 +142,7 @@ public class PredicateBuilder<ENTITY> {
         }
         return this;
     }
+
     public List<Predicate> build() {
         return this.predicates;
     }

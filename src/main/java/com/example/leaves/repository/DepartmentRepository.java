@@ -45,4 +45,7 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
     @Query("SELECT d.name from DepartmentEntity d " +
             "WHERE d.deleted = false ")
     List<String> findAllNamesByDeletedIsFalse();
+
+    List<DepartmentEntity> findAllByDeletedIsFalse();
+
 }

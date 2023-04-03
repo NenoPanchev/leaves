@@ -12,4 +12,10 @@ public interface SoftDeleteRepository {
             "SET e.deleted = true " +
             "WHERE e.id = :id")
     void markAsDeleted(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE #{#entityName} e " +
+            "SET e.deleted = false " +
+            "WHERE e.id = :id")
+    void unMarkAsRemoved(@Param("id") final long id);
 }

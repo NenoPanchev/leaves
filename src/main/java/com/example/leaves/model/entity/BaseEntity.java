@@ -3,12 +3,12 @@ package com.example.leaves.model.entity;
 import javax.persistence.*;
 
 import com.example.leaves.model.dto.BaseDto;
-import com.example.leaves.model.listener.MyEntityListener;
+import com.example.leaves.model.listener.EntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@EntityListeners(MyEntityListener.class)
+@EntityListeners(EntityListener.class)
 @MappedSuperclass
 public abstract class BaseEntity <T extends BaseDto> {
     @Id
