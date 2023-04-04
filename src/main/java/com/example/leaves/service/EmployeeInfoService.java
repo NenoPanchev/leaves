@@ -1,7 +1,6 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.EmployeeInfoDto;
-import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.UserEntity;
 
 import java.io.File;
@@ -15,6 +14,7 @@ public interface EmployeeInfoService {
 //    List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees();
 
     public File getPdfOfRequest(UserEntity employee, long requestId);
+
     List<EmployeeInfoDto> getAll();
 
     EmployeeInfoDto create(EmployeeInfoDto employee, UserEntity user);

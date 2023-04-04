@@ -12,12 +12,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,7 +32,7 @@ public class AuthControllerImpl implements AuthController {
 
     @Override
     public ResponseEntity<?> createAuthenticationToken(UserDto authenticationRequest, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
@@ -60,12 +58,12 @@ public class AuthControllerImpl implements AuthController {
 //            jwt = authorizationHeader.substring(7);
 //            username = jwtUtil.extractUsername(jwt);
 //        }
-            final UserDetails userDetails = userDetailService
-                    .loadUserByUsername(jwtUtil.extractUsername(jwt.getJwt()));
+        final UserDetails userDetails = userDetailService
+                .loadUserByUsername(jwtUtil.extractUsername(jwt.getJwt()));
 
-            AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt.getJwt());
-            mapUserDetailsToAuthenticationResponse(userDetails, authenticationResponse);
-            return ResponseEntity.ok(authenticationResponse);
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt.getJwt());
+        mapUserDetailsToAuthenticationResponse(userDetails, authenticationResponse);
+        return ResponseEntity.ok(authenticationResponse);
 
     }
 

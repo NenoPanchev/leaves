@@ -191,7 +191,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
 
-
     @Override
     public Specification<DepartmentEntity> getSpecification(DepartmentFilter filter) {
         return (root, query, criteriaBuilder) ->

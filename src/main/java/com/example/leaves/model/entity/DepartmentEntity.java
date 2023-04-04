@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "departments", schema = "public")
 public class DepartmentEntity extends BaseEntity {
-    @Column(unique = true, nullable = false,name = "name")
+    @Column(unique = true, nullable = false, name = "name")
     private String name;
 
     @ManyToOne

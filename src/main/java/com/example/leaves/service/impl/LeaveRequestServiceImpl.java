@@ -114,8 +114,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
         }
-        if (leaveRequestDto.getEndDate().isBefore(leaveRequestDto.getStartDate()))
-        {
+        if (leaveRequestDto.getEndDate().isBefore(leaveRequestDto.getStartDate())) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
@@ -129,11 +128,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         LeaveRequest leaveRequest = getById(id);
         if (leaveRequest.getApproved() == null) {
-        UserEntity userEntity=employeeRepository.findByIdAndDeletedIsFalse(leaveRequest.getEmployee().getUserInfo().getId());
-        if (userEntity==null)
-        {
-            throw  new EntityNotFoundException("User  not found ",1);
-        }
+            UserEntity userEntity = employeeRepository.findByIdAndDeletedIsFalse(leaveRequest.getEmployee().getUserInfo().getId());
+            if (userEntity == null) {
+                throw new EntityNotFoundException("User  not found ", 1);
+            }
             EmployeeInfo e = userEntity.getEmployeeInfo();
             e.subtractFromAnnualPaidLeave(leaveRequest.getDaysRequested());
             leaveRequest.setApproved(Boolean.TRUE);
@@ -203,7 +201,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     @Override
     public List<LeaveRequestDto> getAllByEmployee(UserEntity employee) {
         List<LeaveRequestDto> list = new ArrayList<>();
-         leaveRequestRepository.findAllByEmployee(employee.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        leaveRequestRepository.findAllByEmployee(employee.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
@@ -353,7 +351,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     .lessThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .inWithNull(LeaveRequest_.approved, filter.getApproved())
-                    .lessThan(LeaveRequest_.createdAt,ListHelper.getLatestDateTime(filter.getDateCreated()))
+                    .lessThan(LeaveRequest_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(LeaveRequest_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(LeaveRequest_.createdBy, filter.getCreatedBy())
                     .equal(LeaveRequest_.deleted, filter.getDeleted())

@@ -4,11 +4,10 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.model.dto.TypeEmployeeDto;
-import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.TypeEmployee_;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.TypeEmployeeRepository;
+import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import com.example.leaves.util.ListHelper;
@@ -26,10 +25,12 @@ import java.util.List;
 @Service
 public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private final TypeEmployeeRepository typeRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository) {
+    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository, UserRepository userRepository) {
         this.typeRepository = typeRepository;
+        this.userRepository = userRepository;
     }
 
     private static void setTypeChanges(TypeEmployeeDto typeDto, TypeEmployee typeToBeUpdated) {
@@ -51,18 +52,18 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     }
 
     @Override
-    public TypeEmployeeDto create(TypeEmployeeDto typeDto, UserEntity employee) {
-
-        //TODO authentication
+    public TypeEmployeeDto create(TypeEmployeeDto typeDto) {
+        //TODO AUTH
         if (typeRepository.existsByTypeName(typeDto.getTypeName())) {
             throw new DuplicateEntityException("Type", typeDto.getTypeName());
-        }  else if (typeDto.getTypeName()==null||typeDto.getTypeName().isEmpty()||typeDto.getDaysLeave()==0) {
+        } else if (typeDto.getTypeName() == null || typeDto.getTypeName().isEmpty() || typeDto.getDaysLeave() == 0) {
             throw new IllegalArgumentException("invalid body for typeDto");
         } else {
             TypeEmployee typeEmployee = new TypeEmployee();
             typeEmployee.toEntity(typeDto);
             return typeRepository.save(typeEmployee).toDto();
         }
+
     }
 
     public TypeEmployee getById(long typeId) {

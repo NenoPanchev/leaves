@@ -8,13 +8,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.Mockito;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class TestsHelper {
 
 
     public static EmployeeInfo createMockEmployee() {
-        UserEntity mockUser=new UserEntity();
+        UserEntity mockUser = new UserEntity();
         EmployeeInfo employeeInfo = new EmployeeInfo();
         mockUser.setEmployeeInfo(employeeInfo);
         mockUser.setName("MockName");

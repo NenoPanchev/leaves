@@ -1,7 +1,6 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,10 +39,10 @@ public interface UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto dto,
-                                               @PathVariable ("id") Long id,
-                                               BindingResult bindingResult);
+                                       @PathVariable("id") Long id,
+                                       BindingResult bindingResult);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
-    ResponseEntity<String> deleteUser(@PathVariable ("id") Long id);
+    ResponseEntity<String> deleteUser(@PathVariable("id") Long id);
 }

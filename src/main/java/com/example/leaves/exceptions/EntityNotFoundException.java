@@ -9,4 +9,7 @@ public class EntityNotFoundException extends BaseCustomException {
         super(String.format("%s with %s %s not found.", type, attribute, value));
     }
 
+    public EntityNotFoundException(String msg) {
+        super(msg);
+    }
 }

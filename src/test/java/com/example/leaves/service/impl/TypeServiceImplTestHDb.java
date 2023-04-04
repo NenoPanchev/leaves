@@ -2,7 +2,6 @@ package com.example.leaves.service.impl;
 
 
 import com.example.leaves.model.dto.TypeEmployeeDto;
-import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.enums.SearchOperation;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.service.filter.TypeEmployeeFilter;

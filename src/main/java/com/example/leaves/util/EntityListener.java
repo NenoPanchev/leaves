@@ -1,4 +1,4 @@
-package com.example.leaves.model.listener;
+package com.example.leaves.util;
 
 import com.example.leaves.model.dto.BaseDto;
 import com.example.leaves.model.entity.BaseEntity;

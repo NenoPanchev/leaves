@@ -3,7 +3,6 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
 import com.example.leaves.model.entity.UserEntity;
@@ -18,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,7 +46,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .map(EmployeeInfo::toDto)
                 .collect(Collectors.toList());
     }
-@Override
+
+    @Override
     public EmployeeInfoDto create(EmployeeInfoDto employeeDto, UserEntity user) {
         EmployeeInfo employeeInfo = new EmployeeInfo();
         employeeInfo.toEntity(employeeDto);
@@ -70,7 +69,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public EmployeeInfoDto update(EmployeeInfoDto employee, long id) {
-        UserEntity employeeToBeUpdated = employeeRepository.findById((int)id);
+        UserEntity employeeToBeUpdated = employeeRepository.findById((int) id);
         setEmployeeChanges(employee, employeeToBeUpdated);
         employeeRepository.save(employeeToBeUpdated);
         return employee;
@@ -103,12 +102,12 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public EmployeeInfoDto changeType(long employeeId, long typeId) {
-        UserEntity userEntity=employeeRepository.findById((int)typeId);
+        UserEntity userEntity = employeeRepository.findById((int) typeId);
         EmployeeInfo employeeInfo = userEntity.getEmployeeInfo();
         employeeInfo.setEmployeeType(typeService.getById(typeId));
         employeeRepository.save(userEntity);
 
-        return  userEntity
+        return userEntity
                 .getEmployeeInfo()
                 .toDto();
     }

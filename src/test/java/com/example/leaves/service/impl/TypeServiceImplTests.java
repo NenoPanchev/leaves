@@ -4,9 +4,7 @@ package com.example.leaves.service.impl;
 import com.example.leaves.TestsHelper;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.model.dto.TypeEmployeeDto;
-import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.TypeEmployee;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.TypeEmployeeService;
@@ -174,7 +172,7 @@ public class TypeServiceImplTests {
         Mockito.when(mockTypeRepository.save(mockType))
                 .thenReturn(mockType);
         // Act
-        mockTypeService.create(mockType.toDto(), Mockito.mock(UserEntity.class));
+        mockTypeService.create(mockType.toDto());
 
         // Assert
         Mockito.verify(mockTypeRepository, Mockito.times(1))
@@ -191,7 +189,7 @@ public class TypeServiceImplTests {
         // Act, Assert
         Assertions.assertThrows(
                 DuplicateEntityException.class,
-                () -> mockTypeService.create(mockType.toDto(), Mockito.mock(UserEntity.class)));
+                () -> mockTypeService.create(mockType.toDto()));
     }
 
 

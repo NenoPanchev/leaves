@@ -1,9 +1,11 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.PermissionEntity;
+import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.repository.UserRepository;
@@ -25,13 +27,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.transaction.Transactional;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -149,6 +150,7 @@ class UserServiceImplTest {
         UserEntity actual = userService.findByEmail(user.getEmail());
         assertEquals(user.getName(), actual.getName());
     }
+
     @Test
     public void findByEmailThrowsIfNonExistentUser() {
         assertThrows(ObjectNotFoundException.class, () -> userService.findByEmail("safhaosogaas"));
@@ -194,6 +196,7 @@ class UserServiceImplTest {
         assertEquals(1, actual.size());
         assertEquals(admin.getEmail(), actual.get(0).getEmail());
     }
+
     @Test
     public void getFilteredUsers() {
         UserFilter filter = new UserFilter();
@@ -266,7 +269,7 @@ class UserServiceImplTest {
 
     @Test
     public void softDeleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test
@@ -289,7 +292,7 @@ class UserServiceImplTest {
 
     @Test
     public void deleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test

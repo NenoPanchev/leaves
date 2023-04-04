@@ -4,9 +4,11 @@ import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.RefreshRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @CrossOrigin("*")
@@ -15,7 +17,7 @@ public interface AuthController {
 
     @PostMapping()
     ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserDto authenticationRequest,
-                                                       BindingResult bindingResult);
+                                                BindingResult bindingResult);
 
     @PostMapping("/refresh")
     ResponseEntity<?> refreshUserOnClientRefresh(@RequestBody RefreshRequest jwt);
