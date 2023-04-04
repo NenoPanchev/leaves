@@ -71,7 +71,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentDto createDepartment(DepartmentDto dto) {
         DepartmentEntity entity = new DepartmentEntity();
         entity.toEntity(dto);
-        if (dto.getAdminEmail() != null) {
+        if (dto.getAdminEmail() != null && !dto.getAdminEmail().equals("")) {
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
         }
         if (dto.getEmployeeEmails() != null) {
