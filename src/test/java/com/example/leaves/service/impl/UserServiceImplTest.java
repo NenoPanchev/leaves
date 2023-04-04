@@ -1,11 +1,9 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.PermissionEntity;
-import com.example.leaves.model.entity.RoleEntity;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.repository.UserRepository;
@@ -27,12 +25,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @SpringBootTest
@@ -75,10 +74,10 @@ class UserServiceImplTest {
     @BeforeEach
     void setUp() {
         // Permissions
-        read = new PermissionEntity(PermissionEnum.READ.toString());
+        read = new PermissionEntity(PermissionEnum.READ.name());
         read.setId(1L);
 
-        write = new PermissionEntity(PermissionEnum.WRITE.toString());
+        write = new PermissionEntity(PermissionEnum.WRITE.name());
         write.setId(2L);
 
         // Roles
@@ -138,10 +137,11 @@ class UserServiceImplTest {
         UserDto dto = new UserDto();
         dto.setName("Test Test");
         dto.setPassword("1234");
-        dto.setEmail("test@test.com");
+        dto.setEmail("testsdagasgas@testgasdfasdasd.com");
         dto.setDepartment("it");
         UserDto actual = userService.createUser(dto);
-        assertTrue(userRepository.existsByEmailAndDeletedIsFalse("test@test.com"));
+        assertTrue(userRepository.existsByEmailAndDeletedIsFalse("testsdagasgas@testgasdfasdasd.com"));
+        userService.deleteUser(actual.getId());
     }
 
     @Test
@@ -149,7 +149,6 @@ class UserServiceImplTest {
         UserEntity actual = userService.findByEmail(user.getEmail());
         assertEquals(user.getName(), actual.getName());
     }
-
     @Test
     public void findByEmailThrowsIfNonExistentUser() {
         assertThrows(ObjectNotFoundException.class, () -> userService.findByEmail("safhaosogaas"));
@@ -170,7 +169,7 @@ class UserServiceImplTest {
     @Test
     public void getAllUserDtos() {
         List<UserDto> actual = userService.getAllUserDtos();
-        assertEquals(userRepository.count(), actual.size());
+        assertEquals(userRepository.findAllByDeletedIsFalseOrderById().size(), actual.size());
     }
 
     @Test
@@ -195,20 +194,18 @@ class UserServiceImplTest {
         assertEquals(1, actual.size());
         assertEquals(admin.getEmail(), actual.get(0).getEmail());
     }
+    @Test
+    public void getFilteredUsers() {
+        UserFilter filter = new UserFilter();
+        filter.setName("a");
+        filter.setEmail("a");
+        filter.setRoles(Arrays.asList("ADMIN"));
+        Specification<UserEntity> specification = userService.getSpecification(filter);
+        List<UserDto> actual = userService.getFilteredUsers(filter);
 
-//    @Test
-//    public void getFilteredUsers() {
-//        UserFilter filter = new UserFilter();
-//        filter.setName("a");
-//        filter.setEmail("a");
-//        filter.setDepartment("");
-//        filter.setRoles(Arrays.asList("Admin"));
-//        Specification<UserEntity> specification = userService.getSpecification(filter);
-//        List<UserDto> actual = userService.getFilteredUsers(filter);
-//
-//        assertEquals(2, actual.size());
-//        assertEquals(admin.getEmail(), actual.get(1).getEmail());
-//    }
+        assertEquals(2, actual.size());
+        assertEquals(admin.getEmail(), actual.get(1).getEmail());
+    }
 
     @Test
     public void isTheSame() {
@@ -248,24 +245,28 @@ class UserServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserDto()));
     }
 
-//    @Test
-//    public void updateUserThrowsIfNonExistent() {
-//        assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, new UserDto()));
-//    }
+    @Test
+    public void updateUserThrowsIfNonExistent() {
+        UserDto userDto = new UserDto();
+        userDto.setName("aaaaaaa");
+        userDto.setPassword("aaaaaaa");
+        assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, userDto));
+    }
 
     @Test
     public void softDeleteUser() {
 
         testUser = userRepository.save(testUser);
-
-        userService.softDeleteUser(testUser.getId());
-        assertEquals(4, userRepository.count());
+        long id = testUser.getId();
+        userService.softDeleteUser(id);
+        UserEntity expected = userRepository.findById(id).orElse(null);
+        assertTrue(expected.isDeleted());
         userRepository.delete(testUser);
     }
 
     @Test
     public void softDeleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
     }
 
     @Test
@@ -288,7 +289,7 @@ class UserServiceImplTest {
 
     @Test
     public void deleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
     }
 
     @Test

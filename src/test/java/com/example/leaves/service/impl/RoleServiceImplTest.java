@@ -13,8 +13,11 @@ import com.example.leaves.service.filter.RoleFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
@@ -48,9 +51,9 @@ class RoleServiceImplTest {
     void setUp() {
 
         // Permissions
-        PermissionEntity read = new PermissionEntity(PermissionEnum.READ.toString());
-        PermissionEntity write = new PermissionEntity(PermissionEnum.WRITE.toString());
-        PermissionEntity delete = new PermissionEntity(PermissionEnum.DELETE.toString());
+        PermissionEntity read = new PermissionEntity(PermissionEnum.READ.name());
+        PermissionEntity write = new PermissionEntity(PermissionEnum.WRITE.name());
+        PermissionEntity delete = new PermissionEntity(PermissionEnum.DELETE.name());
         List<PermissionEntity> permissions = new ArrayList<>();
 
         // Roles
@@ -93,7 +96,7 @@ class RoleServiceImplTest {
 
     @Test
     void findAllByRoleIn() {
-        String[] roleNames = new String[]{"USER", "ADMIN", "SUPER_ADMIN"};
+        String[] roleNames = new String[] {"USER", "ADMIN", "SUPER_ADMIN"};
         List<RoleEntity> expected = Arrays.asList(user, superAdmin);
         when(mockRoleRepository.findAllByNameInAndDeletedIsFalse(roleNames))
                 .thenReturn(expected);
@@ -106,47 +109,47 @@ class RoleServiceImplTest {
 
     }
 
-//    @Test
-//    void createRole() {
-//        RoleDto expected = new RoleDto();
-//        user.toDto(expected);
-//        RoleEntity entity = new RoleEntity();
-//        entity.toEntity(expected);
-//        when(mockPermissionService.findAllByPermissionNameIn(user
-//                .getPermissions()
-//                .stream()
-//                .map(p -> p.getPermissionEnum().name())
-//                .collect(Collectors.toList())))
-//                .thenReturn(user.getPermissions());
-//        when(mockRoleRepository.save(user))
-//                .thenReturn(user);
-//
-//        RoleDto actual = serviceToTest.createRole(expected);
-//
-//        assertEquals(expected.getPermissions().size(), actual.getPermissions().size());
-//        assertEquals(expected.getName(), actual.getName());
-//    }
+    @Test
+    void createRole() {
+        RoleDto expected = new RoleDto();
+        user.toDto(expected);
+        RoleEntity entity = new RoleEntity();
+        entity.toEntity(expected);
+        when(mockPermissionService.findAllByPermissionNameIn(user
+                .getPermissions()
+                .stream()
+                .map(PermissionEntity::getName)
+                .collect(Collectors.toList())))
+                .thenReturn(user.getPermissions());
+        when(mockRoleRepository.save(user))
+                .thenReturn(user);
 
-//    @Test
-//    void getAllRoleDtos() {
-//        List<RoleEntity> entities = Arrays.asList(user, superAdmin);
-//        List<RoleDto> expected = entities
-//                .stream()
-//                .map(entity -> {
-//                    RoleDto dto = new RoleDto();
-//                    entity.toDto(dto);
-//                    return dto;
-//                })
-//                .collect(Collectors.toList());
-//        when(mockRoleRepository.findAllByDeletedIsFalse())
-//                .thenReturn(entities);
-//
-//        List<RoleDto> actual = serviceToTest.getAllRoleDtos();
-//
-//        assertEquals(expected.size(), actual.size());
-//        assertEquals(expected.get(0).getName(), actual.get(0).getName());
-//        assertEquals(expected.get(1).getName(), actual.get(1).getName());
-//    }
+        RoleDto actual = serviceToTest.createRole(expected);
+
+        assertEquals(expected.getPermissions().size(), actual.getPermissions().size());
+        assertEquals(expected.getName(), actual.getName());
+    }
+
+    @Test
+    void getAllRoleDtos() {
+        List<RoleEntity> entities = Arrays.asList(user, superAdmin);
+        List<RoleDto> expected = entities
+                .stream()
+                .map(entity -> {
+                    RoleDto dto = new RoleDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        when(mockRoleRepository.findAllByDeletedIsFalseOrderById())
+                .thenReturn(entities);
+
+        List<RoleDto> actual = serviceToTest.getAllRoleDtos();
+
+        assertEquals(expected.size(), actual.size());
+        assertEquals(expected.get(0).getName(), actual.get(0).getName());
+        assertEquals(expected.get(1).getName(), actual.get(1).getName());
+    }
 
     @Test
     void existsByName() {

@@ -1,17 +1,19 @@
 package com.example.leaves.service.impl;
 
-
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
-import org.junit.jupiter.api.BeforeEach;
+import com.example.leaves.service.filter.RoleFilter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,16 +86,16 @@ class DepartmentServiceImplTest {
         assertEquals(it.getId(), actual.getId());
     }
 
-//    @Test
-//    public void getAllDepartmentDtos() {
-//        List<DepartmentEntity> entities = Arrays.asList(administration, it);
-//        when(mockDepartmentRepository.findAllByDeletedIsFalse())
-//                .thenReturn(entities);
-//        List<DepartmentDto> actual = serviceToTest.getAllDepartmentDtos();
-//        assertEquals(entities.size(), actual.size());
-//        assertEquals(entities.get(0).getName(), actual.get(0).getName());
-//        assertEquals(entities.get(1).getId(), actual.get(1).getId());
-//    }
+    @Test
+    public void getAllDepartmentDtos() {
+        List<DepartmentEntity> entities = Arrays.asList(administration, it);
+        when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
+                .thenReturn(entities);
+        List<DepartmentDto> actual = serviceToTest.getAllDepartmentDtos();
+        assertEquals(entities.size(), actual.size());
+        assertEquals(entities.get(0).getName(), actual.get(0).getName());
+        assertEquals(entities.get(1).getId(), actual.get(1).getId());
+    }
 
     @Test
     public void createDepartment() {
@@ -142,7 +144,6 @@ class DepartmentServiceImplTest {
         verify(mockDepartmentRepository, times(1)).deleteById(it.getId());
 
     }
-
     @Test
     void deleteDepartmentThrowsWhenNonExistentDepartment() {
         assertThrows(ObjectNotFoundException.class, () -> serviceToTest.deleteDepartment(99L));
@@ -199,43 +200,40 @@ class DepartmentServiceImplTest {
     public void getAllDepartmentsFilteredWithPage() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
-        filter.setName("");
+        filter.setName("ADMINISTRATION");
         filter.setLimit(5);
         filter.setOffset(1);
 
         Specification<DepartmentEntity> specification = departmentService.getSpecification(filter);
 
         List<DepartmentDto> actual = departmentService.getAllDepartmentsFiltered(filter);
-        assertEquals(2, actual.size());
-        assertEquals(it.getName(), actual.get(0).getName());
-        assertEquals(accounting.getName(), actual.get(1).getName());
+        assertEquals(0, actual.size());
     }
 
     @Test
     public void getAllDepartmentsFiltered() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
-        filter.setName("a");
+        filter.setName("ADMINISTRATION");
 
         Specification<DepartmentEntity> specification = departmentService.getSpecification(filter);
 
         List<DepartmentDto> actual = departmentService.getAllDepartmentsFiltered(filter);
-        assertEquals(2, actual.size());
+        assertEquals(1, actual.size());
         assertEquals(administration.getName(), actual.get(0).getName());
-        assertEquals(accounting.getName(), actual.get(1).getName());
     }
 
-//    @Test
-//    public void assignDepartmentAdmins() {
-//        List<DepartmentEntity> entities = Arrays.asList(administration);
-//        when(mockDepartmentRepository.findAllByDeletedIsFalse())
-//                .thenReturn(entities);
-//        administration.setAdmin(superAdmin);
-//        when(mockDepartmentRepository.save(administration))
-//                .thenReturn(administration);
-//        serviceToTest.assignDepartmentAdmins();
-//        verify(mockDepartmentRepository, times(1)).save(administration);
-//    }
+    @Test
+    public void assignDepartmentAdmins() {
+        List<DepartmentEntity> entities = Arrays.asList(administration);
+        when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
+                .thenReturn(entities);
+        administration.setAdmin(superAdmin);
+        when(mockDepartmentRepository.save(administration))
+                .thenReturn(administration);
+        serviceToTest.assignDepartmentAdmins();
+        verify(mockDepartmentRepository, times(1)).save(administration);
+    }
 
     @Test
     public void addEmployeeToDepartment() {

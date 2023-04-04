@@ -46,7 +46,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurer Adapter {   //
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 //                .authorizeRequests().antMatchers("/**", "/users/**", "/roles/**", "/departments/**").permitAll().and()
                 .authorizeRequests().antMatchers(SWAGGER_WHITELIST).permitAll().and()
-                .authorizeRequests().antMatchers("/authenticate").permitAll()
+                .authorizeRequests().antMatchers("/authenticate", "/authenticate/refresh").permitAll()
                 .anyRequest().authenticated();
 
 //        http.authenticationProvider(authenticationProvider());

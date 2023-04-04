@@ -1,6 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,7 +15,7 @@ import java.util.List;
 @RequestMapping("/users")
 public interface UserController {
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getAllUsers();
 
     @GetMapping("/emails")
@@ -22,7 +23,7 @@ public interface UserController {
     ResponseEntity<List<String>> getAllUserEmails();
 
     @PostMapping("/filter")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
     @PostMapping
@@ -39,9 +40,10 @@ public interface UserController {
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto dto,
-                                       @PathVariable("id") Long id,
-                                       BindingResult bindingResult);
+                                               @PathVariable ("id") Long id,
+                                               BindingResult bindingResult);
 
     @DeleteMapping("/{id}")
-    ResponseEntity<String> deleteUser(@PathVariable("id") Long id);
+    @PreAuthorize("hasAuthority('DELETE')")
+    ResponseEntity<String> deleteUser(@PathVariable ("id") Long id);
 }

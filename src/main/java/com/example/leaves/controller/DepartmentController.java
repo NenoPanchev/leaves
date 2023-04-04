@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/departments")
 public interface DepartmentController {
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<DepartmentDto>> getAllDepartments();
 
     @GetMapping("/names")
@@ -22,7 +22,7 @@ public interface DepartmentController {
     ResponseEntity<List<String>> getAllDepartmentNames();
 
     @PostMapping("/filter")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<DepartmentDto>> getFilteredDepartments(@RequestBody DepartmentFilter filter);
 
     @PostMapping
