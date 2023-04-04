@@ -18,7 +18,7 @@ public interface RequestController {
 
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByEmployee(@RequestHeader HttpHeaders headers);
+    List<LeaveRequestDto> getAllByEmployee(@RequestParam long employeeId);
 
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
@@ -30,31 +30,31 @@ public interface RequestController {
 
     @PutMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto update(@RequestHeader HttpHeaders headers, @RequestBody LeaveRequestDto leaveRequestDto);
+    LeaveRequestDto update(@RequestBody LeaveRequestDto leaveRequestDto);
 
     @PostMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto addRequest(@RequestHeader HttpHeaders headers, @RequestBody LeaveRequestDto leaveRequestDto);
+    LeaveRequestDto addRequest(@RequestBody LeaveRequestDto leaveRequestDto);
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest(@RequestHeader HttpHeaders headers, @PathVariable int id);
+    void approveRequest( @PathVariable long id);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")
-    void disapproveRequest(@RequestHeader HttpHeaders headers, @PathVariable int id);
+    void disapproveRequest( @PathVariable int id);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
-    void delete(@RequestHeader HttpHeaders headers, @PathVariable long id);
+    void delete( @PathVariable long id);
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
-    void unMarkAsDeleted(@RequestHeader HttpHeaders headers, @PathVariable long id);
+    void unMarkAsDeleted(@PathVariable long id);
 
     //    @DeleteMapping("/clear")
 //    void clearAllProcessedRequests(@RequestHeader HttpHeaders headers);
     @PostMapping("/Page")
     @PreAuthorize("hasAuthority('READ')")
-    Page<LeaveRequestDto> getPageFiltered(@RequestHeader HttpHeaders headers, @RequestBody LeaveRequestFilter filter);
+    Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
 }

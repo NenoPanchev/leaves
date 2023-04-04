@@ -53,7 +53,6 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
 
     @Override
     public TypeEmployeeDto create(TypeEmployeeDto typeDto) {
-        //TODO AUTH
         if (typeRepository.existsByTypeName(typeDto.getTypeName())) {
             throw new DuplicateEntityException("Type", typeDto.getTypeName());
         } else if (typeDto.getTypeName() == null || typeDto.getTypeName().isEmpty() || typeDto.getDaysLeave() == 0) {
@@ -73,8 +72,6 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
             return typeRepository.findById(typeId);
         }
     }
-
-    //TODO Authorization
     public TypeEmployee update(TypeEmployeeDto typeDto, long id) {
 
         if (typeRepository.findByTypeName(typeDto.getTypeName()) != null

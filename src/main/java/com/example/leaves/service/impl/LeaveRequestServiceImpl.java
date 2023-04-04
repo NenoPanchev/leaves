@@ -20,6 +20,7 @@ import com.example.leaves.util.PredicateBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
@@ -74,7 +75,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public LeaveRequest addRequest(UserEntity employee, LeaveRequestDto leaveRequestDto) {
+    public LeaveRequest addRequest(LeaveRequestDto leaveRequestDto) {
+        UserEntity employee = getCurrentUser();
 
         //TODO EXTEND FUNCTIONALITY
         //TODO THROW MORE SPECIFIC EXCEPTIONS!
@@ -123,12 +125,23 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
+    private UserEntity getCurrentUser() {
+        return employeeRepository
+                .findByEmailAndDeletedIsFalse(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName())
+                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+    }
+
     @Override
-    public LeaveRequest approveRequest(UserEntity user, long id) {
+    public LeaveRequest approveRequest(long id) {
 
         LeaveRequest leaveRequest = getById(id);
         if (leaveRequest.getApproved() == null) {
-            UserEntity userEntity = employeeRepository.findByIdAndDeletedIsFalse(leaveRequest.getEmployee().getUserInfo().getId());
+            UserEntity userEntity = leaveRequest.getEmployee().getUserInfo();
+
             if (userEntity == null) {
                 throw new EntityNotFoundException("User  not found ", 1);
             }
@@ -191,17 +204,27 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto, UserEntity employee) {
+    public LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto) {
+        UserEntity employee = getCurrentUser();
+
+
         LeaveRequest sameStartDate = leaveRequestRepository.findFirstByStartDateAndEmployee
                 (leaveRequestDto.getStartDate(), employee.getEmployeeInfo());
+
         sameStartDate.setEndDate(leaveRequestDto.getEndDate());
+
         return leaveRequestRepository.save(sameStartDate).toDto();
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByEmployee(UserEntity employee) {
+    public List<LeaveRequestDto> getAllByEmployee(Long employeeId) {
         List<LeaveRequestDto> list = new ArrayList<>();
-        leaveRequestRepository.findAllByEmployee(employee.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        UserEntity user = employeeRepository
+                .findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+
+
+        leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
