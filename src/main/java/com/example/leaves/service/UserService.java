@@ -20,8 +20,6 @@ public interface UserService {
     UserDto updateUser(Long id, UserDto dto);
     boolean existsByEmail(String email);
     List<UserDto> getAllUserDtos();
-
-    List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);
     List<UserDto> getFilteredUsers(UserFilter filter);
 
     Specification<UserEntity> getSpecification(final UserFilter filter);

@@ -45,7 +45,7 @@ public class PredicateBuilder<ENTITY> {
     public <T> PredicateBuilder<ENTITY> joinLike(final SingularAttribute<?, T> attribute,
                                                   final String value,
                                                   final String fieldName) {
-        if (value != null) {
+        if (value != null && !value.isEmpty()) {
             final Join<ENTITY, T> departmentJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
             this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(departmentJoin.get(fieldName))),
                     "%"+ value.toUpperCase().trim() + "%"));

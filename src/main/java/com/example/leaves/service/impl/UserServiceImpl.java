@@ -142,26 +142,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria) {
-        UserSpecification userSpecification = new UserSpecification();
-        searchCriteria
-                .stream()
-                .map(criteria ->
-                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
-                .forEach(userSpecification::add);
-        List<UserEntity> entities = userRepository.findAll(userSpecification);
-        return entities
-                .stream()
-                .map(entity -> {
-                    UserDto dto = new UserDto();
-                    entity.toDto(dto);
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
     public void deleteUser(Long id) {
         if (id == 1) {
             throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
