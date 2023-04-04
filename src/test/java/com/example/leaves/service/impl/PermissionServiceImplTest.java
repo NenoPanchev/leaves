@@ -12,6 +12,7 @@
 //import org.springframework.test.context.junit4.SpringRunner;
 //
 //import java.util.Arrays;
+//import java.util.HashSet;
 //import java.util.List;
 //import java.util.Set;
 //import java.util.stream.Collectors;
@@ -92,7 +93,7 @@
 //    @Test
 //    void findAllPermissionNamesByRoleNameIn() {
 //        List<String> roleNames = Arrays.asList("USER", "ADMIN");
-//        Set<PermissionEnum> expected = Arrays.asList(PermissionEnum.READ, PermissionEnum.WRITE).stream().collect(Collectors.toSet());
+//        Set<PermissionEnum> expected = new HashSet<>(Arrays.asList(PermissionEnum.READ, PermissionEnum.WRITE));
 //        when(mockPermissionRepository.findAllPermissionEnumsByRole(roleNames))
 //                .thenReturn(expected);
 //

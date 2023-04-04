@@ -91,5 +91,13 @@ public class EmployeeInfo {
         dto.setName(userInfo.getName());
         return dto;
     }
+    public EmployeeInfo toEntity(EmployeeInfoDto dto) {
+//        EmployeeInfoDto dto = new EmployeeInfoDto();
+//        dto.setTypeId(this.getEmployeeType().getId());
+//        dto.setName(userInfo.getName());
+//        return dto;
+        //TODO
+        return this;
+    }
 
 }

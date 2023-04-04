@@ -24,5 +24,7 @@ public interface TypeEmployeeService {
 
     TypeEmployee getById(long typeId);
 
+    TypeEmployee getByName(String name);
+
     Page<TypeEmployeeDto> getAllFilterPage(TypeEmployeeFilter filter);
 }

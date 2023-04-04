@@ -1,6 +1,8 @@
 package com.example.leaves.service;
 
+import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.UserEntity;
 
 import java.io.File;
 import java.util.List;
@@ -8,9 +10,20 @@ import java.util.List;
 public interface EmployeeInfoService {
 
 
-    EmployeeInfo changeType(long employeeId, long typeId);
+    EmployeeInfoDto changeType(long employeeId, long typeId);
 
-    List<EmployeeInfo> resetAnnualLeaveForAllEmployees();
+//    List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees();
 
-    public File getPdfOfRequest(EmployeeInfo employee, long requestId);
+    public File getPdfOfRequest(UserEntity employee, long requestId);
+    List<EmployeeInfoDto> getAll();
+
+    EmployeeInfoDto create(EmployeeInfoDto employee, UserEntity user);
+
+    EmployeeInfoDto getById(long employeeId);
+
+
+    EmployeeInfoDto update(EmployeeInfoDto employee, long id);
+
+    void delete(long id);
+
 }
