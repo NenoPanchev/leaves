@@ -4,10 +4,11 @@ import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@Repository
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long>,
         JpaSpecificationExecutor<LeaveRequest>,
         SoftDeleteRepository {
@@ -24,6 +25,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     boolean existsByStartDateAndEmployeeAndEndDate(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
 
     List<LeaveRequest> findAllByEmployee(EmployeeInfo employee);
+
+    List<LeaveRequest> findAllByDeletedIsFalse();
 
 //    @Query("UPDATE EntityInfo n set" +
 //            " n.isDeleted=true WHERE n.id in " +

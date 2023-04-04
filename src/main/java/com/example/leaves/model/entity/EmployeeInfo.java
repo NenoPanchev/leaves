@@ -9,7 +9,7 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "employee_info", schema = "leave_manager")
+@Table(name = "employee_info", schema = "public")
 public class EmployeeInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +25,8 @@ public class EmployeeInfo {
     @OneToMany(mappedBy = "employee")
     private List<LeaveRequest> leaveRequests;
 
-    @OneToOne(mappedBy = "employeeInfo")
+    @OneToOne
+    @JoinColumn(name = "user_id")
     private UserEntity userInfo;
 
 
@@ -36,6 +37,14 @@ public class EmployeeInfo {
             setPaidLeave(paidLeave - days);
         }
 
+    }
+
+    public UserEntity getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserEntity userInfo) {
+        this.userInfo = userInfo;
     }
 
     public int getPaidLeave() {

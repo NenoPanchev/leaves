@@ -1,16 +1,12 @@
 package com.example.leaves.util;
 
-
-import org.springframework.expression.Operation;
-import org.springframework.util.CollectionUtils;
-
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class PredicateBuilder<ENTITY> {
     private final Root<ENTITY> root;
@@ -24,126 +20,109 @@ public class PredicateBuilder<ENTITY> {
 
     public <T> PredicateBuilder<?> in(final SingularAttribute<?, T> attribute, final Collection<T> list) {
         if (list != null && !list.isEmpty()) {
-            this.predicates.add(this.root.get((SingularAttribute<? super ENTITY, T>) attribute)
-                    .in(list));
+            this.predicates.add(this.root.get((SingularAttribute<? super ENTITY, T>) attribute).in(list));
+
         }
         return this;
     }
 
-    public PredicateBuilder<?> inIgnoreCase(final SingularAttribute<?, String> attribute, final Collection<String> list) {
+    public <T> PredicateBuilder<?> inWithNull(final SingularAttribute<?, T> attribute, final Collection<T> list) {
         if (list != null && !list.isEmpty()) {
-            this.predicates.add(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute)))
-                    .in(list.stream()
-                            .map(String::toUpperCase)
-                            .collect(Collectors.toList())));
-        }
-        return this;
-    }
 
-    public <T> PredicateBuilder<ENTITY> joinLike(final SingularAttribute<?, T> attribute,
-                                                 final String value,
-                                                 final String fieldName) {
-        if (value != null) {
-            final Join<ENTITY, T> departmentJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
-            this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(departmentJoin.get(fieldName))),
-                    "%" + value.toUpperCase().trim() + "%"));
-        }
-        return this;
-    }
-
-    public <T, D> PredicateBuilder<ENTITY> joinIn(final ListAttribute<?, T> attribute,
-                                                  final Collection<D> list,
-                                                  final String fieldName) {
-        if (list != null && !list.isEmpty()) {
-            final ListJoin<ENTITY, T> roleJoin = root.join((ListAttribute<? super ENTITY, T>) attribute);
-            this.predicates.add(roleJoin.get(fieldName).in(list));
-        }
-        return this;
-    }
-
-    public <T, D> PredicateBuilder<ENTITY> joinInLike(final ListAttribute<?, T> attribute,
-                                                      final Collection<D> list,
-                                                      final String fieldName) {
-        if (list != null && !list.isEmpty()) {
-            final ListJoin<ENTITY, T> roleJoin = root.join((ListAttribute<? super ENTITY, T>) attribute);
-            for (D value : list) {
-
-                this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(roleJoin.get(fieldName))),
-                        "%" + value.toString().toUpperCase().trim() + "%"));
+            if (list.contains(null)) {
+                this.predicates.add(this.root.get((SingularAttribute<? super ENTITY, T>) attribute).isNull());
+            } else {
+                this.predicates.add(this.root.get((SingularAttribute<? super ENTITY, T>) attribute).in(list.toArray()));
             }
-// todo            this.predicates.add(roleJoin.get(fieldName).in(list));
         }
         return this;
     }
 
-    public <T extends Number> PredicateBuilder<?> compare(final SingularAttribute<?, T> attribute,
-                                                          final Operation operation,
-                                                          Collection<T> values) {
-        if (!CollectionUtils.isEmpty(values)) {
-            values.forEach(value -> this.compare(attribute, operation, values));
-        }
-        return this;
-    }
-
-    public PredicateBuilder<?> like(final SingularAttribute<?, String> attribute,
-                                    final String value) {
-
-        if (value != null && !value.isEmpty()) {
-            Path<String> stringPath = this.root.get((SingularAttribute<? super ENTITY, String>) attribute);
-            String val = value.toUpperCase().trim();
-            this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
-                    "%" + value.toUpperCase().trim() + "%"));
-        }
-        return this;
-    }
-
-    public PredicateBuilder<?> equalsIgnoreCase(final SingularAttribute<?, String> attribute,
-                                                final String value) {
+    public <T extends Comparable> PredicateBuilder<?> lessThan(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
-            this.predicates.add(this.builder.equal(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
-                    value.toUpperCase().trim()));
+            this.predicates.add(builder.lessThanOrEqualTo(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
         }
         return this;
     }
 
-    public <T> PredicateBuilder<?> equals(final SingularAttribute<?, T> attribute,
-                                          final T value) {
+    public <T extends Comparable> PredicateBuilder<?> greaterThan(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
-            this.predicates.add(this.builder.equal(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
-                    value));
+            this.predicates.add(builder.greaterThanOrEqualTo(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
+        }
+        return this;
+    }
+    public <T> PredicateBuilder<?> equal(final SingularAttribute<?, T> attribute, final T value) {
+        if (value != null) {
+            this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
+        }
+        return this;
+    }
+    public <T> PredicateBuilder<?> equalsField(final SingularAttribute<?, T> attribute, final T value) {
+        if (value != null) {
+            this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
         }
         return this;
     }
 
-    public <T extends Number> PredicateBuilder<?> compare(final SingularAttribute<?, T> attribute,
-                                                          final Operation operation, T value) {
-        if (value == null || operation == null) {
-            return this;
+    public <T extends Comparable> PredicateBuilder<?> graterThan(final SingularAttribute<?, T> attribute, final T value) {
+        if (value != null) {
+            this.predicates.add(builder.greaterThanOrEqualTo(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
         }
+        return this;
+    }
 
-        switch (operation) {
-//            case GREATER_OR_EQUAL:
-//                greatOrEqual(attribute, value);
-//                break;
-//            case LESS_OR_EQUAL:
-//                lessOrEqual(attribute, value);
-//                break;
-//            case GREATER:
-//                great(attribute, value);
-//                break;
-//            case
-//                    LESS:
-//                less(attribute, value);
-//            break;
-//            case EQUAL:
-//                equal(attribute, value);
-//                break;
-//
+    public <T> PredicateBuilder<ENTITY> joinIn(final SingularAttribute<?, T> attribute, final Collection<?> list, final String fieldName) {
+        if (list != null && !list.isEmpty()) {
+            Expression<String> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName);
+            this.predicates.add(exp.in(list));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinInLessThanDate(final SingularAttribute<?, T> attribute, final LocalDateTime value, final String fieldName) {
+        if (value != null) {
+            Expression<LocalDateTime> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName).as(LocalDateTime.class);
+            this.predicates.add(builder.lessThanOrEqualTo(exp, value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinInGraterThanDate(final SingularAttribute<?, T> attribute, final LocalDateTime value, final String fieldName) {
+        if (value != null) {
+            Expression<LocalDateTime> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName).as(LocalDateTime.class);
+            this.predicates.add(builder.greaterThanOrEqualTo(exp, value));
+        }
+        return this;
+    }
+
+    public <T, D> PredicateBuilder<ENTITY> joinEqual(final SingularAttribute<?, T> attribute, final D value, final String fieldName) {
+        if (value != null) {
+            Expression<String> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName);
+            this.predicates.add(exp.in(value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinInMany(final ListAttribute<?, T> attribute, final Collection<?> list, final String fieldName) {
+        if (list != null && !list.isEmpty()) {
+            Expression<String> exp = root
+                    .join((ListAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName);
+            this.predicates.add(exp.in(list));
         }
         return this;
     }
 
     public List<Predicate> build() {
-        return this.predicates;
+        return predicates;
     }
+
 }

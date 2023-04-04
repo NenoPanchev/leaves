@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "types", schema = "leave_manager")
+@Table(name = "types", schema = "public")
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
 public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 

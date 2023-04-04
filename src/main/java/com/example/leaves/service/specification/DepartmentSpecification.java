@@ -1,6 +1,7 @@
 package com.example.leaves.service.specification;
 
 import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.DepartmentEntity_;
 import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.domain.Specification;
 

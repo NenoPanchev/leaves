@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Entity
-@Table(name = "leave_requests", schema = "leave_manager")
+@Table(name = "leave_requests", schema = "public")
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
 public class LeaveRequest extends BaseEntity {
     @Column(name = "start_date")
@@ -69,7 +69,7 @@ public class LeaveRequest extends BaseEntity {
         super.toDto(dto);
         dto.setStartDate(this.startDate);
         dto.setEndDate(this.endDate);
-        dto.setCreatedBy(employee.getName());
+        dto.setCreatedBy(employee.getUserInfo().getName());
         if (this.approved != null) {
             dto.setApproved(this.approved);
         }

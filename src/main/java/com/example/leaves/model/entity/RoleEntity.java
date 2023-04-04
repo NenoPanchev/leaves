@@ -3,24 +3,30 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-
+@AttributeOverrides(
+        {
+                @AttributeOverride(name = "id", column = @Column(name = "id"))
+        }
+)
 @Entity
-@Table(name = "roles")
-public class RoleEntity extends BaseEntity {
+@Table(name = "roles", schema = "public")
+public class RoleEntity extends BaseEntity<RoleDto> {
+    @Column(name = "name")
     private String name;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "roles_permissions",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "permissions_id"))
     private List<PermissionEntity> permissions;
 
     public RoleEntity() {
         this.setPermissions(new ArrayList<>());
     }
 
-    @Column(nullable = false)
+
     public String getName() {
         return name;
     }
@@ -30,7 +36,7 @@ public class RoleEntity extends BaseEntity {
         return this;
     }
 
-    @ManyToMany
+
     public List<PermissionEntity> getPermissions() {
         return permissions;
     }
