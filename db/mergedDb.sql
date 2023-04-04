@@ -1,27 +1,25 @@
-create table leave_manager.departments
+create table if not exists departments
 (
     id               bigserial
-        primary key,
+        constraint departments_pkey
+            primary key,
     created_at       timestamp,
     created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
-    name             varchar(255) not null
-        constraint uk_j6cwks7xecs5jov19ro8ge3qk
-            unique,
+    name             varchar(255) not null,
     admin_id         bigint
-        constraint fkcvxp4osj5mqfkv196khtumdqh
-            references users
 );
 
-alter table leave_manager.departments
+alter table departments
     owner to postgres;
 
-create table leave_manager.permissions
+create table if not exists permissions
 (
     id               bigserial
-        primary key,
+        constraint permissions_pkey
+            primary key,
     created_at       timestamp,
     created_by       varchar(255),
     deleted          boolean,
@@ -30,13 +28,14 @@ create table leave_manager.permissions
     name             varchar(255)
 );
 
-alter table leave_manager.permissions
+alter table permissions
     owner to postgres;
 
-create table leave_manager.roles
+create table if not exists roles
 (
     id               bigserial
-        primary key,
+        constraint roles_pkey
+            primary key,
     created_at       timestamp,
     created_by       varchar(255),
     deleted          boolean,
@@ -47,85 +46,27 @@ create table leave_manager.roles
             unique
 );
 
-alter table leave_manager.roles
+alter table roles
     owner to postgres;
 
-create table leave_manager.roles_permissions
+create table if not exists roles_permissions
 (
-    role_entity_id bigint not null
-        constraint fkcdbljndeppr51frgjy734pnvh
+    role_id        bigint not null
+        constraint roles_permissions_roles_id_fk
             references roles,
     permissions_id bigint not null
-        constraint fk570wuy6sacdnrw8wdqjfh7j0q
+        constraint roles_permissions_permissions_id_fk
             references permissions
 );
 
-alter table leave_manager.roles_permissions
+alter table roles_permissions
     owner to postgres;
 
-create table leave_manager.departments_employees
-(
-    department_entity_id bigint not null
-        constraint fkm43pi51roimdraacqgbme76ce
-            references departments,
-    employees_id         bigint not null
-        constraint uk_kkqm4u9yevlnut2gxh9dp20u3
-            unique
-        constraint fkq15i68aqj5ys9lypsyaxybufj
-            references users
-);
-
-alter table leave_manager.departments_employees
-    owner to postgres;
-
-create table leave_manager.users_roles
-(
-    user_entity_id bigint not null
-        constraint fk7v417qhe0i2m9h8njggvciv00
-            references users,
-    roles_id       bigint not null
-        constraint fka62j07k5mhgifpp955h37ponj
-            references roles
-);
-
-alter table leave_manager.users_roles
-    owner to postgres;
-
-create table leave_manager.types
-(
-    type_name    integer               not null,
-    type_days    integer               not null,
-    id           serial
-        constraint types_pk
-            primary key,
-    date_created timestamp             not null,
-    created_by   varchar               not null,
-    last_updated timestamp,
-    updated_by   varchar,
-    is_deleted   boolean default false not null
-);
-
-alter table leave_manager.types
-    owner to postgres;
-
-create table leave_manager.employee_info
-(
-    id         serial
-        constraint employee_info_pk
-            primary key,
-    type_id    integer
-        constraint employee_info_types_id_fk
-            references leave_manager.types,
-    days_leave integer default 20 not null
-);
-
-alter table leave_manager.employee_info
-    owner to postgres;
-
-create table leave_manager.users
+create table if not exists users
 (
     id               bigserial
-        primary key,
+        constraint users_pkey
+            primary key,
     created_at       timestamp,
     created_by       varchar(255),
     deleted          boolean,
@@ -137,35 +78,100 @@ create table leave_manager.users
     name             varchar(255),
     password         varchar(255) not null,
     department_id    bigint
-        constraint fksbg59w8q63i0oo53rlgvlcnjq
-            references departments,
-    employee_info_id integer
-        constraint users_employee_info_id_fk
-            references leave_manager.employee_info
+        constraint users_departments_id_fk
+            references departments
 );
 
-alter table leave_manager.users
+alter table users
     owner to postgres;
 
-create table leave_manager.leave_requests
+alter table departments
+    add constraint departments_users_id_fk
+        foreign key (admin_id) references users;
+
+create table if not exists departments_employees
 (
-    employee_id  integer
-        constraint leave_requests_employee_info_id_fk
-            references leave_manager.employee_info,
-    approved     boolean,
-    start_date   date                  not null,
-    end_date     date                  not null,
-    id           serial
+    department_id bigint not null
+        constraint departments_employees_departments_id_fk
+            references departments,
+    employees_id  bigint not null
+        constraint departments_employees_users_id_fk
+            references users
+);
+
+alter table departments_employees
+    owner to postgres;
+
+create table if not exists users_roles
+(
+    user_entity_id bigint not null
+        constraint users_roles_users_id_fk
+            references users,
+    roles_id       bigint not null
+        constraint users_roles_roles_id_fk
+            references roles
+);
+
+alter table users_roles
+    owner to postgres;
+
+create table if not exists types
+(
+    type_name        integer               not null,
+    type_days        integer               not null,
+    id               serial
+        constraint types_pk
+            primary key,
+    created_at       timestamp             not null,
+    created_by       varchar               not null,
+    last_modified_at timestamp,
+    last_modified_by varchar,
+    deleted          boolean default false not null
+);
+
+alter table types
+    owner to postgres;
+
+create table if not exists employee_info
+(
+    id               serial
+        constraint employee_info_pk
+            primary key,
+    type_id          integer
+        constraint employee_info_types_id_fk
+            references types,
+    days_leave       integer default 20 not null,
+    user_id          integer
+        constraint employee_info_users_id_fk
+            references users,
+    created_at       timestamp,
+    created_by       varchar,
+    deleted          boolean,
+    last_modified_at timestamp,
+    last_modified_by varchar
+);
+
+alter table employee_info
+    owner to postgres;
+
+create table if not exists leave_requests
+(
+    id               integer generated by default as identity
         constraint leave_requests_pk
             primary key,
-    date_created timestamp             not null,
-    created_by   varchar,
-    last_updated timestamp,
-    updated_by   varchar,
-    is_deleted   boolean default false not null
+    approved         boolean,
+    start_date       date not null,
+    end_date         date not null,
+    employee_info_id integer
+        constraint leave_requests_employee_info_id_fk
+            references employee_info,
+    deleted          boolean,
+    created_at       timestamp,
+    created_by       varchar,
+    last_modified_at timestamp,
+    last_modified_by varchar
 );
 
-alter table leave_manager.leave_requests
+alter table leave_requests
     owner to postgres;
-
 
