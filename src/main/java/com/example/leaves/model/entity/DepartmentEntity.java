@@ -16,7 +16,7 @@ public class DepartmentEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private UserEntity admin;
-    @OneToMany(mappedBy = "department", cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "department")
     private List<UserEntity> employees = new ArrayList<>();
 
     public DepartmentEntity() {
@@ -93,11 +93,18 @@ public class DepartmentEntity extends BaseEntity {
         this.employees.add(userEntity);
     }
 
+    public void addAll(List<UserEntity> employees) {
+        if (this.employees == null) {
+            this.employees = new ArrayList<>();
+        }
+        this.employees.addAll(employees);
+    }
+
     public void removeEmployee(UserEntity userEntity) {
         this.employees.remove(userEntity);
     }
 
-    public void removeEmployees(List<UserEntity> entities) {
+    public void removeAll(List<UserEntity> entities) {
         this.employees.removeAll(entities);
     }
 }

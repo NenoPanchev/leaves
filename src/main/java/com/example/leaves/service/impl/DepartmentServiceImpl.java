@@ -73,7 +73,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (dto.getAdminEmail() != null && !dto.getAdminEmail().equals("")) {
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
         }
-        sortEmployeeChangesOnUpdate(entity, dto.getEmployeeEmails());
         if (dto.getEmployeeEmails() != null) {
             List<UserEntity> employees = new ArrayList<>();
             dto.getEmployeeEmails()
@@ -93,27 +92,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         return dto;
     }
 
-    private void sortEmployeeChangesOnUpdate(DepartmentEntity entity, List<String> employeeEmails) {
-        List<UserEntity> differentFromOldAndNew = new ArrayList<>();
-        List<String> oldEmails = new ArrayList<>();
-        if (entity.getEmployees() != null && entity.getEmployees().size() > 0) {
-           oldEmails = entity
-                    .getEmployees()
-                    .stream()
-                    .map(UserEntity::getEmail)
-                    .collect(Collectors.toList());
-        }
-        if (employeeEmails != null) {
-            List<UserEntity> employees = new ArrayList<>();
-            employeeEmails
-                    .forEach(email -> {
-                        UserEntity employee = userService.findByEmail(email);
-                        employees.add(employee);
-                        detachEmployeeFromDepartment(employee);
-                    });
-            entity.setEmployees(employees);
-        }
-    }
+
 
     @Override
     @Transactional
@@ -150,6 +129,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (!departmentRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Department with id: %d does not exist", id));
         }
+        userService.detachDepartmentFromUsers(id);
         departmentRepository.markAsDeleted(id);
     }
 
@@ -170,25 +150,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         } else if (entity.getAdmin() != null && !dto.getAdminEmail().equals(entity.getAdmin().getEmail())){
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
         }
-
-        if (dto.getEmployeeEmails() != null) {
-            List<UserEntity> employees = new ArrayList<>();
-            entity
-                    .getEmployees()
-                            .forEach(this::detachEmployeeFromDepartment);
-            dto.getEmployeeEmails()
-                    .forEach(email -> {
-                        UserEntity employee = userService.findByEmail(email);
-                        employees.add(employee);
-                        detachEmployeeFromDepartment(employee);
-                    });
-            entity.setEmployees(employees);
-        }
-
-        entity = departmentRepository.save(entity);
-        DepartmentEntity finalEntity = entity;
-        entity.getEmployees()
-                .forEach(empl -> empl.setDepartment(finalEntity));
+        sortEmployeeChangesOnUpdate(entity, dto.getEmployeeEmails());
+        departmentRepository.save(entity);
         entity.toDto(dto);
         return dto;
     }
@@ -288,4 +251,40 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository.findAllNamesByDeletedIsFalse();
     }
 
+    @Transactional
+    public void sortEmployeeChangesOnUpdate(DepartmentEntity entity, List<String> employeeEmails) {
+        List<UserEntity> toRemove = new ArrayList<>();
+        List<UserEntity> toAdd = new ArrayList<>();
+        List<String> oldEmails = new ArrayList<>();
+        if (entity.getEmployees() != null && entity.getEmployees().size() > 0) {
+            oldEmails = entity
+                    .getEmployees()
+                    .stream()
+                    .map(UserEntity::getEmail)
+                    .collect(Collectors.toList());
+        }
+        if (employeeEmails != null) {
+            List<UserEntity> employees = new ArrayList<>();
+            entity
+                    .getEmployees()
+                            .forEach(empl -> {
+                                if (employeeEmails.contains(empl.getEmail())) {
+                                    employeeEmails.remove(empl.getEmail());
+                                } else {
+                                    toRemove.add(empl);
+                                }
+                            });
+            employeeEmails
+                    .forEach(email -> {
+                        UserEntity employee = userService.findByEmail(email);
+                        toAdd.add(employee);
+                    });
+            entity.removeAll(toRemove);
+            toRemove
+                    .forEach(empl -> empl.setDepartment(null));
+            entity.addAll(toAdd);
+            toAdd
+                    .forEach(empl -> empl.setDepartment(entity));
+        }
+    }
 }
