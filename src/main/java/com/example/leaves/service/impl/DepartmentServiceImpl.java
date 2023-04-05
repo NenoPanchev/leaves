@@ -87,9 +87,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
 
         entity = departmentRepository.save(entity);
-//        entity.getEmployees()
-//                        .stream()
-//                                .forEach(empl -> empl.setDepartment(entity));
+        DepartmentEntity finalEntity = entity;
+        entity.getEmployees()
+                                .forEach(empl -> empl.setDepartment(finalEntity));
         entity.toDto(dto);
         return dto;
     }
@@ -146,12 +146,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         entity.toEntity(dto);
         if (dto.getAdminEmail() == null || dto.getAdminEmail().equals("")) {
             entity.setAdmin(null);
-        } else {
+        } else if (entity.getAdmin() != null && !dto.getAdminEmail().equals(entity.getAdmin().getEmail())){
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
-
         }
+
         if (dto.getEmployeeEmails() != null) {
             List<UserEntity> employees = new ArrayList<>();
+            entity
+                    .getEmployees()
+                            .forEach(this::detachEmployeeFromDepartment);
             dto.getEmployeeEmails()
                     .forEach(email -> {
                         UserEntity employee = userService.findByEmail(email);
@@ -162,6 +165,9 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
 
         entity = departmentRepository.save(entity);
+        DepartmentEntity finalEntity = entity;
+        entity.getEmployees()
+                .forEach(empl -> empl.setDepartment(finalEntity));
         entity.toDto(dto);
         return dto;
     }
