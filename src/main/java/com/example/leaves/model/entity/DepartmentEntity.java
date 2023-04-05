@@ -96,4 +96,8 @@ public class DepartmentEntity extends BaseEntity {
     public void removeEmployee(UserEntity userEntity) {
         this.employees.remove(userEntity);
     }
+
+    public void removeEmployees(List<UserEntity> entities) {
+        this.employees.removeAll(entities);
+    }
 }

@@ -19,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,6 +73,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (dto.getAdminEmail() != null && !dto.getAdminEmail().equals("")) {
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
         }
+        sortEmployeeChangesOnUpdate(entity, dto.getEmployeeEmails());
         if (dto.getEmployeeEmails() != null) {
             List<UserEntity> employees = new ArrayList<>();
             dto.getEmployeeEmails()
@@ -92,6 +91,28 @@ public class DepartmentServiceImpl implements DepartmentService {
                                 .forEach(empl -> empl.setDepartment(finalEntity));
         entity.toDto(dto);
         return dto;
+    }
+
+    private void sortEmployeeChangesOnUpdate(DepartmentEntity entity, List<String> employeeEmails) {
+        List<UserEntity> differentFromOldAndNew = new ArrayList<>();
+        List<String> oldEmails = new ArrayList<>();
+        if (entity.getEmployees() != null && entity.getEmployees().size() > 0) {
+           oldEmails = entity
+                    .getEmployees()
+                    .stream()
+                    .map(UserEntity::getEmail)
+                    .collect(Collectors.toList());
+        }
+        if (employeeEmails != null) {
+            List<UserEntity> employees = new ArrayList<>();
+            employeeEmails
+                    .forEach(email -> {
+                        UserEntity employee = userService.findByEmail(email);
+                        employees.add(employee);
+                        detachEmployeeFromDepartment(employee);
+                    });
+            entity.setEmployees(employees);
+        }
     }
 
     @Override
