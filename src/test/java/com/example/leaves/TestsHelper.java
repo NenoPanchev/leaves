@@ -17,6 +17,7 @@ public class TestsHelper {
         EmployeeInfo employeeInfo = new EmployeeInfo();
         mockUser.setEmployeeInfo(employeeInfo);
         mockUser.setName("MockName");
+        employeeInfo.setUserInfo(mockUser);
         TypeEmployee typeEmployee = createMockType();
         mockUser.getEmployeeInfo().setEmployeeType(typeEmployee);
         return employeeInfo;
