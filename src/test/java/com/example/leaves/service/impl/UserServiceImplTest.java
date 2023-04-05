@@ -1,5 +1,7 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.LeavesApplication;
+import com.example.leaves.config.H2TestProfileJPAConfig;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.DepartmentEntity;
@@ -36,7 +38,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
+@SpringBootTest(classes = {
+        LeavesApplication.class,
+        H2TestProfileJPAConfig.class
+})
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 class UserServiceImplTest {

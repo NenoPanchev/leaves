@@ -16,7 +16,7 @@ public class DepartmentEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private UserEntity admin;
-    @OneToMany(mappedBy = "department")
+    @OneToMany(mappedBy = "department", cascade = CascadeType.MERGE)
     private List<UserEntity> employees = new ArrayList<>();
 
     public DepartmentEntity() {
