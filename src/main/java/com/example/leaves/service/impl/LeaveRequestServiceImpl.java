@@ -16,7 +16,7 @@ import com.example.leaves.service.LeaveRequestService;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -253,7 +253,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public Specification<LeaveRequest> getSpecificationLessThanDates(LeaveRequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(LeaveRequest_.id, ListHelper.getGreatestNum(filter.getId()))
                     .lessThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
@@ -275,7 +275,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         if (startDate != null && endDate != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
-                Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                         .graterThan(LeaveRequest_.startDate, startDate)
                         .lessThan(LeaveRequest_.endDate, endDate)
                         .equalsField(LeaveRequest_.employee, employee)
@@ -295,7 +295,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         if (date != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
-                Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                         .lessThan(LeaveRequest_.startDate, date)
                         .graterThan(LeaveRequest_.endDate, date)
                         .equalsField(LeaveRequest_.employee, employee)
@@ -316,7 +316,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         if (startDate != null && endDate != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
-                Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                         .lessThan(LeaveRequest_.startDate, startDate)
                         .graterThan(LeaveRequest_.endDate, endDate)
                         .equalsField(LeaveRequest_.employee, employee)
@@ -334,7 +334,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public Specification<LeaveRequest> getSpecificationGraterThanDates(LeaveRequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(LeaveRequest_.id, ListHelper.getGreatestNum(filter.getId()))
                     .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .graterThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
@@ -354,7 +354,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(LeaveRequest_.id, ListHelper.getGreatestNum(filter.getId()))
                     .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .graterThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
@@ -375,7 +375,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(LeaveRequest_.id, ListHelper.getGreatestNum(filter.getId()))
                     .lessThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
@@ -413,7 +413,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(LeaveRequest_.id, filter.getId())
                     .in(LeaveRequest_.startDate, filter.getStartDate())
                     .in(LeaveRequest_.endDate, filter.getEndDate())
@@ -433,7 +433,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public Specification<LeaveRequest> getSpecification(LeaveRequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(LeaveRequest_.id, filter.getId())
                     .in(LeaveRequest_.startDate, filter.getStartDate())
                     .in(LeaveRequest_.endDate, filter.getEndDate())

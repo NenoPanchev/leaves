@@ -12,7 +12,7 @@ import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -145,7 +145,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecification(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(TypeEmployee_.id, filter.getId())
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .in(TypeEmployee_.daysLeave, filter.getDaysLeave())
@@ -163,7 +163,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecificationLessThan(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .lessThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))
@@ -181,7 +181,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecificationGreaterThan(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .graterThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))

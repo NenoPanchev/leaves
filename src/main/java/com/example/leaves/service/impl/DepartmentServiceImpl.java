@@ -12,7 +12,7 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilderV1;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -201,7 +201,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public Specification<DepartmentEntity> getSpecification(DepartmentFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(DepartmentEntity_.id, filter.getIds())
                     .like(DepartmentEntity_.name, filter.getName())
                     .equals(DepartmentEntity_.deleted, filter.isDeleted())

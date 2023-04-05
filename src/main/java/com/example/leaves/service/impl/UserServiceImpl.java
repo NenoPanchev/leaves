@@ -11,10 +11,8 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.service.specification.SearchCriteria;
-import com.example.leaves.service.specification.UserSpecification;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilderV1;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -121,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto getUserById(Long id) {
+    public UserDto getUserById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
             throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
         }
@@ -289,7 +287,7 @@ public class UserServiceImpl implements UserService {
 
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(UserEntity_.id, filter.getIds())
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())

@@ -1,5 +1,6 @@
 package com.example.leaves.repository;
 
+import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.*;

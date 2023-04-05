@@ -17,7 +17,7 @@ public interface UserService {
 
     UserEntity findByEmail(String email);
 
-    UserDto getUserById(Long id);
+    UserDto getUserById(long id);
 
     void deleteUser(Long id);
 
@@ -31,7 +31,6 @@ public interface UserService {
 
     List<UserDto> getAllUserDtos();
 
-    List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);
 
     List<UserDto> getFilteredUsers(UserFilter filter);
 
