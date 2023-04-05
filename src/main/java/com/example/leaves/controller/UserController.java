@@ -22,6 +22,10 @@ public interface UserController {
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<String>> getAllUserEmails();
 
+    @GetMapping("/available")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<List<String>> getUserEmailsOfAvailableEmployees();
+
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);

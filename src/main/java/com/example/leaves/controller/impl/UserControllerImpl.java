@@ -5,7 +5,6 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.UserService;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +34,13 @@ public class UserControllerImpl implements UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(userService.getAllEmails());
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getUserEmailsOfAvailableEmployees() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.getEmailsOfAvailableEmployees());
     }
 
     @Override

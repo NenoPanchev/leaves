@@ -318,6 +318,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAllEmailsByDeletedIsFalse();
     }
 
+    @Override
+    public List<String> getEmailsOfAvailableEmployees() {
+        return userRepository.findAllEmailsByDeletedIsFalseAndDepartmentIsNull();
+    }
+
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,
                                                 String dtoDepartmentName, boolean sameDepartment) {
         if (!isEmpty(dtoDepartmentName) && !sameDepartment) {
