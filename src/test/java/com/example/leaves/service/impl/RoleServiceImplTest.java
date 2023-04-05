@@ -143,6 +143,7 @@ class RoleServiceImplTest {
 
         List<RoleDto> actual = serviceToTest.getAllRoleDtos();
 
+
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0).getName(), actual.get(0).getName());
         assertEquals(expected.get(1).getName(), actual.get(1).getName());

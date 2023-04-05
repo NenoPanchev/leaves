@@ -44,14 +44,14 @@ public class WebSecurityConfig { // extends WebSecurityConfigurer Adapter {   //
         http.cors().and().csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//                .authorizeRequests().antMatchers("/**", "/users/**", "/roles/**", "/departments/**").permitAll().and()
                 .authorizeRequests().antMatchers(SWAGGER_WHITELIST).permitAll().and()
                 .authorizeRequests().antMatchers("/authenticate", "/authenticate/refresh").permitAll()
                 .anyRequest().authenticated();
 
+        http.headers().frameOptions().disable();
+
 //        http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 }

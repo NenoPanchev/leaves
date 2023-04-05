@@ -26,7 +26,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
 @SpringBootTest
 public class TypeServiceImplTests {
 
@@ -38,7 +37,7 @@ public class TypeServiceImplTests {
 
     @InjectMocks
     @Autowired
-    TypeEmployeeService mockTypeService;
+    TypeEmployeeServiceImpl mockTypeService;
 
 
     @Autowired
@@ -80,8 +79,8 @@ public class TypeServiceImplTests {
     void getById_should_returnType_when_matchExist() {
         //Arrange
         TypeEmployee typeEmployee = TestsHelper.createMockType();
-        Mockito.when(mockTypeRepository.findById(typeEmployee.getId()))
-                .thenReturn(Optional.of(typeEmployee));
+        Mockito.when(mockTypeRepository.findById((long)typeEmployee.getId()))
+                .thenReturn(typeEmployee);
         // Act
         TypeEmployee result = mockTypeService.getById(typeEmployee.getId());
 
@@ -181,10 +180,11 @@ public class TypeServiceImplTests {
 
     @Test
     public void create_Should_Throw_When_TypeWithSameNameExists() {
+
         // Arrange
         TypeEmployee mockType = TestsHelper.createMockType();
-        Mockito.when(mockTypeRepository.findByTypeName(mockType.getTypeName()))
-                .thenReturn(mockType);
+        Mockito.when(mockTypeRepository.existsByTypeName(mockType.getTypeName()))
+                .thenReturn(true);
 
         // Act, Assert
         Assertions.assertThrows(
