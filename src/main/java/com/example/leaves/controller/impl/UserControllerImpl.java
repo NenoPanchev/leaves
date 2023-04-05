@@ -88,4 +88,13 @@ public class UserControllerImpl implements UserController {
                 .body("User deleted");
     }
 
+    @Override
+    public ResponseEntity<UserDto> addType(long typeId, long userId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userService.addType(typeId, userId));
+    }
 }
+
+
+

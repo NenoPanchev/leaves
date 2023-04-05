@@ -26,7 +26,6 @@ public interface UserController {
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
     @PostMapping
-    @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> create(
             @Valid
             @RequestBody UserDto dto,
@@ -45,4 +44,8 @@ public interface UserController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
     ResponseEntity<String> deleteUser(@PathVariable("id") Long id);
+
+    @PostMapping("/{userId}/type")
+    @PreAuthorize("hasAuthority('WRITE')")
+    ResponseEntity<UserDto> addType(@RequestBody long typeId,@PathVariable("userId")  long userId);
 }

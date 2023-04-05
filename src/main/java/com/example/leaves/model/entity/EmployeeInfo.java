@@ -3,18 +3,15 @@ package com.example.leaves.model.entity;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.util.EntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.util.List;
-
+@EntityListeners(EntityListener.class)
 @Entity
 @Table(name = "employee_info", schema = "public")
-public class EmployeeInfo {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
+public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "type_id")
@@ -25,8 +22,7 @@ public class EmployeeInfo {
     @OneToMany(mappedBy = "employee")
     private List<LeaveRequest> leaveRequests;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @OneToOne(mappedBy = "employeeInfo",cascade=CascadeType.ALL)
     private UserEntity userInfo;
 
 
@@ -92,13 +88,5 @@ public class EmployeeInfo {
         return dto;
     }
 
-    public EmployeeInfo toEntity(EmployeeInfoDto dto) {
-//        EmployeeInfoDto dto = new EmployeeInfoDto();
-//        dto.setTypeId(this.getEmployeeType().getId());
-//        dto.setName(userInfo.getName());
-//        return dto;
-        //TODO
-        return this;
-    }
 
 }

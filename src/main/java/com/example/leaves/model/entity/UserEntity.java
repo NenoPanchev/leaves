@@ -34,7 +34,9 @@ public class UserEntity extends BaseEntity<UserDto> {
     @ManyToMany
     private List<RoleEntity> roles;
 
-    @OneToOne(mappedBy = "userInfo")
+
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name = "employee_info_id")
     private EmployeeInfo employeeInfo;
 
     public UserEntity() {

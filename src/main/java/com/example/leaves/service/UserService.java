@@ -26,6 +26,8 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    UserDto addType(long typeId,long userId);
+
     List<UserDto> getAllUserDtos();
 
     List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);

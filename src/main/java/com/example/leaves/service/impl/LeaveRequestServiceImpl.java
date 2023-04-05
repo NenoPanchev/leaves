@@ -24,6 +24,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
+import javax.transaction.Transactional;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +138,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
+    @Transactional
     public LeaveRequest approveRequest(long id) {
 
         LeaveRequest leaveRequest = getById(id);
@@ -158,6 +161,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
+    @Transactional
     public LeaveRequest disapproveRequest(long id) {
         LeaveRequest leaveRequest = getById(id);
         if (leaveRequest.getApproved() == null) {
@@ -194,16 +198,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) {
         leaveRequestRepository.markAsDeleted(id);
     }
 
     @Override
+    @Transactional
     public void unMarkAsDelete(long id) {
         leaveRequestRepository.unMarkAsRemoved(id);
     }
 
     @Override
+    @Transactional
     public LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto) {
         UserEntity employee = getCurrentUser();
 
@@ -229,7 +236,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     private Page<LeaveRequestDto> getLeaveRequestDtoFilteredGraterThan(LeaveRequestFilter filter) {
-        List<LeaveRequestDto> list = new ArrayList<>();
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         return leaveRequestRepository.findAll(getSpecificationGraterThanDates(filter)
                 .or(ifApprovedHasNullGraterThanDates(filter)), pageRequest).map(LeaveRequest::toDto);

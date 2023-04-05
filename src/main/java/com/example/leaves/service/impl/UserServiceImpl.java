@@ -1,9 +1,11 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
@@ -33,13 +35,20 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
+    private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, @Lazy RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           @Lazy RoleService roleService,
+                           @Lazy DepartmentService departmentService,
+                           @Lazy TypeEmployeeRepository typeEmployeeRepository) {
+
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
         this.passwordEncoder = passwordEncoder;
+        this.typeEmployeeRepository = typeEmployeeRepository;
     }
 
     @Override
@@ -92,6 +101,8 @@ public class UserServiceImpl implements UserService {
         }
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
+        entity.setEmployeeInfo(new EmployeeInfo());
+
         entity = userRepository.save(entity);
         if (!isEmpty(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
@@ -251,6 +262,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmailAndDeletedIsFalse(email);
+    }
+
+    @Override
+    public UserDto addType(long typeId, long userId) {
+       TypeEmployee typeEmployee= typeEmployeeRepository
+               .findById((Long)typeId)
+               .orElseThrow(()-> new EntityNotFoundException("Type not found"));
+       UserEntity user=userRepository
+               .findById(userId)
+               .orElseThrow(()-> new EntityNotFoundException("User not found"));
+       user.getEmployeeInfo().setEmployeeType(typeEmployee);
+       UserDto dto=new UserDto();
+        userRepository.save(user).toDto(dto);
+       return dto;
+
     }
 
 

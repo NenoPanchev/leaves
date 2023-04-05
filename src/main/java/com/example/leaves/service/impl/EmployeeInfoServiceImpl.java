@@ -36,7 +36,9 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
 
     private static void setEmployeeChanges(EmployeeInfoDto dto, UserEntity employeeToBeUpdated) {
-        employeeToBeUpdated.setEmployeeInfo(new EmployeeInfo().toEntity(dto));
+        EmployeeInfo employeeInfo=new EmployeeInfo();
+        employeeInfo.toEntity(dto);
+        employeeToBeUpdated.setEmployeeInfo(employeeInfo);
     }
 
     public List<EmployeeInfoDto> getAll() {
