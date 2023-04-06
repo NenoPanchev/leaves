@@ -18,7 +18,7 @@ import javax.sql.DataSource;
 public class H2TestProfileJPAConfig {
 
     @Bean
-    @Profile("test")
+    @Profile("testInMemory")
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
