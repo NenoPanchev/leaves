@@ -82,6 +82,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         //TODO EXTEND FUNCTIONALITY
         //TODO THROW MORE SPECIFIC EXCEPTIONS!
+        addRequestValidation(leaveRequestDto, employee);
+        return addRequestIn(employee.getEmployeeInfo(), leaveRequestDto);
+
+    }
+
+    private void addRequestValidation(LeaveRequestDto leaveRequestDto, UserEntity employee) {
+        sameDates(leaveRequestDto, employee);
+        requestWithDatesBetweenArgDates(leaveRequestDto, employee);
+        requestDatesBetweenActualDates(leaveRequestDto, employee);
+        dateArgBetween(leaveRequestDto, employee);
+    }
+
+    private void sameDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
         boolean exists = leaveRequestRepository.existsByStartDateAndEmployeeAndEndDate(
                 leaveRequestDto.getStartDate(),
                 employee.getEmployeeInfo(),
@@ -91,6 +104,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
         }
+    }
+
+    private void requestWithDatesBetweenArgDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
         boolean between = leaveRequestRepository.exists(
                 getRequestWithDatesBetweenArgDates(leaveRequestDto.getStartDate(),
                         leaveRequestDto.getEndDate(),
@@ -100,6 +116,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
         }
+    }
+
+    private void requestDatesBetweenActualDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
         boolean outside = leaveRequestRepository.exists(
                 getRequestWithArgDatesBetweenActualDates(leaveRequestDto.getStartDate(),
                         leaveRequestDto.getEndDate(),
@@ -109,6 +128,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
         }
+    }
+
+    private void dateArgBetween(LeaveRequestDto leaveRequestDto, UserEntity employee) {
         boolean dateArgBetween = leaveRequestRepository.exists(
                 getRequestWithDatesWrappingArgDate(leaveRequestDto.getStartDate(), employee.getEmployeeInfo()))
                 || leaveRequestRepository.exists(
@@ -123,8 +145,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                     , leaveRequestDto.getStartDate()
                     , leaveRequestDto.getEndDate()), "Add");
         }
-        return addRequestIn(employee.getEmployeeInfo(), leaveRequestDto);
-
     }
 
     private UserEntity getCurrentUser() {
