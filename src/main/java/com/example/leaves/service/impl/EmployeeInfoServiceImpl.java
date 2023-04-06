@@ -84,7 +84,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
 
             return PdfUtil.getPdfFile(employee.getName(), "egn", "location",
-                    "position", "reqestTo", String.valueOf(leaveRequest.getDaysRequested()), "year",
+                    "position", "requestTo", String.valueOf(leaveRequest.getDaysRequested()), "year",
                     leaveRequest.getStartDate().toString(), leaveRequest.getEndDate().plusDays(1).toString());
 
         } catch (DocumentException | IOException e) {

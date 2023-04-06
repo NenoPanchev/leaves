@@ -244,7 +244,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByEmployee(Long employeeId) {
+    public List<LeaveRequestDto> getAllByCurrentUser() {
+        List<LeaveRequestDto> list = new ArrayList<>();
+        UserEntity user = getCurrentUser();
+
+
+        leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        return list;
+    }
+    public List<LeaveRequestDto> getAllByEmployeeId(long employeeId) {
         List<LeaveRequestDto> list = new ArrayList<>();
         UserEntity user = employeeRepository
                 .findById(employeeId)
@@ -254,7 +262,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
-
     private Page<LeaveRequestDto> getLeaveRequestDtoFilteredGraterThan(LeaveRequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         return leaveRequestRepository.findAll(getSpecificationGraterThanDates(filter)

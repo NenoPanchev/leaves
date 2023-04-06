@@ -3,7 +3,6 @@ package com.example.leaves.controller;
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,7 @@ public interface RequestController {
 
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByEmployee(@RequestParam long employeeId);
+    List<LeaveRequestDto> getAllByCurrentUser();
 
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")

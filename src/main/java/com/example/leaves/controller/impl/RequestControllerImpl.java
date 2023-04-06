@@ -31,9 +31,9 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByEmployee(long employeeId) {
+    public List<LeaveRequestDto> getAllByCurrentUser() {
 
-        return leaveRequestService.getAllByEmployee(employeeId);
+        return leaveRequestService.getAllByCurrentUser();
     }
 
 

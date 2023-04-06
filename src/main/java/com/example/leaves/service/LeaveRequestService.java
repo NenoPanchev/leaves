@@ -2,7 +2,6 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.entity.LeaveRequest;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.data.domain.Page;
 
@@ -31,6 +30,6 @@ public interface LeaveRequestService {
 
     LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto);
 
-    List<LeaveRequestDto> getAllByEmployee(Long employeeId);
+    List<LeaveRequestDto> getAllByCurrentUser();
 
 }
