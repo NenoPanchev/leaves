@@ -2,11 +2,10 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,15 +16,28 @@ import java.util.List;
                 @NamedAttributeNode("department")
         }
 )
-
+@AttributeOverrides(
+        {
+                @AttributeOverride(name = "id", column = @Column(name = "id"))
+        }
+)
 @Entity
-@Table(name = "users")
-public class UserEntity extends BaseEntity{
+@Table(name = "users", schema = "public")
+public class UserEntity extends BaseEntity<UserDto> {
+    @Column(name = "name")
     private String name;
+    @Column(name = "email")
     private String email;
+    @Column(nullable = false,name = "password")
     private String password;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @JoinColumn(name = "department_id")
     private DepartmentEntity department;
+    @ManyToMany
     private List<RoleEntity> roles;
+
+    @OneToOne(mappedBy = "userInfo")
+    private EmployeeInfo employeeInfo;
 
     public UserEntity() {
         this.roles = new ArrayList<>();
@@ -41,7 +53,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @Column(nullable = false)
+
     public String getPassword() {
         return password;
     }
@@ -51,7 +63,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @ManyToMany
+
     public List<RoleEntity> getRoles() {
         return roles;
     }
@@ -62,7 +74,6 @@ public class UserEntity extends BaseEntity{
     }
 
 
-    @ManyToOne
     public DepartmentEntity getDepartment() {
         return department;
     }
@@ -72,7 +83,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @Column
+
     public String getName() {
         return name;
     }
@@ -116,5 +127,13 @@ public class UserEntity extends BaseEntity{
 
     public void removeRole(RoleEntity role) {
         this.roles.remove(role);
+    }
+
+    public EmployeeInfo getEmployeeInfo() {
+        return employeeInfo;
+    }
+
+    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
+        this.employeeInfo = employeeInfo;
     }
 }

@@ -1,29 +1,33 @@
 package com.example.leaves.model.entity;
 
-import javax.persistence.*;
-
 import com.example.leaves.model.dto.BaseDto;
-import com.example.leaves.model.listener.MyEntityListener;
+import com.example.leaves.model.listener.EntityListener;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-@EntityListeners(MyEntityListener.class)
+@EntityListeners(EntityListener.class)
 @MappedSuperclass
-public abstract class BaseEntity <T extends BaseDto> {
+public abstract class BaseEntity<T extends BaseDto> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "createdBy")
     private String createdBy;
+    @Column(name = "createdAt")
     private LocalDateTime createdAt;
+    @Column(name = "lastModifiedBy")
     private String lastModifiedBy;
+    @Column(name = "lastModifiedAt")
     private LocalDateTime lastModifiedAt;
+    @Column(name = "deleted")
     private boolean deleted = Boolean.FALSE;
 
 
     public BaseEntity() {
     }
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long getId() {
         return id;
     }
@@ -33,7 +37,7 @@ public abstract class BaseEntity <T extends BaseDto> {
     }
 
 
-    @Column
+
     public String getCreatedBy() {
         return createdBy;
     }
@@ -42,7 +46,7 @@ public abstract class BaseEntity <T extends BaseDto> {
         this.createdBy = createdBy;
     }
 
-    @Column
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -51,7 +55,7 @@ public abstract class BaseEntity <T extends BaseDto> {
         this.createdAt = createdAt;
     }
 
-    @Column
+
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -60,7 +64,7 @@ public abstract class BaseEntity <T extends BaseDto> {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    @Column
+
     public LocalDateTime getLastModifiedAt() {
         return lastModifiedAt;
     }
@@ -85,7 +89,7 @@ public abstract class BaseEntity <T extends BaseDto> {
         this.setLastModifiedBy(baseDto.getLastModifiedBy() == null ? this.lastModifiedBy : baseDto.getLastModifiedBy());
     }
 
-    @Column
+
     public boolean isDeleted() {
         return deleted;
     }

@@ -1,16 +1,11 @@
 package com.example.leaves.model.dto;
 
-import com.example.leaves.model.entity.BaseEntity;
-import com.example.leaves.model.entity.RoleEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoleDto extends BaseDto {

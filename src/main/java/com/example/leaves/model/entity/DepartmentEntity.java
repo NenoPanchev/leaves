@@ -2,17 +2,21 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.DepartmentDto;
 
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
-@Table(name = "departments")
-public class DepartmentEntity extends BaseEntity{
+@Table(name = "departments", schema = "public")
+public class DepartmentEntity extends BaseEntity {
+    @Column(unique = true, nullable = false,name = "name")
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
     private UserEntity admin;
+    @OneToMany(mappedBy = "department")
     private List<UserEntity> employees = new ArrayList<>();
 
     public DepartmentEntity() {
@@ -23,7 +27,7 @@ public class DepartmentEntity extends BaseEntity{
         this.name = department;
     }
 
-    @Column(unique = true, nullable = false)
+
     public String getName() {
         return name;
     }
@@ -32,7 +36,7 @@ public class DepartmentEntity extends BaseEntity{
         this.name = department;
     }
 
-    @ManyToOne
+
     public UserEntity getAdmin() {
         return admin;
     }
@@ -41,7 +45,7 @@ public class DepartmentEntity extends BaseEntity{
         this.admin = admin;
     }
 
-    @OneToMany
+
     public List<UserEntity> getEmployees() {
         return employees;
     }
@@ -65,7 +69,7 @@ public class DepartmentEntity extends BaseEntity{
         }
         if (this.employees != null && this.employees.size() != 0) {
             dto.setEmployeeEmails(employees.stream()
-                            .filter(userEntity -> !userEntity.isDeleted())
+                    .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
             if (dto.getEmployeeEmails().size() == 0) {
@@ -81,6 +85,7 @@ public class DepartmentEntity extends BaseEntity{
         super.toEntity(dto);
         this.setName(dto.getName() == null ? this.getName() : dto.getName().toUpperCase());
     }
+
     public void addEmployee(UserEntity userEntity) {
         if (this.employees == null) {
             this.employees = new ArrayList<>();

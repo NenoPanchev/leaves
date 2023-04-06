@@ -3,9 +3,9 @@ package com.example.leaves.model.payload.response;
 import java.util.List;
 
 public class AuthenticationResponse {
+    private final String jwt;
     private String email;
     private List<String> authorities;
-    private final String jwt;
 
     public AuthenticationResponse(String jwt) {
         this.jwt = jwt;

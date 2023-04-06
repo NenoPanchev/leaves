@@ -3,8 +3,9 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.PermissionEntity;
 import com.example.leaves.model.entity.PermissionEntity_;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.RoleEntity_;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.model.entity.enums.RoleEnum;
@@ -14,7 +15,7 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.PredicateBuilderV1;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -48,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
                     RoleEntity roleEntity = new RoleEntity()
                             .setName(enm.name());
                     List<PermissionEntity> permissions = new ArrayList<>();
-                    switch (roleEntity.getName()){
+                    switch (roleEntity.getName()) {
                         case "SUPER_ADMIN":
                             permissions = permissionService
                                     .findAllByNameIn(PermissionEnum.READ.name(), PermissionEnum.WRITE.name(), PermissionEnum.DELETE.name());
@@ -84,9 +85,9 @@ public class RoleServiceImpl implements RoleService {
         List<PermissionEntity> permissionEntities;
         if (dto.getPermissions() != null) {
             List<String> permissionNames = dto.getPermissions()
-                        .stream()
-                                .map(PermissionDto::getName)
-                                        .collect(Collectors.toList());
+                    .stream()
+                    .map(PermissionDto::getName)
+                    .collect(Collectors.toList());
             permissionEntities = permissionService.findAllByPermissionNameIn(permissionNames);
         } else {
             permissionEntities = permissionService.findAllByNameIn(PermissionEnum.READ.name());
@@ -95,7 +96,7 @@ public class RoleServiceImpl implements RoleService {
         roleEntity = roleRepository.save(roleEntity);
         RoleDto roleDto = new RoleDto();
         roleEntity.toDto(roleDto);
-        return  roleDto;
+        return roleDto;
     }
 
     @Override
@@ -131,7 +132,6 @@ public class RoleServiceImpl implements RoleService {
     }
 
 
-
     @Override
     @Transactional
     public RoleDto updateRoleById(Long id, RoleDto dto) {
@@ -140,7 +140,7 @@ public class RoleServiceImpl implements RoleService {
         }
         RoleEntity roleEntity = roleRepository
                 .findById(id)
-                .orElseThrow(() -> new  ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
 
         List<PermissionEntity> permissionEntities;
         if (dto.getPermissions() != null) {
@@ -193,7 +193,7 @@ public class RoleServiceImpl implements RoleService {
     public Specification<RoleEntity> getSpecification(RoleFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
                     .in(RoleEntity_.id, filter.getIds())
                     .like(RoleEntity_.name, filter.getName())
                     .equals(RoleEntity_.deleted, filter.isDeleted())

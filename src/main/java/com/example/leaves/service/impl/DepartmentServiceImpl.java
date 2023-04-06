@@ -2,8 +2,9 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.DepartmentEntity_;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
@@ -11,7 +12,7 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.PredicateBuilderV1;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -103,7 +104,7 @@ public class DepartmentServiceImpl implements DepartmentService {
                     entity.toDto(dto);
                     return dto;
                 })
-                .orElseThrow(() -> new  ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Department with id: %d does not exist", id)));
     }
 
     @Override
@@ -189,11 +190,13 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .collect(Collectors.toList());
     }
 
+
+
     @Override
     public Specification<DepartmentEntity> getSpecification(DepartmentFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
                     .in(DepartmentEntity_.id, filter.getIds())
                     .like(DepartmentEntity_.name, filter.getName())
                     .equals(DepartmentEntity_.deleted, filter.isDeleted())

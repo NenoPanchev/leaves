@@ -14,7 +14,9 @@ import java.util.Optional;
 @Repository
 public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Long>, JpaSpecificationExecutor<DepartmentEntity>, SoftDeleteRepository {
     Optional<DepartmentEntity> findByDeletedIsFalseAndName(String name);
+
     boolean existsByNameAndDeletedIsFalse(String name);
+
     @Query("SELECT d.name FROM DepartmentEntity d " +
             "WHERE d.id = :id " +
             "AND d.deleted = false ")
@@ -45,4 +47,7 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
     @Query("SELECT d.name from DepartmentEntity d " +
             "WHERE d.deleted = false ")
     List<String> findAllNamesByDeletedIsFalse();
+
+    List<DepartmentEntity> findAllByDeletedIsFalse();
+
 }

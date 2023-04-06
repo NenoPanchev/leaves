@@ -6,11 +6,10 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.filter.RoleFilter;
-import com.example.leaves.service.specification.SearchCriteria;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class RoleControllerImpl implements RoleController {
 
     @Override
     public ResponseEntity<RoleDto> updateRole(Long id, RoleDto dto, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
         if (dto.getName() != null) {

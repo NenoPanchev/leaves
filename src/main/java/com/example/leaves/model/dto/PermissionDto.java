@@ -1,14 +1,12 @@
 package com.example.leaves.model.dto;
 
-import com.example.leaves.model.entity.PermissionEntity;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.constraints.Pattern;
-import java.time.LocalDateTime;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PermissionDto extends BaseDto{
+public class PermissionDto extends BaseDto {
     private String name;
 
     public PermissionDto() {

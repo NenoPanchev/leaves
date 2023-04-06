@@ -27,6 +27,7 @@ public class RoleSpecification implements Specification<RoleEntity> {
     public void add(SearchCriteria criteria) {
         list.add(criteria);
     }
+
     @Override
     public Specification<RoleEntity> and(Specification<RoleEntity> other) {
         return Specification.super.and(other);

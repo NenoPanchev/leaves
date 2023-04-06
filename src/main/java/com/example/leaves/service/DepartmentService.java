@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface DepartmentService {
     void seedDepartments();
+
     DepartmentEntity findByDepartment(String department);
 
     List<DepartmentDto> getAllDepartmentDtos();

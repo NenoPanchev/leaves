@@ -1,6 +1,6 @@
 package com.example.leaves.service.specification;
 
-public enum SearchOperation {
+public enum SearchOperationV1 {
     GREATER_THAN,
     LESS_THAN,
     GREATER_THAN_EQUAL,

@@ -5,13 +5,13 @@ import java.util.List;
 public class SearchCriteria {
     private String key;
     private Object value;
-    private SearchOperation operation;
+    private SearchOperationV1 operation;
     private List<String> values;
 
     public SearchCriteria() {
     }
 
-    public SearchCriteria(String key, Object value, SearchOperation operation) {
+    public SearchCriteria(String key, Object value, SearchOperationV1 operation) {
         this.key = key;
         this.value = value;
         this.operation = operation;
@@ -33,11 +33,11 @@ public class SearchCriteria {
         this.value = value;
     }
 
-    public SearchOperation getOperation() {
+    public SearchOperationV1 getOperation() {
         return operation;
     }
 
-    public void setOperation(SearchOperation operation) {
+    public void setOperation(SearchOperationV1 operation) {
         this.operation = operation;
     }
 

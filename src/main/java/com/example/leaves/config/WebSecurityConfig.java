@@ -3,7 +3,6 @@ package com.example.leaves.config;
 import com.example.leaves.config.jwt.AuthEntryPointJwt;
 import com.example.leaves.config.jwt.JwtRequestFilter;
 import com.example.leaves.config.services.AppUserDetailService;
-import com.example.leaves.constants.GlobalConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
