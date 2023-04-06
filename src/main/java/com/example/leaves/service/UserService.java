@@ -1,10 +1,11 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.service.filter.UserFilter;
 import com.example.leaves.service.specification.SearchCriteria;
+import com.example.leaves.service.filter.UserFilter;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface UserService {
 
     UserEntity findByEmail(String email);
 
-    UserDto getUserById(Long id);
+    UserDto getUserById(long id);
 
     void deleteUser(Long id);
 
@@ -26,9 +27,10 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    UserDto addType(long typeId,long userId);
+
     List<UserDto> getAllUserDtos();
 
-    List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria);
 
     List<UserDto> getFilteredUsers(UserFilter filter);
 
@@ -41,4 +43,6 @@ public interface UserService {
     void detachDepartmentFromUsers(Long id);
 
     List<String> getAllEmails();
+
+    List<String> getEmailsOfAvailableEmployees();
 }

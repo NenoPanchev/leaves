@@ -1,7 +1,7 @@
 package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.BaseDto;
-import com.example.leaves.model.listener.EntityListener;
+import com.example.leaves.util.EntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -35,7 +35,6 @@ public abstract class BaseEntity<T extends BaseDto> {
     public void setId(Long id) {
         this.id = id;
     }
-
 
 
     public String getCreatedBy() {

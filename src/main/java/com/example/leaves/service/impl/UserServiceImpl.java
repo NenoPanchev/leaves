@@ -1,18 +1,18 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.service.specification.SearchCriteria;
-import com.example.leaves.service.specification.UserSpecification;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilderV1;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,13 +33,20 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
+    private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, @Lazy RoleService roleService, @Lazy DepartmentService departmentService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           @Lazy RoleService roleService,
+                           @Lazy DepartmentService departmentService,
+                           @Lazy TypeEmployeeRepository typeEmployeeRepository) {
+
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
         this.passwordEncoder = passwordEncoder;
+        this.typeEmployeeRepository = typeEmployeeRepository;
     }
 
     @Override
@@ -92,6 +99,8 @@ public class UserServiceImpl implements UserService {
         }
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
+        entity.setEmployeeInfo(new EmployeeInfo());
+
         entity = userRepository.save(entity);
         if (!isEmpty(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
@@ -110,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto getUserById(Long id) {
+    public UserDto getUserById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
             throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
         }
@@ -126,26 +135,6 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUserDtos() {
         return userRepository
                 .findAllByDeletedIsFalseOrderById()
-                .stream()
-                .map(entity -> {
-                    UserDto dto = new UserDto();
-                    entity.toDto(dto);
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public List<UserDto> getAllUsersFiltered(List<SearchCriteria> searchCriteria) {
-        UserSpecification userSpecification = new UserSpecification();
-        searchCriteria
-                .stream()
-                .map(criteria ->
-                        new SearchCriteria(criteria.getKey(), criteria.getValue(), criteria.getOperation()))
-                .forEach(userSpecification::add);
-        List<UserEntity> entities = userRepository.findAll(userSpecification);
-        return entities
                 .stream()
                 .map(entity -> {
                     UserDto dto = new UserDto();
@@ -253,6 +242,21 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmailAndDeletedIsFalse(email);
     }
 
+    @Override
+    public UserDto addType(long typeId, long userId) {
+       TypeEmployee typeEmployee= typeEmployeeRepository
+               .findById((Long)typeId)
+               .orElseThrow(()-> new EntityNotFoundException("Type not found"));
+       UserEntity user=userRepository
+               .findById(userId)
+               .orElseThrow(()-> new EntityNotFoundException("User not found"));
+       user.getEmployeeInfo().setEmployeeType(typeEmployee);
+       UserDto dto=new UserDto();
+        userRepository.save(user).toDto(dto);
+       return dto;
+
+    }
+
 
     @Override
     @Transactional
@@ -283,7 +287,7 @@ public class UserServiceImpl implements UserService {
 
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(UserEntity_.id, filter.getIds())
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())
@@ -330,6 +334,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> getAllEmails() {
         return userRepository.findAllEmailsByDeletedIsFalse();
+    }
+
+    @Override
+    public List<String> getEmailsOfAvailableEmployees() {
+        return userRepository.findAllEmailsByDeletedIsFalseAndDepartmentIsNull();
     }
 
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,

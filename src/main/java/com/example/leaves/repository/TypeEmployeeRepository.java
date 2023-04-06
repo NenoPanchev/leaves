@@ -14,11 +14,9 @@ public interface TypeEmployeeRepository extends JpaRepository<TypeEmployee, Long
 
     boolean existsByTypeName(String name);
 
-     TypeEmployee findById(long id);
+    TypeEmployee findById(long id);
 
-     List<TypeEmployee> findAllByDeletedIsFalse();
-
-
+    List<TypeEmployee> findAllByDeletedIsFalse();
 
 
 }

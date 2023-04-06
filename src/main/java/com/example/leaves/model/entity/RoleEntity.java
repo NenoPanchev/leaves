@@ -2,10 +2,12 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
 @AttributeOverrides(
         {
                 @AttributeOverride(name = "id", column = @Column(name = "id"))
@@ -16,6 +18,7 @@ import java.util.List;
 public class RoleEntity extends BaseEntity<RoleDto> {
     @Column(name = "name")
     private String name;
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "roles_permissions",
             joinColumns = @JoinColumn(name = "role_id"),

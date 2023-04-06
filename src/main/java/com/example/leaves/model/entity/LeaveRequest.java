@@ -23,7 +23,7 @@ public class LeaveRequest extends BaseEntity {
 
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_info_id")
     @JsonBackReference
     private EmployeeInfo employee;
 

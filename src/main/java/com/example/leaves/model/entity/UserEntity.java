@@ -2,8 +2,6 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ public class UserEntity extends BaseEntity<UserDto> {
     private String name;
     @Column(name = "email")
     private String email;
-    @Column(nullable = false,name = "password")
+    @Column(nullable = false, name = "password")
     private String password;
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "department_id")
@@ -36,7 +34,9 @@ public class UserEntity extends BaseEntity<UserDto> {
     @ManyToMany
     private List<RoleEntity> roles;
 
-    @OneToOne(mappedBy = "userInfo")
+
+    @OneToOne(cascade=CascadeType.ALL)
+    @JoinColumn(name = "employee_info_id")
     private EmployeeInfo employeeInfo;
 
     public UserEntity() {

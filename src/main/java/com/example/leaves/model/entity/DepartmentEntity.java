@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "departments", schema = "public")
 public class DepartmentEntity extends BaseEntity {
-    @Column(unique = true, nullable = false,name = "name")
+    @Column(unique = true, nullable = false, name = "name")
     private String name;
 
     @ManyToOne
@@ -93,7 +93,18 @@ public class DepartmentEntity extends BaseEntity {
         this.employees.add(userEntity);
     }
 
+    public void addAll(List<UserEntity> employees) {
+        if (this.employees == null) {
+            this.employees = new ArrayList<>();
+        }
+        this.employees.addAll(employees);
+    }
+
     public void removeEmployee(UserEntity userEntity) {
         this.employees.remove(userEntity);
+    }
+
+    public void removeAll(List<UserEntity> entities) {
+        this.employees.removeAll(entities);
     }
 }

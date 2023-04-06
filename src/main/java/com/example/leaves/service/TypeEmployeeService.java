@@ -3,14 +3,13 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.TypeEmployeeDto;
 import com.example.leaves.model.entity.TypeEmployee;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TypeEmployeeService {
-    TypeEmployeeDto create(TypeEmployeeDto type, UserEntity employee);
+    TypeEmployeeDto create(TypeEmployeeDto type);
 
     List<TypeEmployeeDto> getAll();
 
@@ -23,6 +22,8 @@ public interface TypeEmployeeService {
     List<TypeEmployeeDto> getAllFilter(TypeEmployeeFilter filter);
 
     TypeEmployee getById(long typeId);
+
+    TypeEmployee getByName(String name);
 
     Page<TypeEmployeeDto> getAllFilterPage(TypeEmployeeFilter filter);
 }

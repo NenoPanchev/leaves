@@ -9,9 +9,9 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface LeaveRequestService {
-    LeaveRequest addRequest(UserEntity employee, LeaveRequestDto leaveRequestDto);
+    LeaveRequest addRequest(LeaveRequestDto leaveRequestDto);
 
-    LeaveRequest approveRequest(UserEntity employee, long id);
+    LeaveRequest approveRequest(long id);
 
     LeaveRequest disapproveRequest(long id);
 
@@ -29,8 +29,8 @@ public interface LeaveRequestService {
 
     void unMarkAsDelete(long id);
 
-    LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto, UserEntity employee);
+    LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto);
 
-    List<LeaveRequestDto> getAllByEmployee(UserEntity employee);
+    List<LeaveRequestDto> getAllByEmployee(Long employeeId);
 
 }

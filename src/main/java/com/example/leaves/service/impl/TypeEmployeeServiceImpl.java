@@ -4,16 +4,15 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.model.dto.TypeEmployeeDto;
-import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.TypeEmployee_;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.TypeEmployeeRepository;
+import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,10 +25,12 @@ import java.util.List;
 @Service
 public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private final TypeEmployeeRepository typeRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository) {
+    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository, UserRepository userRepository) {
         this.typeRepository = typeRepository;
+        this.userRepository = userRepository;
     }
 
     private static void setTypeChanges(TypeEmployeeDto typeDto, TypeEmployee typeToBeUpdated) {
@@ -51,18 +52,17 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     }
 
     @Override
-    public TypeEmployeeDto create(TypeEmployeeDto typeDto, UserEntity employee) {
-
-        //TODO authentication
+    public TypeEmployeeDto create(TypeEmployeeDto typeDto) {
         if (typeRepository.existsByTypeName(typeDto.getTypeName())) {
             throw new DuplicateEntityException("Type", typeDto.getTypeName());
-        }  else if (typeDto.getTypeName()==null||typeDto.getTypeName().isEmpty()||typeDto.getDaysLeave()==0) {
+        } else if (typeDto.getTypeName() == null || typeDto.getTypeName().isEmpty() || typeDto.getDaysLeave() == 0) {
             throw new IllegalArgumentException("invalid body for typeDto");
         } else {
             TypeEmployee typeEmployee = new TypeEmployee();
             typeEmployee.toEntity(typeDto);
             return typeRepository.save(typeEmployee).toDto();
         }
+
     }
 
     public TypeEmployee getById(long typeId) {
@@ -72,8 +72,6 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
             return typeRepository.findById(typeId);
         }
     }
-
-    //TODO Authorization
     public TypeEmployee update(TypeEmployeeDto typeDto, long id) {
 
         if (typeRepository.findByTypeName(typeDto.getTypeName()) != null
@@ -147,7 +145,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecification(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(TypeEmployee_.id, filter.getId())
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .in(TypeEmployee_.daysLeave, filter.getDaysLeave())
@@ -165,7 +163,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecificationLessThan(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .lessThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))
@@ -183,7 +181,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private Specification<TypeEmployee> getSpecificationGreaterThan(TypeEmployeeFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .graterThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))

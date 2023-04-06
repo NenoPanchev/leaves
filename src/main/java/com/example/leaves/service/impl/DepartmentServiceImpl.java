@@ -12,16 +12,14 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilderV1;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,12 +85,14 @@ public class DepartmentServiceImpl implements DepartmentService {
         }
 
         entity = departmentRepository.save(entity);
-//        entity.getEmployees()
-//                        .stream()
-//                                .forEach(empl -> empl.setDepartment(entity));
+        DepartmentEntity finalEntity = entity;
+        entity.getEmployees()
+                                .forEach(empl -> empl.setDepartment(finalEntity));
         entity.toDto(dto);
         return dto;
     }
+
+
 
     @Override
     @Transactional
@@ -129,6 +129,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (!departmentRepository.existsById(id)) {
             throw new ObjectNotFoundException(String.format("Department with id: %d does not exist", id));
         }
+        userService.detachDepartmentFromUsers(id);
         departmentRepository.markAsDeleted(id);
     }
 
@@ -146,22 +147,11 @@ public class DepartmentServiceImpl implements DepartmentService {
         entity.toEntity(dto);
         if (dto.getAdminEmail() == null || dto.getAdminEmail().equals("")) {
             entity.setAdmin(null);
-        } else {
+        } else if (entity.getAdmin() != null && !dto.getAdminEmail().equals(entity.getAdmin().getEmail())){
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
-
         }
-        if (dto.getEmployeeEmails() != null) {
-            List<UserEntity> employees = new ArrayList<>();
-            dto.getEmployeeEmails()
-                    .forEach(email -> {
-                        UserEntity employee = userService.findByEmail(email);
-                        employees.add(employee);
-                        detachEmployeeFromDepartment(employee);
-                    });
-            entity.setEmployees(employees);
-        }
-
-        entity = departmentRepository.save(entity);
+        sortEmployeeChangesOnUpdate(entity, dto.getEmployeeEmails());
+        departmentRepository.save(entity);
         entity.toDto(dto);
         return dto;
     }
@@ -191,12 +181,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
 
-
     @Override
     public Specification<DepartmentEntity> getSpecification(DepartmentFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(DepartmentEntity_.id, filter.getIds())
                     .like(DepartmentEntity_.name, filter.getName())
                     .equals(DepartmentEntity_.deleted, filter.isDeleted())
@@ -262,4 +251,40 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository.findAllNamesByDeletedIsFalse();
     }
 
+    @Transactional
+    public void sortEmployeeChangesOnUpdate(DepartmentEntity entity, List<String> employeeEmails) {
+        List<UserEntity> toRemove = new ArrayList<>();
+        List<UserEntity> toAdd = new ArrayList<>();
+        List<String> oldEmails = new ArrayList<>();
+        if (entity.getEmployees() != null && entity.getEmployees().size() > 0) {
+            oldEmails = entity
+                    .getEmployees()
+                    .stream()
+                    .map(UserEntity::getEmail)
+                    .collect(Collectors.toList());
+        }
+        if (employeeEmails != null) {
+            List<UserEntity> employees = new ArrayList<>();
+            entity
+                    .getEmployees()
+                            .forEach(empl -> {
+                                if (employeeEmails.contains(empl.getEmail())) {
+                                    employeeEmails.remove(empl.getEmail());
+                                } else {
+                                    toRemove.add(empl);
+                                }
+                            });
+            employeeEmails
+                    .forEach(email -> {
+                        UserEntity employee = userService.findByEmail(email);
+                        toAdd.add(employee);
+                    });
+            entity.removeAll(toRemove);
+            toRemove
+                    .forEach(empl -> empl.setDepartment(null));
+            entity.addAll(toAdd);
+            toAdd
+                    .forEach(empl -> empl.setDepartment(entity));
+        }
+    }
 }

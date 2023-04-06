@@ -2,6 +2,7 @@ package com.example.leaves.constants;
 
 public class GlobalConstants {
     public static final String INITIAL_DEPARTMENTS = "ADMIN, IT, ACCOUNTING";
+    //TODO RENAME H2 IS IN HERE
     public static final String[] SWAGGER_WHITELIST = {
             // -- Swagger UI v2
             "/v2/api-docs",
@@ -13,7 +14,8 @@ public class GlobalConstants {
             "/webjars/**",
             // -- Swagger UI v3 (OpenAPI)
             "/v3/api-docs/**",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
             // other public endpoints of your API may be appended to this array
+            "/h2-console/**"
     };
 }

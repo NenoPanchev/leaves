@@ -15,7 +15,7 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
 import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilderV1;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -193,7 +193,7 @@ public class RoleServiceImpl implements RoleService {
     public Specification<RoleEntity> getSpecification(RoleFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
-            Predicate[] predicates = new PredicateBuilderV1<>(root, criteriaBuilder)
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(RoleEntity_.id, filter.getIds())
                     .like(RoleEntity_.name, filter.getName())
                     .equals(RoleEntity_.deleted, filter.isDeleted())

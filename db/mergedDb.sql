@@ -62,6 +62,42 @@ create table if not exists roles_permissions
 alter table roles_permissions
     owner to postgres;
 
+create table if not exists types
+(
+    type_name        varchar               not null,
+    type_days        integer               not null,
+    id               serial
+        constraint types_pk
+            primary key,
+    created_at       timestamp,
+    created_by       varchar,
+    last_modified_at timestamp,
+    last_modified_by varchar,
+    deleted          boolean default false not null
+);
+
+alter table types
+    owner to postgres;
+
+create table if not exists employee_info
+(
+    id               serial
+        constraint employee_info_pk
+            primary key,
+    type_id          integer
+        constraint employee_info_types_id_fk
+            references types,
+    days_leave       integer default 20 not null,
+    created_at       timestamp,
+    created_by       varchar,
+    deleted          boolean,
+    last_modified_at timestamp,
+    last_modified_by varchar
+);
+
+alter table employee_info
+    owner to postgres;
+
 create table if not exists users
 (
     id               bigserial
@@ -79,7 +115,10 @@ create table if not exists users
     password         varchar(255) not null,
     department_id    bigint
         constraint users_departments_id_fk
-            references departments
+            references departments,
+    employee_info_id integer
+        constraint users_employee_info_id_fk
+            references employee_info
 );
 
 alter table users
@@ -113,45 +152,6 @@ create table if not exists users_roles
 );
 
 alter table users_roles
-    owner to postgres;
-
-create table if not exists types
-(
-    type_name        integer               not null,
-    type_days        integer               not null,
-    id               serial
-        constraint types_pk
-            primary key,
-    created_at       timestamp             not null,
-    created_by       varchar               not null,
-    last_modified_at timestamp,
-    last_modified_by varchar,
-    deleted          boolean default false not null
-);
-
-alter table types
-    owner to postgres;
-
-create table if not exists employee_info
-(
-    id               serial
-        constraint employee_info_pk
-            primary key,
-    type_id          integer
-        constraint employee_info_types_id_fk
-            references types,
-    days_leave       integer default 20 not null,
-    user_id          integer
-        constraint employee_info_users_id_fk
-            references users,
-    created_at       timestamp,
-    created_by       varchar,
-    deleted          boolean,
-    last_modified_at timestamp,
-    last_modified_by varchar
-);
-
-alter table employee_info
     owner to postgres;
 
 create table if not exists leave_requests
