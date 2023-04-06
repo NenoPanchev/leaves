@@ -57,27 +57,33 @@ public class UserServiceImpl implements UserService {
         }
         DepartmentEntity administration = departmentService.findByDepartment("Administration");
         UserEntity superAdmin = new UserEntity();
+        EmployeeInfo employeeInfo=new EmployeeInfo();
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
         superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
         superAdmin.setDepartment(administration);
+        superAdmin.setEmployeeInfo(employeeInfo);
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
 
         UserEntity admin = new UserEntity();
+        EmployeeInfo employeeInfo2=new EmployeeInfo();
         admin.setName("Admin Admin");
         admin.setEmail("admin@admin.com");
+        admin.setEmployeeInfo(employeeInfo2);
         admin.setPassword(passwordEncoder.encode("1234"));
         admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
         admin.setDepartment(administration);
         userRepository.save(admin);
         departmentService.addEmployeeToDepartment(admin, administration);
 
+        EmployeeInfo employeeInfo3=new EmployeeInfo();
         DepartmentEntity it = departmentService.findByDepartment("IT");
         UserEntity user = new UserEntity();
         user.setName("User User");
         user.setEmail("user@user.com");
+        user.setEmployeeInfo(employeeInfo3);
         user.setPassword(passwordEncoder.encode("1234"));
         user.setRoles(roleService.findAllByRoleIn("USER"));
         user.setDepartment(it);
