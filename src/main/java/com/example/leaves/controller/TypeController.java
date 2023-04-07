@@ -22,11 +22,11 @@ public interface TypeController {
 
     @PostMapping("/Page")
     @PreAuthorize("hasAuthority('READ')")
-    Page<TypeEmployeeDto> getPageFiltered(@RequestHeader HttpHeaders headers, @RequestBody TypeEmployeeFilter filter);
+    Page<TypeEmployeeDto> getPageFiltered(@RequestBody TypeEmployeeFilter filter);
 
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")
-    TypeEmployeeDto create(@RequestBody TypeEmployeeDto typeEmployee, @RequestHeader HttpHeaders headers);
+    TypeEmployeeDto create(@RequestBody TypeEmployeeDto typeEmployee);
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")

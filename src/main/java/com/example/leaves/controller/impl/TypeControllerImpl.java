@@ -34,13 +34,13 @@ public class TypeControllerImpl implements TypeController {
     }
 
     @Override
-    public Page<TypeEmployeeDto> getPageFiltered(HttpHeaders headers, TypeEmployeeFilter filter) {
+    public Page<TypeEmployeeDto> getPageFiltered( TypeEmployeeFilter filter) {
 //        Employee employee = AuthenticationHelper.tryGetUser(headers);
         return typeService.getAllFilterPage(filter);
     }
 
     @Override
-    public TypeEmployeeDto create(TypeEmployeeDto typeEmployee, HttpHeaders headers) {
+    public TypeEmployeeDto create(TypeEmployeeDto typeEmployee) {
         return typeService.create(typeEmployee);
     }
 
