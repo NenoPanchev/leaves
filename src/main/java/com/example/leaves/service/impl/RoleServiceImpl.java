@@ -14,6 +14,7 @@ import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
@@ -212,6 +213,24 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<String> getAllRoleNames() {
         return roleRepository.findAllNamesByDeletedIsFalse();
+    }
+
+    @Override
+    public Page<RoleDto> getAllRolesFilteredPage(RoleFilter roleFilter) {
+        Page<RoleDto> pageToReturn = null;
+        if (roleFilter.getLimit() != null && roleFilter.getLimit() > 0) {
+            int offset = roleFilter.getOffset() == null ? 0 : roleFilter.getOffset();
+            int limit = roleFilter.getLimit();
+            OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(roleFilter);
+            Page<RoleEntity> page = roleRepository.findAll(getSpecification(roleFilter), pageable);
+
+            pageToReturn = page.map(pg -> {
+                RoleDto dto = new RoleDto();
+                pg.toDto(dto);
+                return dto;
+            });
+        }
+        return pageToReturn;
     }
 
     @Override
