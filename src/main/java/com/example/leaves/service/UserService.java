@@ -45,4 +45,6 @@ public interface UserService {
     List<String> getAllEmails();
 
     List<String> getEmailsOfAvailableEmployees();
+
+    UserEntity findUserById(long id);
 }

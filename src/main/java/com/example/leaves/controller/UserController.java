@@ -1,5 +1,6 @@
 package com.example.leaves.controller;
 
+import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.util.List;
 
 @CrossOrigin
@@ -52,4 +54,8 @@ public interface UserController {
     @PostMapping("/{userId}/type")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> addType(@RequestBody long typeId,@PathVariable("userId")  long userId);
+
+    @PostMapping("/{userId}/pdf")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<File>  getPdfOfRequest(@RequestBody long request,@PathVariable("userId")  long userId);
 }
