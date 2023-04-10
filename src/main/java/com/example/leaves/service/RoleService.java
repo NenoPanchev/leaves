@@ -35,5 +35,5 @@ public interface RoleService {
 
     List<String> getAllRoleNames();
 
-    Page<RoleDto> getAllRolesFilteredPage(RoleFilter filter);
+    Page<RoleDto> getRolesPage(RoleFilter filter);
 }

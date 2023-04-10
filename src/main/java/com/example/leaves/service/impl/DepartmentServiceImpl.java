@@ -2,6 +2,7 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
+import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.DepartmentEntity_;
 import com.example.leaves.model.entity.UserEntity;
@@ -11,6 +12,7 @@ import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
+import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
@@ -249,6 +251,24 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<String> getAllNames() {
         return departmentRepository.findAllNamesByDeletedIsFalse();
+    }
+
+    @Override
+    public Page<DepartmentDto> getDepartmentsPage(DepartmentFilter departmentFilter) {
+        Page<DepartmentDto> page = null;
+        if (departmentFilter.getLimit() != null && departmentFilter.getLimit() > 0) {
+            int offset = departmentFilter.getOffset() == null ? 0 : departmentFilter.getOffset();
+            int limit = departmentFilter.getLimit();
+            OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(departmentFilter);
+            page = departmentRepository
+                    .findAll(getSpecification(departmentFilter), pageable)
+                    .map(pg -> {
+                        DepartmentDto dto = new DepartmentDto();
+                        pg.toDto(dto);
+                        return dto;
+                    });
+        }
+        return page;
     }
 
     @Transactional

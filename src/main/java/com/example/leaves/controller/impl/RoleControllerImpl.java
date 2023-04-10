@@ -44,10 +44,10 @@ public class RoleControllerImpl implements RoleController {
     }
 
     @Override
-    public ResponseEntity<Page<RoleDto>> getFilteredRolesPaged(RoleFilter roleFilter) {
+    public ResponseEntity<Page<RoleDto>> getRolesPage(RoleFilter roleFilter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(roleService.getAllRolesFilteredPage(roleFilter));
+                .body(roleService.getRolesPage(roleFilter));
     }
 
     @Override
