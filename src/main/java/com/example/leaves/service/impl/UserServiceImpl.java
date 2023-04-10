@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         }
         DepartmentEntity administration = departmentService.findByDepartment("Administration");
         UserEntity superAdmin = new UserEntity();
-        EmployeeInfo employeeInfo=new EmployeeInfo();
+        EmployeeInfo employeeInfo = new EmployeeInfo();
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
         departmentService.addEmployeeToDepartment(superAdmin, administration);
 
         UserEntity admin = new UserEntity();
-        EmployeeInfo employeeInfo2=new EmployeeInfo();
+        EmployeeInfo employeeInfo2 = new EmployeeInfo();
         admin.setName("Admin Admin");
         admin.setEmail("admin@admin.com");
         admin.setEmployeeInfo(employeeInfo2);
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(admin);
         departmentService.addEmployeeToDepartment(admin, administration);
 
-        EmployeeInfo employeeInfo3=new EmployeeInfo();
+        EmployeeInfo employeeInfo3 = new EmployeeInfo();
         DepartmentEntity it = departmentService.findByDepartment("IT");
         UserEntity user = new UserEntity();
         user.setName("User User");
@@ -251,16 +251,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addType(long typeId, long userId) {
-       TypeEmployee typeEmployee= typeEmployeeRepository
-               .findById((Long)typeId)
-               .orElseThrow(()-> new EntityNotFoundException("Type not found"));
-       UserEntity user=userRepository
-               .findById(userId)
-               .orElseThrow(()-> new EntityNotFoundException("User not found"));
-       user.getEmployeeInfo().setEmployeeType(typeEmployee);
-       UserDto dto=new UserDto();
+        TypeEmployee typeEmployee = typeEmployeeRepository
+                .findById((Long) typeId)
+                .orElseThrow(() -> new EntityNotFoundException("Type not found"));
+        UserEntity user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        user.getEmployeeInfo().setEmployeeType(typeEmployee);
+        UserDto dto = new UserDto();
         userRepository.save(user).toDto(dto);
-       return dto;
+        return dto;
 
     }
 
@@ -346,6 +346,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> getEmailsOfAvailableEmployees() {
         return userRepository.findAllEmailsByDeletedIsFalseAndDepartmentIsNull();
+    }
+
+    @Override
+    public UserEntity findUserById(long id) {
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("user not found"));
     }
 
     @Override

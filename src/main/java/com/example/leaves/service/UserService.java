@@ -48,4 +48,6 @@ public interface UserService {
     List<String> getEmailsOfAvailableEmployees();
 
     Page<UserDto> getUsersPage(UserFilter filter);
+
+    UserEntity findUserById(long id);
 }
