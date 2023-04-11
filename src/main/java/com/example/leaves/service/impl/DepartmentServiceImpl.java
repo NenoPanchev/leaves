@@ -2,7 +2,6 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.DepartmentEntity_;
 import com.example.leaves.model.entity.UserEntity;
@@ -191,8 +190,8 @@ public class DepartmentServiceImpl implements DepartmentService {
                     .in(DepartmentEntity_.id, filter.getIds())
                     .like(DepartmentEntity_.name, filter.getName())
                     .equals(DepartmentEntity_.deleted, filter.isDeleted())
-                    .joinLike(DepartmentEntity_.admin, filter.getAdmin(), UserEntity_.EMAIL)
-                    .joinIn(DepartmentEntity_.employees, filter.getEmployees(), UserEntity_.EMAIL)
+                    .joinLike(DepartmentEntity_.admin, filter.getAdminEmail(), UserEntity_.EMAIL)
+                    .joinIn(DepartmentEntity_.employees, filter.getEmployeeEmails(), UserEntity_.EMAIL)
                     .build()
                     .toArray(new Predicate[0]);
 
