@@ -128,7 +128,7 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<UserDto> getUserByEmail(String text) {
         UserDto userDto = new UserDto();
-        String email = text.substring(1, text.length() - 1);
+        String email = text.replaceAll("\"", "");
         userService.findByEmail(email).toDto(userDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
