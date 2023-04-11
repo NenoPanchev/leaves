@@ -52,7 +52,8 @@ public class PdfUtil {
             }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfConverter pdfConverter = new PdfConverter();
-            pdfConverter.convert(doc, baos, PdfOptions.getDefault());
+//            pdfConverter.convert(doc, baos, PdfOptions.getDefault());
+
             return baos.toByteArray();
         } finally {
 

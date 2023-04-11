@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "leave_requests", schema = "public")
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
-public class LeaveRequest extends BaseEntity {
+public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -37,7 +37,7 @@ public class LeaveRequest extends BaseEntity {
     }
 
     public int getDaysRequested() {
-        return (int) ChronoUnit.DAYS.between(startDate, endDate);
+        return (int) ChronoUnit.DAYS.between(startDate, endDate)+1;
     }
 
     public EmployeeInfo getEmployee() {
