@@ -5,8 +5,8 @@ import java.util.List;
 public class DepartmentFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
-    private String admin;
-    private List<String> employees;
+    private String adminEmail;
+    private List<String> employeeEmails;
 
     public DepartmentFilter() {
     }
@@ -27,19 +27,19 @@ public class DepartmentFilter extends BaseFilter {
         this.name = name;
     }
 
-    public String getAdmin() {
-        return admin;
+    public String getAdminEmail() {
+        return adminEmail;
     }
 
-    public void setAdmin(String admin) {
-        this.admin = admin;
+    public void setAdminEmail(String adminEmail) {
+        this.adminEmail = adminEmail;
     }
 
-    public List<String> getEmployees() {
-        return employees;
+    public List<String> getEmployeeEmails() {
+        return employeeEmails;
     }
 
-    public void setEmployees(List<String> employees) {
-        this.employees = employees;
+    public void setEmployeeEmails(List<String> employeeEmails) {
+        this.employeeEmails = employeeEmails;
     }
 }

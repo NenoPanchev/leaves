@@ -224,21 +224,21 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public Page<RoleDto> getAllRolesFilteredPage(RoleFilter roleFilter) {
-        Page<RoleDto> pageToReturn = null;
+    public Page<RoleDto> getRolesPage(RoleFilter roleFilter) {
+        Page<RoleDto> page = null;
         if (roleFilter.getLimit() != null && roleFilter.getLimit() > 0) {
             int offset = roleFilter.getOffset() == null ? 0 : roleFilter.getOffset();
             int limit = roleFilter.getLimit();
             OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(roleFilter);
-            Page<RoleEntity> page = roleRepository.findAll(getSpecification(roleFilter), pageable);
-
-            pageToReturn = page.map(pg -> {
-                RoleDto dto = new RoleDto();
-                pg.toDto(dto);
-                return dto;
-            });
+            page = roleRepository
+                    .findAll(getSpecification(roleFilter), pageable)
+                    .map(pg -> {
+                        RoleDto dto = new RoleDto();
+                        pg.toDto(dto);
+                        return dto;
+                    });
         }
-        return pageToReturn;
+        return page;
     }
 
     @Override

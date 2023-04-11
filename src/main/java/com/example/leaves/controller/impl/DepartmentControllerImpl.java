@@ -6,6 +6,7 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.filter.DepartmentFilter;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -40,6 +41,13 @@ public class DepartmentControllerImpl implements DepartmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(departmentService.getAllDepartmentsFiltered(filter));
+    }
+
+    @Override
+    public ResponseEntity<Page<DepartmentDto>> getDepartmentsPage(DepartmentFilter departmentFilter) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(departmentService.getDepartmentsPage(departmentFilter));
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -46,6 +47,8 @@ public interface UserService {
     List<String> getAllEmails();
 
     List<String> getEmailsOfAvailableEmployees();
+
+    Page<UserDto> getUsersPage(UserFilter filter);
 
     UserEntity findUserById(long id);
 

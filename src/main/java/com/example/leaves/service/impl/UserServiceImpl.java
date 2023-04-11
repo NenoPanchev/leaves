@@ -11,6 +11,7 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
+import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
@@ -368,6 +369,24 @@ public class UserServiceImpl implements UserService {
                                 .getAuthentication()
                                 .getName())
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
+    }
+
+    @Override
+    public Page<UserDto> getUsersPage(UserFilter filter) {
+        Page<UserDto> page = null;
+        if (filter.getLimit() != null && filter.getLimit() > 0) {
+            int offset = filter.getOffset() == null ? 0 : filter.getOffset();
+            int limit = filter.getLimit();
+            OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+            page = userRepository
+                    .findAll(getSpecification(filter), pageable)
+                    .map(pg -> {
+                        UserDto dto = new UserDto();
+                        pg.toDto(dto);
+                        return dto;
+                    });
+        }
+        return page;
     }
 
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,

@@ -1,7 +1,6 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.LeaveRequestDto;
-import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +30,10 @@ public interface UserController {
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
+
+    @PostMapping("/page")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<Page<UserDto>> getUsersPage(@RequestBody UserFilter userFilter);
 
     @PostMapping
     ResponseEntity<UserDto> create(

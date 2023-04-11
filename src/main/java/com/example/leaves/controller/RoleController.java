@@ -29,7 +29,7 @@ public interface RoleController {
 
     @PostMapping("/page")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<Page<RoleDto>> getFilteredRolesPaged(@RequestBody RoleFilter roleFilter);
+    ResponseEntity<Page<RoleDto>> getRolesPage(@RequestBody RoleFilter roleFilter);
 
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN')")
