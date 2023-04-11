@@ -1,5 +1,9 @@
 package com.example.leaves.util;
 
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.pdf.BaseFont;
+import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
@@ -8,14 +12,16 @@ import org.apache.poi.xwpf.usermodel.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 public class PdfUtil {
-    private static final String OUTPUTFILE = "C:/Users/Vladimir/Desktop/ReadPdfssssddddddss.pdf";
 
     private static String FILE = "src/main/resources/docx/отпуск.docx";
 
@@ -26,7 +32,7 @@ public class PdfUtil {
              * if uploaded doc then use HWPF else if uploaded Docx file use
              * XWPFDocument
              */
-            File tempFile = File.createTempFile("Request", ".pdf");
+            //File tempFile = File.createTempFile("Request", ".pdf");
 
             XWPFDocument doc = new XWPFDocument(
                     OPCPackage.open(FILE));
@@ -50,9 +56,16 @@ public class PdfUtil {
                     }
                 }
             }
+            //final FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/docx/отпуск4.pdf");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PdfConverter pdfConverter = new PdfConverter();
-            pdfConverter.convert(doc, baos, PdfOptions.getDefault());
+            PdfOptions options = PdfOptions.create();
+            options.fontProvider(getiFontProvider());
+
+            PdfConverter.getInstance().convert(doc, baos, options);
+            //PdfConverter pdfConverter = new PdfConverter();
+            //doc.write(fileOutputStream);
+            //pdfConverter.convert(doc, fileOutputStream, PdfOptions.getDefault());
+            //fileOutputStream.write(baos.toByteArray());
             return baos.toByteArray();
         } finally {
 
@@ -68,6 +81,34 @@ public class PdfUtil {
                 r.setText(text, 0);
             }
         }
+    }
+    private static IFontProvider getiFontProvider() {
+        return (familyName, encoding, size, style, color) -> {
+            try {
+                if (familyName.equalsIgnoreCase("Times New Roman")) {
+                    BaseFont baseFont;
+                    if (style == Font.BOLD) {
+                        baseFont = BaseFont.createFont("ttf/Times New RomanB.ttf", encoding, BaseFont.EMBEDDED);
+                    } else {
+                        baseFont = BaseFont.createFont("ttf/Times New Roman.ttf", encoding, BaseFont.EMBEDDED);
+                    }
+                    return new Font(baseFont, size, style, color);
+                } else if (familyName.equalsIgnoreCase("Calibri") || encoding.equalsIgnoreCase(BaseFont.IDENTITY_H)) {
+                    BaseFont baseFont;
+                    if (style == Font.BOLD) {
+                        baseFont = BaseFont.createFont("ttf/CalibriB.ttf", encoding, BaseFont.EMBEDDED);
+                    } else {
+                        baseFont = BaseFont.createFont("ttf/Calibri.ttf", encoding, BaseFont.EMBEDDED);
+                    }
+                    return new Font(baseFont, size, style, color);
+                }
+            } catch (final Exception e) {
+//                LOGGER.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+
+            return FontFactory.getFont(familyName, encoding, size, style, color);
+        };
     }
 
 }
