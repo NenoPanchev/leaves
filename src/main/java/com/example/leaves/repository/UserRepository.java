@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     Optional<UserEntity> findByIdAndDeletedIsFalse(Long id);
     boolean existsByEmailAndDeletedIsFalse(String email);
 
+    Optional<UserEntity> findByEmail(String email);
+
     @Query("SELECT u.email FROM UserEntity u " +
             "WHERE u.id = :id " +
             "AND u.deleted = false ")

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.management.relation.Role;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -129,6 +130,13 @@ public class RoleServiceImpl implements RoleService {
                     entity.toDto(dto);
                     return dto;
                 })
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+    }
+
+    @Override
+    public RoleEntity getRoleById(Long id) {
+        return roleRepository
+                .findByIdAndDeletedIsFalse(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
     }
 

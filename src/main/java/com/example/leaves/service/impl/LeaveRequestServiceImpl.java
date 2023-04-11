@@ -13,6 +13,7 @@ import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.LeaveRequestRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.LeaveRequestService;
+import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
@@ -36,13 +37,16 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     UserRepository employeeRepository;
     LeaveRequestRepository leaveRequestRepository;
 
+    UserService userService;
+
 
     @Autowired
     public LeaveRequestServiceImpl(UserRepository employeeRepository
-            , LeaveRequestRepository leaveRequestRepository) {
+            , LeaveRequestRepository leaveRequestRepository,  UserService userService) {
 
         this.employeeRepository = employeeRepository;
         this.leaveRequestRepository = leaveRequestRepository;
+        this.userService=userService;
     }
 
 
@@ -148,13 +152,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     private UserEntity getCurrentUser() {
-        return employeeRepository
-                .findByEmailAndDeletedIsFalse(
-                        SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getName())
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+        return userService.getCurrentUser();
     }
 
     @Override

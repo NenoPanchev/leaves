@@ -3,14 +3,14 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PdfInvalidException;
+import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.EmployeeInfoService;
-import com.example.leaves.service.LeaveRequestService;
-import com.example.leaves.service.TypeEmployeeService;
+import com.example.leaves.service.*;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +26,23 @@ import java.util.stream.Collectors;
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final UserRepository employeeRepository;
+    private final UserService userService;
     private final TypeEmployeeService typeService;
 
     private final LeaveRequestService leaveRequestService;
+    private final RoleService roleService;
 
     @Autowired
-    public EmployeeInfoServiceImpl(UserRepository employeeRepository, TypeEmployeeService typeService, LeaveRequestService leaveRequestService) {
+    public EmployeeInfoServiceImpl(UserRepository employeeRepository,
+                                   TypeEmployeeService typeService,
+                                   LeaveRequestService leaveRequestService,
+                                   UserService userService,
+                                   RoleService roleService) {
         this.employeeRepository = employeeRepository;
         this.typeService = typeService;
         this.leaveRequestService = leaveRequestService;
+        this.userService = userService;
+        this.roleService = roleService;
     }
 
 
@@ -82,16 +90,21 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public File getPdfOfRequest(UserEntity employee, long requestId) {
-
+    public File getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm) {
+        UserEntity employee = userService.getCurrentUser();
         LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
+        if (employee != leaveRequest.getEmployee().getUserInfo() ||
+                !(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L)))) {
+            throw new UnauthorizedException("You are not authorized for this operation");
+        }
+
         Map<String, String> words = new HashMap<>();
-        words.put("fullName", employee.getName());
-        words.put("egn", "1234567890");
-        words.put("location", "plovdiv");
-        words.put("position", "WoWoWoW");
-        words.put("requestToName", "GOsho GOshomir5");
-        words.put("year", "2023");
+        words.put("fullName", leaveRequest.getEmployee().getUserInfo().getName());
+        words.put("egn", pdfRequestForm.getEgn());
+        words.put("location", pdfRequestForm.getLocation());
+        words.put("position", pdfRequestForm.getPosition());
+        words.put("requestToName",  pdfRequestForm.getRequestToName());
+        words.put("year", pdfRequestForm.getYear());
         //TODO ADD NEW COLUMNS IN DB
         //TODO SAVE EGN ?
 

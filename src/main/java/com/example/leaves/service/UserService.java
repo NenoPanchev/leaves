@@ -6,6 +6,7 @@ import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -47,4 +48,8 @@ public interface UserService {
     List<String> getEmailsOfAvailableEmployees();
 
     UserEntity findUserById(long id);
+
+    UserDto findUserByEmail(String email);
+
+    UserEntity getCurrentUser();
 }

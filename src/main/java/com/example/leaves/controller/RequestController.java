@@ -56,4 +56,5 @@ public interface RequestController {
     @PostMapping("/Page")
     @PreAuthorize("hasAuthority('READ')")
     Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
+
 }

@@ -1,6 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +56,17 @@ public interface UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> addType(@RequestBody long typeId,@PathVariable("userId")  long userId);
 
-    @PostMapping("/{userId}/pdf")
+    @PostMapping("/{requestId}/pdf")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<File>  getPdfOfRequest(@RequestBody long request,@PathVariable("userId")  long userId);
+    ResponseEntity<File>  getPdfOfRequest(@PathVariable("requestId") long requestId,
+                                          @RequestBody PdfRequestForm pdfRequestForm);
+    @PostMapping("/email")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<UserDto>  getUserByEmail(@RequestBody String email);
+
+    @GetMapping("/current")
+    @PreAuthorize("hasAuthority('READ')")
+    UserDto  getCurrentUser();
+
+
 }

@@ -7,6 +7,7 @@ public class AuthenticationResponse {
     private String email;
     private List<String> authorities;
 
+
     public AuthenticationResponse(String jwt) {
         this.jwt = jwt;
     }
@@ -30,4 +31,5 @@ public class AuthenticationResponse {
     public void setAuthorities(List<String> authorities) {
         this.authorities = authorities;
     }
+
 }

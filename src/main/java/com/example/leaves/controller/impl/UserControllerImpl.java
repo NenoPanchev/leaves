@@ -3,19 +3,15 @@ package com.example.leaves.controller.impl;
 import com.example.leaves.controller.UserController;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
-import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
@@ -114,11 +110,27 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<File> getPdfOfRequest( long request,long userId) {
-        UserEntity user=userService.findUserById(userId);
+    public ResponseEntity<File> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getPdfOfRequest(user,request));
+                .body(employeeInfoService.getPdfOfRequest(request,pdfRequestForm));
+    }
+
+    @Override
+    public ResponseEntity<UserDto> getUserByEmail(String text) {
+        UserDto userDto = new UserDto();
+        String email = text.substring(1, text.length() - 1);
+        userService.findByEmail(email).toDto(userDto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userDto);
+    }
+
+    @Override
+    public UserDto getCurrentUser() {
+        UserDto userDto = new UserDto();
+        userService.getCurrentUser().toDto(userDto);
+        return userDto;
     }
 }
 

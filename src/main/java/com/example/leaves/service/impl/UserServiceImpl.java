@@ -352,6 +352,24 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("user not found"));
     }
 
+    @Override
+    public UserDto findUserByEmail(String email) {
+        UserDto dto=new UserDto();
+         userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("user not found")).toDto(dto);
+        return dto;
+    }
+
+    @Override
+    public UserEntity getCurrentUser() {
+        return userRepository
+                .findByEmailAndDeletedIsFalse(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName())
+                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+    }
+
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,
                                                 String dtoDepartmentName, boolean sameDepartment) {
         if (!isEmpty(dtoDepartmentName) && !sameDepartment) {
