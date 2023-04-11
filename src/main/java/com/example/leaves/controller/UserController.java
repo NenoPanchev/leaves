@@ -1,6 +1,5 @@
 package com.example.leaves.controller;
 
-import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.filter.UserFilter;
@@ -11,7 +10,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.File;
 import java.util.List;
 
 @CrossOrigin
@@ -59,19 +57,20 @@ public interface UserController {
 
     @PostMapping("/{userId}/type")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<UserDto> addType(@RequestBody long typeId,@PathVariable("userId")  long userId);
+    ResponseEntity<UserDto> addType(@RequestBody long typeId, @PathVariable("userId") long userId);
 
     @PostMapping("/{requestId}/pdf")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<byte[]>  getPdfOfRequest(@PathVariable("requestId") long requestId,
-                                          @RequestBody PdfRequestForm pdfRequestForm);
+    ResponseEntity<byte[]> getPdfOfRequest(@PathVariable("requestId") long requestId,
+                                           @RequestBody PdfRequestForm pdfRequestForm);
+
     @PostMapping("/email")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<UserDto>  getUserByEmail(@RequestBody String email);
+    ResponseEntity<UserDto> getUserByEmail(@RequestBody String email);
 
     @GetMapping("/current")
     @PreAuthorize("hasAuthority('READ')")
-    UserDto  getCurrentUser();
+    UserDto getCurrentUser();
 
 
 }

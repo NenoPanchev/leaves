@@ -20,7 +20,9 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -88,11 +90,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         entity = departmentRepository.save(entity);
         DepartmentEntity finalEntity = entity;
         entity.getEmployees()
-                                .forEach(empl -> empl.setDepartment(finalEntity));
+                .forEach(empl -> empl.setDepartment(finalEntity));
         entity.toDto(dto);
         return dto;
     }
-
 
 
     @Override
@@ -148,7 +149,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         entity.toEntity(dto);
         if (dto.getAdminEmail() == null || dto.getAdminEmail().equals("")) {
             entity.setAdmin(null);
-        } else if (entity.getAdmin() != null && !dto.getAdminEmail().equals(entity.getAdmin().getEmail())){
+        } else if (entity.getAdmin() != null && !dto.getAdminEmail().equals(entity.getAdmin().getEmail())) {
             entity.setAdmin(userService.findByEmail(dto.getAdminEmail()));
         }
         sortEmployeeChangesOnUpdate(entity, dto.getEmployeeEmails());
@@ -286,13 +287,13 @@ public class DepartmentServiceImpl implements DepartmentService {
             List<UserEntity> employees = new ArrayList<>();
             entity
                     .getEmployees()
-                            .forEach(empl -> {
-                                if (employeeEmails.contains(empl.getEmail())) {
-                                    employeeEmails.remove(empl.getEmail());
-                                } else {
-                                    toRemove.add(empl);
-                                }
-                            });
+                    .forEach(empl -> {
+                        if (employeeEmails.contains(empl.getEmail())) {
+                            employeeEmails.remove(empl.getEmail());
+                        } else {
+                            toRemove.add(empl);
+                        }
+                    });
             employeeEmails
                     .forEach(email -> {
                         UserEntity employee = userService.findByEmail(email);

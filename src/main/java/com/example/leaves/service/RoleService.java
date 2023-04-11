@@ -6,7 +6,6 @@ import com.example.leaves.service.filter.RoleFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 public interface RoleService {
@@ -21,6 +20,7 @@ public interface RoleService {
     boolean existsByName(String name);
 
     RoleDto findRoleById(Long id);
+
     RoleEntity getRoleById(Long id);
 
     void deleteRole(Long id);

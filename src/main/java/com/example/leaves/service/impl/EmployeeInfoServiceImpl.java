@@ -16,7 +16,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -93,8 +92,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm) {
         UserEntity employee = userService.getCurrentUser();
         LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
-        if (!(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L))))
-        {
+        if (!(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L)))) {
             if (employee != leaveRequest.getEmployee().getUserInfo()
             ) {
                 throw new UnauthorizedException("You are not authorized for this operation");
@@ -106,7 +104,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         words.put("egn", pdfRequestForm.getEgn());
         words.put("location", pdfRequestForm.getLocation());
         words.put("position", pdfRequestForm.getPosition());
-        words.put("requestToName",  pdfRequestForm.getRequestToName());
+        words.put("requestToName", pdfRequestForm.getRequestToName());
         words.put("year", pdfRequestForm.getYear());
         //TODO ADD NEW COLUMNS IN DB
         //TODO SAVE EGN ?

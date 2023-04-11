@@ -18,10 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -79,7 +77,7 @@ public class TypeServiceImplTests {
     void getById_should_returnType_when_matchExist() {
         //Arrange
         TypeEmployee typeEmployee = TestsHelper.createMockType();
-        Mockito.when(mockTypeRepository.findById((long)typeEmployee.getId()))
+        Mockito.when(mockTypeRepository.findById((long) typeEmployee.getId()))
                 .thenReturn(typeEmployee);
         // Act
         TypeEmployee result = mockTypeService.getById(typeEmployee.getId());

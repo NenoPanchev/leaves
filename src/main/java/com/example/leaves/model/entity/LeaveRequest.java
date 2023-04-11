@@ -1,6 +1,7 @@
 package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.util.DatesUtil;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
@@ -37,9 +38,8 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     }
 
     public int getDaysRequested() {
-        return (int) ChronoUnit.DAYS.between(startDate, endDate)+1;
+        return  DatesUtil.countBusinessDaysBetween(startDate,endDate).size();
     }
-
     public EmployeeInfo getEmployee() {
         return employee;
     }

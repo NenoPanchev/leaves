@@ -72,6 +72,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
             return typeRepository.findById(typeId);
         }
     }
+
     public TypeEmployee update(TypeEmployeeDto typeDto, long id) {
 
         if (typeRepository.findByTypeName(typeDto.getTypeName()) != null

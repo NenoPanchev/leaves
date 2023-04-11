@@ -21,12 +21,10 @@ import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,34 +40,43 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Autowired
     public LeaveRequestServiceImpl(UserRepository employeeRepository
-            , LeaveRequestRepository leaveRequestRepository,  UserService userService) {
+            , LeaveRequestRepository leaveRequestRepository, UserService userService) {
 
         this.employeeRepository = employeeRepository;
         this.leaveRequestRepository = leaveRequestRepository;
-        this.userService=userService;
+        this.userService = userService;
     }
 
 
     private LeaveRequest addRequestIn(EmployeeInfo employee, LeaveRequestDto leaveRequestDto) {
         LeaveRequest request = new LeaveRequest();
         request.toEntity(leaveRequestDto);
+
         List<LeaveRequest> sameRequest = leaveRequestRepository.findAllByStartDateAndEmployeeAndEndDate
                 (request.getStartDate(), employee, request.getEndDate());
+
         List<LeaveRequest> sameStartDate = leaveRequestRepository.findAllByStartDateAndEmployee
                 (request.getStartDate(), employee);
+
         if (null == sameRequest || sameRequest.isEmpty()) {
+
             if (employee.checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested())) {
+
                 if (sameStartDate == null || sameStartDate.isEmpty()) {
                     request.setEmployee(employee);
                     return leaveRequestRepository.save(request);
+
                 } else {
+
                     throw new DuplicateEntityException("There is request with same start Date");
+
                 }
 
             } else {
                 throw new PaidleaveNotEnoughException(
                         String.format("%s@%s", request.getDaysRequested(), employee.getPaidLeave())
                         , "Add");
+
             }
         } else {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
@@ -250,6 +257,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
+
     public List<LeaveRequestDto> getAllByEmployeeId(long employeeId) {
         List<LeaveRequestDto> list = new ArrayList<>();
         UserEntity user = employeeRepository
@@ -260,6 +268,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
+
     private Page<LeaveRequestDto> getLeaveRequestDtoFilteredGraterThan(LeaveRequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         return leaveRequestRepository.findAll(getSpecificationGraterThanDates(filter)

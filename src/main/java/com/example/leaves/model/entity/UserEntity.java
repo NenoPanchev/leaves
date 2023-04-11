@@ -35,7 +35,7 @@ public class UserEntity extends BaseEntity<UserDto> {
     private List<RoleEntity> roles;
 
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_info_id")
     private EmployeeInfo employeeInfo;
 

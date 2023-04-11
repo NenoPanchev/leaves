@@ -1,7 +1,6 @@
 package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -14,8 +13,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity>, SoftDeleteRepository {
     @EntityGraph(value = "full")
     Optional<UserEntity> findByEmailAndDeletedIsFalse(String email);
+
     @EntityGraph(value = "full")
     Optional<UserEntity> findByIdAndDeletedIsFalse(Long id);
+
     boolean existsByEmailAndDeletedIsFalse(String email);
 
     Optional<UserEntity> findByEmail(String email);

@@ -1,12 +1,9 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
-import com.example.leaves.service.specification.SearchCriteria;
 import com.example.leaves.service.filter.UserFilter;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -29,7 +26,7 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
-    UserDto addType(long typeId,long userId);
+    UserDto addType(long typeId, long userId);
 
     List<UserDto> getAllUserDtos();
 

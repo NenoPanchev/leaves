@@ -37,15 +37,15 @@ public interface RequestController {
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest( @PathVariable long id);
+    void approveRequest(@PathVariable long id);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")
-    void disapproveRequest( @PathVariable int id);
+    void disapproveRequest(@PathVariable int id);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
-    void delete( @PathVariable long id);
+    void delete(@PathVariable long id);
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")

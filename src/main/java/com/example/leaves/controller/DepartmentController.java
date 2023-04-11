@@ -1,9 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.filter.DepartmentFilter;
-import com.example.leaves.service.filter.RoleFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -11,14 +11,9 @@ import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 
 public class PdfUtil {
@@ -60,7 +55,7 @@ public class PdfUtil {
             //final FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/docx/отпуск4.pdf");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfOptions options = PdfOptions.create();
-            options.fontProvider(getiFontProvider());
+            options.fontProvider(getFontProvider());
 
             PdfConverter.getInstance().convert(doc, baos, options);
             //PdfConverter pdfConverter = new PdfConverter();
@@ -83,7 +78,8 @@ public class PdfUtil {
             }
         }
     }
-    private static IFontProvider getiFontProvider() {
+
+    private static IFontProvider getFontProvider() {
         return (familyName, encoding, size, style, color) -> {
             try {
                 if (familyName.equalsIgnoreCase("Times New Roman")) {

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.util.List;
+
 @EntityListeners(EntityListener.class)
 @Entity
 @Table(name = "employee_info", schema = "public")
@@ -22,7 +23,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToMany(mappedBy = "employee")
     private List<LeaveRequest> leaveRequests;
 
-    @OneToOne(mappedBy = "employeeInfo",cascade=CascadeType.ALL)
+    @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
 

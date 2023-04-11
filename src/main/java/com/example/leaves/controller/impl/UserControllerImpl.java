@@ -5,18 +5,15 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.data.domain.Page;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
 import java.util.List;
 
 
@@ -122,7 +119,7 @@ public class UserControllerImpl implements UserController {
     public ResponseEntity<byte[]> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getPdfOfRequest(request,pdfRequestForm));
+                .body(employeeInfoService.getPdfOfRequest(request, pdfRequestForm));
     }
 
     @Override
