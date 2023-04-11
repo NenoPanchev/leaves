@@ -90,12 +90,15 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public File getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm) {
+    public byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm) {
         UserEntity employee = userService.getCurrentUser();
         LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
-        if (employee != leaveRequest.getEmployee().getUserInfo() ||
-                !(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L)))) {
-            throw new UnauthorizedException("You are not authorized for this operation");
+        if (!(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L))))
+        {
+            if (employee != leaveRequest.getEmployee().getUserInfo()
+            ) {
+                throw new UnauthorizedException("You are not authorized for this operation");
+            }
         }
 
         Map<String, String> words = new HashMap<>();

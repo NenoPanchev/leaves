@@ -119,7 +119,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<File> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm) {
+    public ResponseEntity<byte[]> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(employeeInfoService.getPdfOfRequest(request,pdfRequestForm));

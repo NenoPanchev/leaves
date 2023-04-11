@@ -14,7 +14,7 @@ public interface EmployeeInfoService {
 
 //    List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees();
 
-    public File getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
+    byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
 
     List<EmployeeInfoDto> getAll();
 

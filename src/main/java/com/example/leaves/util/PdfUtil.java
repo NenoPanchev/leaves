@@ -6,6 +6,7 @@ import org.apache.poi.xwpf.converter.pdf.PdfConverter;
 import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +19,7 @@ public class PdfUtil {
 
     private static String FILE = "src/main/resources/docx/отпуск.docx";
 
-    public static File replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
+    public static byte[] replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
         try {
 
             /**
@@ -49,10 +50,10 @@ public class PdfUtil {
                     }
                 }
             }
-
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfConverter pdfConverter = new PdfConverter();
-            pdfConverter.convert(doc, Files.newOutputStream(tempFile.toPath()), PdfOptions.getDefault());
-            return new File(tempFile.getPath());
+            pdfConverter.convert(doc, baos, PdfOptions.getDefault());
+            return baos.toByteArray();
         } finally {
 
         }

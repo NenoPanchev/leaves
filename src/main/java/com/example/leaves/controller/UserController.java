@@ -63,7 +63,7 @@ public interface UserController {
 
     @PostMapping("/{requestId}/pdf")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<File>  getPdfOfRequest(@PathVariable("requestId") long requestId,
+    ResponseEntity<byte[]>  getPdfOfRequest(@PathVariable("requestId") long requestId,
                                           @RequestBody PdfRequestForm pdfRequestForm);
     @PostMapping("/email")
     @PreAuthorize("hasAuthority('READ')")
