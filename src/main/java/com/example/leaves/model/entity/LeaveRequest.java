@@ -19,6 +19,12 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "approved_start_date")
+    private LocalDate approvedStartDate;
+
+    @Column(name = "approved_end_date")
+    private LocalDate approvedEndDate;
+
     @Column(name = "approved")
     private Boolean approved;
 
@@ -31,6 +37,22 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
 
     public Boolean getApproved() {
         return approved;
+    }
+
+    public LocalDate getApprovedStartDate() {
+        return approvedStartDate;
+    }
+
+    public void setApprovedStartDate(LocalDate approvedStartDate) {
+        this.approvedStartDate = approvedStartDate;
+    }
+
+    public LocalDate getApprovedEndDate() {
+        return approvedEndDate;
+    }
+
+    public void setApprovedEndDate(LocalDate approvedEndDate) {
+        this.approvedEndDate = approvedEndDate;
     }
 
     public void setApproved(Boolean approved) {
@@ -64,18 +86,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         this.endDate = endDate;
     }
 
-    public LeaveRequestDto toDto() {
-        LeaveRequestDto dto = new LeaveRequestDto();
-        super.toDto(dto);
-        dto.setStartDate(this.startDate);
-        dto.setEndDate(this.endDate);
-        dto.setCreatedBy(employee.getUserInfo().getName());
-        if (this.approved != null) {
-            dto.setApproved(this.approved);
-        }
 
-        return dto;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -91,8 +102,24 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         return Objects.hash(super.hashCode(), startDate, endDate, employee);
     }
 
+    public LeaveRequestDto toDto() {
+        LeaveRequestDto dto = new LeaveRequestDto();
+        super.toDto(dto);
+        dto.setStartDate(this.startDate);
+        dto.setEndDate(this.endDate);
+        dto.setCreatedBy(employee.getUserInfo().getName());
+        dto.setApprovedEndDate(this.approvedEndDate);
+        dto.setApprovedStartDate(this.approvedStartDate);
+        if (this.approved != null) {
+            dto.setApproved(this.approved);
+        }
+
+        return dto;
+    }
     public void toEntity(LeaveRequestDto baseDto) {
         super.toEntity(baseDto);
+        this.setApprovedStartDate(baseDto.getApprovedStartDate());
+        this.setApprovedEndDate(baseDto.getApprovedEndDate());
         this.setStartDate(baseDto.getStartDate());
         this.setEndDate(baseDto.getEndDate());
 

@@ -9,10 +9,34 @@ public class LeaveRequestDto extends BaseDto {
 
     private LocalDate endDate;
 
+    private LocalDate approvedStartDate;
+
+    private LocalDate approvedEndDate;
+
     private Boolean approved;
 
 
     public LeaveRequestDto() {
+    }
+
+    public LocalDate getApprovedStartDate() {
+        return approvedStartDate;
+    }
+
+    public void setApprovedStartDate(LocalDate approvedStartDate) {
+        this.approvedStartDate = approvedStartDate;
+    }
+
+    public LocalDate getApprovedEndDate() {
+        return approvedEndDate;
+    }
+
+    public void setApprovedEndDate(LocalDate approvedEndDate) {
+        this.approvedEndDate = approvedEndDate;
+    }
+
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
     }
 
     public Boolean getApproved() {
