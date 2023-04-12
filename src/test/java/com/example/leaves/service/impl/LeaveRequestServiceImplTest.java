@@ -116,12 +116,13 @@ public class LeaveRequestServiceImplTest {
         LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
         EmployeeInfo employee = TestsHelper.createMockEmployee();
         mockLeaveRequest.setEmployee(employee);
+        LeaveRequestDto dto=new LeaveRequestDto();
 
         Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
                 .thenReturn(mockLeaveRequest);
 
         // Act
-        mockService.approveRequest(mockLeaveRequest.getId());
+        mockService.approveRequest(mockLeaveRequest.getId(),dto);
 
         // Assert
         Assertions.assertAll(
@@ -181,11 +182,12 @@ public class LeaveRequestServiceImplTest {
         EmployeeInfo employee = TestsHelper.createMockEmployee();
         mockLeaveRequest.setEmployee(employee);
         mockLeaveRequest.setApproved(true);
+        LeaveRequestDto dto=new LeaveRequestDto();
         Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
                 .thenReturn(mockLeaveRequest);
         // Act
         assertThrows(RequestAlreadyProcessed.class,
-                () -> mockService.approveRequest(mockLeaveRequest.getId()));
+                () -> mockService.approveRequest(mockLeaveRequest.getId(),dto));
 
     }
 

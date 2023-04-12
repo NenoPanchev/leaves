@@ -32,6 +32,7 @@ import java.util.List;
 @Service
 public class LeaveRequestServiceImpl implements LeaveRequestService {
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
+    public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     UserRepository employeeRepository;
     LeaveRequestRepository leaveRequestRepository;
 
@@ -164,7 +165,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     @Transactional
-    public LeaveRequest approveRequest(long id) {
+    public LeaveRequest approveRequest(long id,LeaveRequestDto leaveRequestDto) {
 
         LeaveRequest leaveRequest = getById(id);
         if (leaveRequest.getApproved() == null) {
@@ -173,6 +174,16 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             if (userEntity == null) {
                 throw new EntityNotFoundException("User  not found ", 1);
             }
+
+            if (leaveRequestDto.getApprovedStartDate().isBefore(leaveRequest.getStartDate())
+                    ||leaveRequestDto.getApprovedStartDate().isAfter(leaveRequest.getEndDate()))
+            {
+                throw new IllegalArgumentException(APPROVE_REQUEST_EXCEPTION_MSG);
+            }
+
+            leaveRequest.setApprovedEndDate(leaveRequestDto.getApprovedEndDate());
+            leaveRequest.setApprovedStartDate(leaveRequestDto.getApprovedStartDate());
+
             EmployeeInfo e = userEntity.getEmployeeInfo();
             e.subtractFromAnnualPaidLeave(leaveRequest.getDaysRequested());
             leaveRequest.setApproved(Boolean.TRUE);

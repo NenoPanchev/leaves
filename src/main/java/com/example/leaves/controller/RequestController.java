@@ -37,7 +37,7 @@ public interface RequestController {
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest(@PathVariable long id);
+    void approveRequest(@PathVariable long id,@RequestBody LeaveRequestDto leaveRequestDto);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")

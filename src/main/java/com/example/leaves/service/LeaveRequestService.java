@@ -10,7 +10,7 @@ import java.util.List;
 public interface LeaveRequestService {
     LeaveRequest addRequest(LeaveRequestDto leaveRequestDto);
 
-    LeaveRequest approveRequest(long id);
+    LeaveRequest approveRequest(long id,LeaveRequestDto leaveRequestDto);
 
     LeaveRequest disapproveRequest(long id);
 

@@ -59,9 +59,9 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public void approveRequest(long id) {
+    public void approveRequest(long id,LeaveRequestDto leaveRequestDto) {
         try {
-            leaveRequestService.approveRequest(id);
+            leaveRequestService.approveRequest(id,leaveRequestDto);
         } catch (RequestAlreadyProcessed | PaidleaveNotEnoughException e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage(), e);
         }
