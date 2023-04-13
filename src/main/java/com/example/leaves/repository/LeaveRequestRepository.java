@@ -17,15 +17,13 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     LeaveRequest findById(long id);
 
 
-    List<LeaveRequest> findAllByStartDateAndEmployeeAndEndDate(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
+    List<LeaveRequest> findAllByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
 
-    List<LeaveRequest> findAllByStartDateAndEmployee(LocalDate startDate, EmployeeInfo employee);
+    List<LeaveRequest> findAllByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
 
-    LeaveRequest findFirstByStartDateAndEmployee(LocalDate startDate, EmployeeInfo employee);
+    LeaveRequest findFirstByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
 
-    boolean existsByStartDateAndEmployeeAndEndDate(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
-
-    List<LeaveRequest> findAllByEmployee(EmployeeInfo employee);
+    boolean existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
 
     List<LeaveRequest> findAllByEmployeeAndDeletedIsFalse(EmployeeInfo employee);
 
