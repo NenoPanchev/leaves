@@ -54,7 +54,7 @@ public interface RequestController {
     //    @DeleteMapping("/clear")
 //    void clearAllProcessedRequests(@RequestHeader HttpHeaders headers);
     @PostMapping("/Page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
 
 }
