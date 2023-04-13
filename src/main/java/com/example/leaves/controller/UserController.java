@@ -32,7 +32,7 @@ public interface UserController {
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     ResponseEntity<Page<UserDto>> getUsersPage(@RequestBody UserFilter userFilter);
 
     @PostMapping
