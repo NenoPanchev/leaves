@@ -3,7 +3,6 @@ package com.example.leaves.model.dto;
 import com.example.leaves.util.DatesUtil;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 public class LeaveRequestDto extends BaseDto {
 
@@ -37,14 +36,13 @@ public class LeaveRequestDto extends BaseDto {
         this.approvedEndDate = approvedEndDate;
     }
 
-    public void setApproved(Boolean approved) {
-        this.approved = approved;
-    }
-
     public Boolean getApproved() {
         return approved;
     }
 
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
 
     public void setApproved(boolean approved) {
         this.approved = approved;
@@ -67,6 +65,6 @@ public class LeaveRequestDto extends BaseDto {
     }
 
     public int getDaysRequested() {
-        return DatesUtil.countBusinessDaysBetween(startDate,endDate).size();
+        return DatesUtil.countBusinessDaysBetween(startDate, endDate).size();
     }
 }

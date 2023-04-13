@@ -29,5 +29,7 @@ public class ApplicationConfig {
                 .setPrettyPrinting()
                 .registerTypeAdapter(LocalDate.class, jsonDeserializer)
                 .create();
-        };
     }
+
+    ;
+}

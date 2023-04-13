@@ -5,18 +5,14 @@ import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.mapstruct.Context;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.xml.ws.Response;
 import java.util.List;
 
 @CrossOrigin
@@ -66,7 +62,7 @@ public interface UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> addType(@RequestBody long typeId, @PathVariable("userId") long userId);
 
-//    @PostMapping("/{requestId}/pdf")
+    //    @PostMapping("/{requestId}/pdf")
 //    @PreAuthorize("hasAuthority('READ')")
 //    ResponseEntity<byte[]> getPdfOfRequest(@PathVariable("requestId") long requestId,
 //                                           @RequestBody PdfRequestForm pdfRequestForm);

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Entity
@@ -39,6 +38,10 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         return approved;
     }
 
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
+
     public LocalDate getApprovedStartDate() {
         return approvedStartDate;
     }
@@ -55,13 +58,10 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         this.approvedEndDate = approvedEndDate;
     }
 
-    public void setApproved(Boolean approved) {
-        this.approved = approved;
+    public int getDaysRequested() {
+        return DatesUtil.countBusinessDaysBetween(startDate, endDate).size();
     }
 
-    public int getDaysRequested() {
-        return  DatesUtil.countBusinessDaysBetween(startDate,endDate).size();
-    }
     public EmployeeInfo getEmployee() {
         return employee;
     }
@@ -85,7 +85,6 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
-
 
 
     @Override
@@ -116,6 +115,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
 
         return dto;
     }
+
     public void toEntity(LeaveRequestDto baseDto) {
         super.toEntity(baseDto);
         this.setApprovedStartDate(baseDto.getApprovedStartDate());

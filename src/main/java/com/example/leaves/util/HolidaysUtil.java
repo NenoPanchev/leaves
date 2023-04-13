@@ -9,17 +9,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.leaves.constants.GlobalConstants.*;
+import static com.example.leaves.constants.GlobalConstants.CHRISTMAS_HOLIDAYS_PREFIX;
+import static com.example.leaves.constants.GlobalConstants.EASTER_HOLIDAYS;
 
 @Component
 public class HolidaysUtil {
@@ -27,6 +24,7 @@ public class HolidaysUtil {
     @Value("${holidays.api.base.url}")
     private String HOLIDAY_API_BASE_URL;
     private List<LocalDate> holidays = new ArrayList<>();
+
     public HolidaysUtil(Gson gson) {
         this.gson = gson;
     }
@@ -40,6 +38,7 @@ public class HolidaysUtil {
         holidays.addAll(fetchAllHolidayDatesForYear(nextYear));
         setHolidays(holidays);
     }
+
     private List<LocalDate> fetchAllHolidayDatesForYear(int year) throws IOException {
         String urlString = HOLIDAY_API_BASE_URL + year + "/BG";
         List<LocalDate> holidayDates = new ArrayList<>();
@@ -50,43 +49,44 @@ public class HolidaysUtil {
                 .get()
                 .uri(urlString)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<Holiday>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<Holiday>>() {
+                })
                 .block();
 
 
-            // Checks how many of Christmas Holidays are in the weekend
-            int daysToAddAfterChristmasHolidays = checkHowManyDaysToAddAfterChristmasHolidays(holidays);
+        // Checks how many of Christmas Holidays are in the weekend
+        int daysToAddAfterChristmasHolidays = checkHowManyDaysToAddAfterChristmasHolidays(holidays);
 
 //                      According to Bulgarian Labour Code, Art. 154, para. 2
 //                      If holiday is not Easter Holiday and is in the weekend,
 //                      next one or two work days should be holidays as well
-            holidays
-                    .stream()
-                    .forEach(day -> {
-                        if (EASTER_HOLIDAYS.contains(day.getName())
-                                || day.getName().contains(CHRISTMAS_HOLIDAYS_PREFIX)) {
-                            holidayDates.add(day.getDate());
-                        } else {
-                            holidayDates.add(day.getDate());
-                            int daysToSkip = 0;
-                            if (isSunday(day.getDate())) {
-                                daysToSkip = 1;
-                            }
-                            if (isSaturday(day.getDate())) {
-                                daysToSkip = 2;
-                            }
-                            if (daysToSkip != 0) {
-                                LocalDate addedDate = day.getDate().plusDays(daysToSkip);
-                                holidayDates.add(addedDate);
-                            }
+        holidays
+                .stream()
+                .forEach(day -> {
+                    if (EASTER_HOLIDAYS.contains(day.getName())
+                            || day.getName().contains(CHRISTMAS_HOLIDAYS_PREFIX)) {
+                        holidayDates.add(day.getDate());
+                    } else {
+                        holidayDates.add(day.getDate());
+                        int daysToSkip = 0;
+                        if (isSunday(day.getDate())) {
+                            daysToSkip = 1;
                         }
-                    });
+                        if (isSaturday(day.getDate())) {
+                            daysToSkip = 2;
+                        }
+                        if (daysToSkip != 0) {
+                            LocalDate addedDate = day.getDate().plusDays(daysToSkip);
+                            holidayDates.add(addedDate);
+                        }
+                    }
+                });
 
-            // Adds that many holidays after Christmas
-            for (int i = 1; i <= daysToAddAfterChristmasHolidays; i++) {
-                LocalDate addedDate = holidays.get(holidays.size() - 1).getDate().plusDays(i);
-                holidayDates.add(addedDate);
-            }
+        // Adds that many holidays after Christmas
+        for (int i = 1; i <= daysToAddAfterChristmasHolidays; i++) {
+            LocalDate addedDate = holidays.get(holidays.size() - 1).getDate().plusDays(i);
+            holidayDates.add(addedDate);
+        }
 
         return holidayDates;
     }
