@@ -19,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         typeToBeUpdated.setDaysLeave(typeDto.getDaysLeave());
     }
 
-
+    @Override
     public List<TypeEmployeeDto> getAll() {
         List<TypeEmployeeDto> list = new ArrayList<>();
 
@@ -64,7 +65,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         }
 
     }
-
+    @Override
     public TypeEmployee getById(long typeId) {
         if (typeRepository.findById(typeId) == null) {
             throw new EntityNotFoundException("Type not found", typeId);
@@ -72,7 +73,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
             return typeRepository.findById(typeId);
         }
     }
-
+    @Override
     public TypeEmployee update(TypeEmployeeDto typeDto, long id) {
 
         if (typeRepository.findByTypeName(typeDto.getTypeName()) != null
@@ -89,7 +90,8 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
 
 
     }
-
+    @Override
+    @Transactional
     public void delete(long id) {
         //TODO make change type method for all employees with this type so it can be deleted?
         typeRepository.markAsDeleted(id);

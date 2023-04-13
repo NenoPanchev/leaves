@@ -78,12 +78,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     private void addRequestValidation(LeaveRequestDto leaveRequestDto, UserEntity employee) {
         LeaveRequest request = new LeaveRequest();
         request.toEntity(leaveRequestDto);
-
+        CheckIfDateBeforeToday(leaveRequestDto);
         CheckIfEmployeeHasEnoughDaysPaidLeave(employee, request);
         sameDates(leaveRequestDto, employee);
         requestWithDatesBetweenArgDates(leaveRequestDto, employee);
         requestDatesBetweenActualDates(leaveRequestDto, employee);
         dateArgBetween(leaveRequestDto, employee);
+    }
+
+    private void CheckIfDateBeforeToday(LeaveRequestDto request) {
+        if (request.getStartDate().isBefore(LocalDate.now())) {
+            throw new PaidleaveNotEnoughException(
+                    String.format("%s@%s", request.getStartDate(),LocalDate.now()), "Add");
+        }
     }
 
     private void CheckIfEmployeeHasEnoughDaysPaidLeave(UserEntity employee, LeaveRequest request) {
