@@ -2,7 +2,6 @@ package com.example.leaves.constants;
 
 public class GlobalConstants {
     public static final String INITIAL_DEPARTMENTS = "ADMIN, IT, ACCOUNTING";
-    public static final String HOLIDAYS_API_BASE_URL = "https://date.nager.at/api/v3/publicholidays/";
     public static final String EASTER_HOLIDAYS = "Good Friday, Holy Saturday, Easter Sunday, Easter Monday";
     public static final String CHRISTMAS_HOLIDAYS_PREFIX = "Christmas";
 

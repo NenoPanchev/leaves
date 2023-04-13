@@ -2,7 +2,11 @@ package com.example.leaves.util;
 
 import com.example.leaves.model.payload.response.Holiday;
 import com.google.gson.Gson;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,11 +24,14 @@ import static com.example.leaves.constants.GlobalConstants.*;
 @Component
 public class HolidaysUtil {
     private final Gson gson;
+    @Value("${holidays.api.base.url}")
+    private String HOLIDAY_API_BASE_URL;
     private List<LocalDate> holidays = new ArrayList<>();
     public HolidaysUtil(Gson gson) {
         this.gson = gson;
     }
 
+    @Scheduled(cron = "1 0 0 1 6 * ", zone = "EET")
     public void setHolidayDates() throws IOException {
         List<LocalDate> holidays = new ArrayList<>();
         int currentYear = LocalDate.now().getYear();
@@ -34,46 +41,39 @@ public class HolidaysUtil {
         setHolidays(holidays);
     }
     private List<LocalDate> fetchAllHolidayDatesForYear(int year) throws IOException {
-        int currentYear = LocalDate.now().getYear();
-        int nextYear = currentYear + 1;
-        URL url = new URL(HOLIDAYS_API_BASE_URL + year + "/BG");
+        String urlString = HOLIDAY_API_BASE_URL + year + "/BG";
         List<LocalDate> holidayDates = new ArrayList<>();
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.connect();
 
-        //Getting the response code
-        int responseCode = conn.getResponseCode();
-        conn.disconnect();
-        if (responseCode != 200) {
-            throw new RuntimeException("HttpResponseCode: " + responseCode);
-        } else {
-            InputStreamReader inputStreamReader = new InputStreamReader(url.openStream());
-            List<Holiday> holidays = Arrays.stream(gson
-                            .fromJson(inputStreamReader, Holiday[].class))
-                    .collect(Collectors.toList());
-            //Close the scanner
-            inputStreamReader.close();
+        WebClient.Builder builder = WebClient.builder();
+
+        List<Holiday> holidays = builder.build()
+                .get()
+                .uri(urlString)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<Holiday>>() {})
+                .block();
 
 
             // Checks how many of Christmas Holidays are in the weekend
             int daysToAddAfterChristmasHolidays = checkHowManyDaysToAddAfterChristmasHolidays(holidays);
+
+//                      According to Bulgarian Labour Code, Art. 154, para. 2
+//                      If holiday is not Easter Holiday and is in the weekend,
+//                      next one or two work days should be holidays as well
             holidays
                     .stream()
                     .forEach(day -> {
-//                      According to Bulgarian Labour Code, Art. 154, para. 2
-//                      If holiday is not Easter Holiday and is in Saturday or Sunday,
-//                      next or next two work days should be holidays as well
-                        if (EASTER_HOLIDAYS.contains(day.getName()) || day.getName().contains(CHRISTMAS_HOLIDAYS_PREFIX)) {
+                        if (EASTER_HOLIDAYS.contains(day.getName())
+                                || day.getName().contains(CHRISTMAS_HOLIDAYS_PREFIX)) {
                             holidayDates.add(day.getDate());
                         } else {
                             holidayDates.add(day.getDate());
                             int daysToSkip = 0;
-                            if (isSaturday(day.getDate())) {
-                                daysToSkip = 2;
-                            }
                             if (isSunday(day.getDate())) {
                                 daysToSkip = 1;
+                            }
+                            if (isSaturday(day.getDate())) {
+                                daysToSkip = 2;
                             }
                             if (daysToSkip != 0) {
                                 LocalDate addedDate = day.getDate().plusDays(daysToSkip);
@@ -87,7 +87,7 @@ public class HolidaysUtil {
                 LocalDate addedDate = holidays.get(holidays.size() - 1).getDate().plusDays(i);
                 holidayDates.add(addedDate);
             }
-        }
+
         return holidayDates;
     }
 
