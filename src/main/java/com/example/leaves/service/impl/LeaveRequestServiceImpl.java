@@ -21,6 +21,7 @@ import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
@@ -38,14 +39,17 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     UserService userService;
 
+    private final EmailServiceImpl emailSender;
+
 
     @Autowired
     public LeaveRequestServiceImpl(UserRepository employeeRepository
-            , LeaveRequestRepository leaveRequestRepository, UserService userService) {
+            , LeaveRequestRepository leaveRequestRepository, UserService userService, EmailServiceImpl emailSender) {
 
         this.employeeRepository = employeeRepository;
         this.leaveRequestRepository = leaveRequestRepository;
         this.userService = userService;
+        this.emailSender = emailSender;
     }
 
 
@@ -65,6 +69,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
                 if (sameStartDate == null || sameStartDate.isEmpty()) {
                     request.setEmployee(employee);
+//                    emailSender.sendMessage("vladimirkacharov@gmail.com","asdasd","dasdsdsds");
                     return leaveRequestRepository.save(request);
 
                 } else {
@@ -265,7 +270,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         UserEntity user = getCurrentUser();
 
 
-        leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
@@ -276,7 +281,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
 
 
-        leaveRequestRepository.findAllByEmployee(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 

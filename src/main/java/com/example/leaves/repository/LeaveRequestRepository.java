@@ -27,6 +27,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
 
     List<LeaveRequest> findAllByEmployee(EmployeeInfo employee);
 
+    List<LeaveRequest> findAllByEmployeeAndDeletedIsFalse(EmployeeInfo employee);
+
     List<LeaveRequest> findAllByDeletedIsFalse();
 
 //    @Query("UPDATE EntityInfo n set" +

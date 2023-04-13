@@ -8,12 +8,18 @@ import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 
@@ -116,10 +122,12 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<byte[]> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm) {
+    public ResponseEntity<ByteArrayResource> getPdfOfRequest(long request, PdfRequestForm pdfRequestForm, HttpServletResponse response) {
+        final ByteArrayResource resource = new ByteArrayResource(employeeInfoService.getPdfOfRequest(request, pdfRequestForm));
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getPdfOfRequest(request, pdfRequestForm));
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     @Override

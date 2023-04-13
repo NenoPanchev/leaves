@@ -4,6 +4,7 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.UserEntity;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface EmployeeInfoService {

@@ -110,8 +110,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         //TODO SAVE EGN ?
 
 
-        words.put("startDate", String.valueOf(leaveRequest.getStartDate()));
-        words.put("endDate", String.valueOf(leaveRequest.getEndDate().plusDays(1)));
+        words.put("startDate", String.valueOf(leaveRequest.getApprovedStartDate()));
+        words.put("endDate", String.valueOf(leaveRequest.getApprovedEndDate().plusDays(1)));
         words.put("daysNumber", String.valueOf(leaveRequest.getDaysRequested()));
 
         try {

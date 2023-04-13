@@ -58,10 +58,6 @@ public class PdfUtil {
             options.fontProvider(getFontProvider());
 
             PdfConverter.getInstance().convert(doc, baos, options);
-            //PdfConverter pdfConverter = new PdfConverter();
-            //doc.write(fileOutputStream);
-            //pdfConverter.convert(doc, fileOutputStream, PdfOptions.getDefault());
-            //fileOutputStream.write(baos.toByteArray());
             return baos.toByteArray();
         } finally {
 
