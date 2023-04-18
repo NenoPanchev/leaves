@@ -5,12 +5,16 @@ import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.util.EntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
 
 @EntityListeners(EntityListener.class)
 @Entity
+@Getter
+@Setter
 @Table(name = "employee_info", schema = "public")
 public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
@@ -20,6 +24,16 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     private TypeEmployee employeeType;
     @Column(name = "days_leave")
     private int paidLeave;
+
+    @Column(name = "ssn")
+    private String ssn;
+    //TODO CHANGE SSN TO CHAR ARR
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "position")
+    private String position;
     @OneToMany(mappedBy = "employee")
     private List<LeaveRequest> leaveRequests;
 

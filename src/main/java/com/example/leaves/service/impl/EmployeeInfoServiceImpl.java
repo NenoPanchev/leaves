@@ -90,29 +90,24 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm) {
+        //Current user may not be the one that made the leave request
         UserEntity employee = userService.getCurrentUser();
+
         LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
-        if (!(employee.getRoles().contains(roleService.getRoleById(1L)) || employee.getRoles().contains(roleService.getRoleById(2L)))) {
+        UserEntity userOfRequest = leaveRequest.getEmployee().getUserInfo();
+        if (!(employee.getRoles().contains(roleService.getRoleById(1L)) ||
+                employee.getRoles().contains(roleService.getRoleById(2L)))) {
             if (employee != leaveRequest.getEmployee().getUserInfo()
             ) {
                 throw new UnauthorizedException("You are not authorized for this operation");
             }
         }
 
-        Map<String, String> words = new HashMap<>();
-        words.put("fullName", leaveRequest.getEmployee().getUserInfo().getName());
-        words.put("egn", pdfRequestForm.getEgn());
-        words.put("location", pdfRequestForm.getLocation());
-        words.put("position", pdfRequestForm.getPosition());
-        words.put("requestToName", pdfRequestForm.getRequestToName());
-        words.put("year", pdfRequestForm.getYear());
-        //TODO ADD NEW COLUMNS IN DB
-        //TODO SAVE EGN ?
+        setPersonalEmployeeInfo(pdfRequestForm, userOfRequest);
 
 
-        words.put("startDate", String.valueOf(leaveRequest.getApprovedStartDate()));
-        words.put("endDate", String.valueOf(leaveRequest.getApprovedEndDate().plusDays(1)));
-        words.put("daysNumber", String.valueOf(leaveRequest.getDaysRequested()));
+        Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, leaveRequest, userOfRequest);
+
 
         try {
             return PdfUtil.replaceWords(words);
@@ -121,6 +116,72 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         }
 
 
+    }
+
+    private Map<String, String> setEmployeePersonalInfoMap(PdfRequestForm pdfRequestForm,
+                                                           LeaveRequest leaveRequest,
+                                                           UserEntity userOfRequest) {
+        Map<String, String> words = new HashMap<>();
+
+        words.put("fullName", userOfRequest.getName());
+        if (pdfRequestForm.getSaved()) {
+
+            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
+                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
+                words.put("egn", userOfRequest.getEmployeeInfo().getSsn());
+            }
+            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
+                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
+                words.put("location", userOfRequest.getEmployeeInfo().getAddress());
+            }
+
+            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
+                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
+                words.put("position", userOfRequest.getEmployeeInfo().getPosition());
+            }
+
+        } else {
+
+            if (pdfRequestForm.getSsn() != null && !pdfRequestForm.getSsn().isEmpty()) {
+                words.put("egn", pdfRequestForm.getSsn());
+            }
+
+            if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {
+                words.put("location", pdfRequestForm.getAddress());
+            }
+
+            if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
+                words.put("position", pdfRequestForm.getPosition());
+            }
+        }
+
+
+        words.put("requestToName", pdfRequestForm.getRequestToName());
+
+        words.put("year", pdfRequestForm.getYear());
+
+        words.put("startDate", String.valueOf(leaveRequest.getApprovedStartDate()));
+
+        words.put("endDate", String.valueOf(leaveRequest.getApprovedEndDate().plusDays(1)));
+
+        words.put("daysNumber", String.valueOf(leaveRequest.getDaysRequested()));
+
+        return words;
+    }
+
+    private void setPersonalEmployeeInfo(PdfRequestForm pdfRequestForm, UserEntity employee) {
+        if (pdfRequestForm.getSaved()) {
+            if (pdfRequestForm.getSsn() != null && !pdfRequestForm.getSsn().isEmpty()) {
+                employee.getEmployeeInfo().setSsn(pdfRequestForm.getSsn());
+            }
+
+            if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {
+                employee.getEmployeeInfo().setAddress(pdfRequestForm.getAddress());
+            }
+            if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
+                employee.getEmployeeInfo().setPosition(pdfRequestForm.getPosition());
+            }
+        }
     }
 
     @Override
