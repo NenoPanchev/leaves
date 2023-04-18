@@ -113,6 +113,8 @@ public class UserEntity extends BaseEntity<UserDto> {
             roleDtoList.add(roleDto);
         }
         dto.setRoles(roleDtoList);
+
+        dto.setEmployeeInfoDto(this.employeeInfo.toDto());
     }
 
     public void toEntity(UserDto dto) {

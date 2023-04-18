@@ -1,17 +1,17 @@
 package com.example.leaves.model.dto;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class EmployeeInfoDto extends UserDto {
+
     private long typeId;
 
-    public EmployeeInfoDto() {
-    }
+    private int daysLeave;
 
-
-    public long getTypeId() {
-        return typeId;
-    }
-
-    public void setTypeId(long typeId) {
-        this.typeId = typeId;
-    }
+    private int typeDaysLeave;
 }
