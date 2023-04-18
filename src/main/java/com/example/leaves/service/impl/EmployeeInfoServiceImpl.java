@@ -124,7 +124,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         Map<String, String> words = new HashMap<>();
 
         words.put("fullName", userOfRequest.getName());
-        if (pdfRequestForm.getSaved()) {
+        if (pdfRequestForm.isSaved()) {
 
             if (userOfRequest.getEmployeeInfo().getSsn() != null &&
                     !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
@@ -170,7 +170,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     private void setPersonalEmployeeInfo(PdfRequestForm pdfRequestForm, UserEntity employee) {
-        if (pdfRequestForm.getSaved()) {
+        if (pdfRequestForm.isSaved()) {
             if (pdfRequestForm.getSsn() != null && !pdfRequestForm.getSsn().isEmpty()) {
                 employee.getEmployeeInfo().setSsn(pdfRequestForm.getSsn());
             }
