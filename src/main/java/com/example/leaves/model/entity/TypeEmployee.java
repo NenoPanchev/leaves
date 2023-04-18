@@ -64,7 +64,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         List<EmployeeInfoDto> list = new ArrayList<>();
 
         if (this.employeeWithType != null && !getEmployeesWithType().isEmpty()) {
-            getEmployeesWithType().forEach(e -> list.add(e.toDto()));
+            this.getEmployeesWithType().forEach(e -> list.add(e.toDto()));
             typeEmployeeDto.setEmployeeWithType(list);
         } else {
             typeEmployeeDto.setEmployeeWithType(list);

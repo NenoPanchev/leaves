@@ -56,38 +56,60 @@ public class UserServiceImpl implements UserService {
         if (userRepository.count() > 0) {
             return;
         }
+        // Get types of Employee
+        TypeEmployee trainee = typeEmployeeRepository.findByTypeName("Trainee");
+        TypeEmployee regular = typeEmployeeRepository.findByTypeName("Regular");
+
+        // Super Admin
         DepartmentEntity administration = departmentService.findByDepartment("Administration");
         UserEntity superAdmin = new UserEntity();
-        EmployeeInfo employeeInfo = new EmployeeInfo();
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
         superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
         superAdmin.setDepartment(administration);
-        superAdmin.setEmployeeInfo(employeeInfo);
+
+        // Employee Info
+        EmployeeInfo superAdminEmployeeInfo = new EmployeeInfo();
+        superAdminEmployeeInfo.setEmployeeType(regular);
+        superAdminEmployeeInfo.setPaidLeave(regular.getDaysLeave());
+        superAdmin.setEmployeeInfo(superAdminEmployeeInfo);
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
 
+        // Admin
         UserEntity admin = new UserEntity();
-        EmployeeInfo employeeInfo2 = new EmployeeInfo();
         admin.setName("Admin Admin");
         admin.setEmail("admin@admin.com");
-        admin.setEmployeeInfo(employeeInfo2);
         admin.setPassword(passwordEncoder.encode("1234"));
         admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
         admin.setDepartment(administration);
+
+        // Employee Info
+        EmployeeInfo adminEmployeeInfo = new EmployeeInfo();
+        adminEmployeeInfo.setEmployeeType(regular);
+        adminEmployeeInfo.setPaidLeave(regular.getDaysLeave());
+        admin.setEmployeeInfo(adminEmployeeInfo);
+
         userRepository.save(admin);
         departmentService.addEmployeeToDepartment(admin, administration);
 
-        EmployeeInfo employeeInfo3 = new EmployeeInfo();
+
+        // User
         DepartmentEntity it = departmentService.findByDepartment("IT");
         UserEntity user = new UserEntity();
         user.setName("User User");
         user.setEmail("user@user.com");
-        user.setEmployeeInfo(employeeInfo3);
         user.setPassword(passwordEncoder.encode("1234"));
         user.setRoles(roleService.findAllByRoleIn("USER"));
         user.setDepartment(it);
+
+        // Employee Info
+        EmployeeInfo userEmployeeInfo = new EmployeeInfo();
+        userEmployeeInfo.setEmployeeType(trainee);
+        userEmployeeInfo.setPaidLeave(trainee.getDaysLeave());
+        user.setEmployeeInfo(userEmployeeInfo);
+
         userRepository.save(user);
         departmentService.addEmployeeToDepartment(user, it);
     }

@@ -127,6 +127,23 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         }
     }
 
+    @Override
+    public void seedTypes() {
+        if (typeRepository.count() > 0) {
+            return;
+        }
+        TypeEmployee trainee = new TypeEmployee();
+        trainee.setTypeName("Trainee");
+        trainee.setDaysLeave(20);
+
+        TypeEmployee regular = new TypeEmployee();
+        regular.setTypeName("Regular");
+        regular.setDaysLeave(25);
+
+        typeRepository.save(trainee);
+        typeRepository.save(regular);
+    }
+
     private Page<TypeEmployeeDto> getTypeEmployeeFilteredEqual(TypeEmployeeFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         return typeRepository.findAll(getSpecification(filter), pageRequest).map(TypeEmployee::toDto);
