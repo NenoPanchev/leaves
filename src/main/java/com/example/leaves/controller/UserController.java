@@ -35,7 +35,7 @@ public interface UserController {
     ResponseEntity<List<UserDto>> getFilteredUsers(@RequestBody UserFilter filter);
 
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Page<UserDto>> getUsersPage(@RequestBody UserFilter userFilter);
 
     @PostMapping
