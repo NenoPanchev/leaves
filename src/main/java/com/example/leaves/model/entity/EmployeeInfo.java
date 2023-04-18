@@ -99,9 +99,11 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     public EmployeeInfoDto toDto() {
         EmployeeInfoDto dto = new EmployeeInfoDto();
         dto.setTypeId(this.getEmployeeType().getId());
+        dto.setTypeName(this.getEmployeeType().getTypeName());
         dto.setTypeDaysLeave(this.employeeType.getDaysLeave());
         dto.setDaysLeave(this.paidLeave);
         dto.setName(userInfo.getName());
+        dto.setId(userInfo.getId());
         return dto;
     }
 

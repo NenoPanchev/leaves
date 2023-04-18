@@ -9,6 +9,7 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
 import com.example.leaves.util.PdfUtil;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final UserRepository employeeRepository;
     private final UserService userService;
+    private final EmployeeInfoRepository employeeInfoRepository;
     private final TypeEmployeeService typeService;
     @Value("${allowed-leave-days-to-carry-over}")
     private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
@@ -37,11 +39,12 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Autowired
     public EmployeeInfoServiceImpl(UserRepository employeeRepository,
-                                   TypeEmployeeService typeService,
+                                   EmployeeInfoRepository employeeInfoRepository, TypeEmployeeService typeService,
                                    LeaveRequestService leaveRequestService,
                                    UserService userService,
                                    RoleService roleService) {
         this.employeeRepository = employeeRepository;
+        this.employeeInfoRepository = employeeInfoRepository;
         this.typeService = typeService;
         this.leaveRequestService = leaveRequestService;
         this.userService = userService;
@@ -197,7 +200,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-//    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 0 1 1 1 *")
     public void updatePaidLeaveAnnually() {
         employeeRepository
                 .findAllByDeletedIsFalse()
@@ -210,6 +213,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     }
                     empl.setPaidLeave(
                             empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
+                    employeeInfoRepository.save(empl);
                 });
     }
 

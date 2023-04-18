@@ -136,12 +136,12 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         trainee.setTypeName("Trainee");
         trainee.setDaysLeave(20);
 
-        TypeEmployee regular = new TypeEmployee();
-        regular.setTypeName("Regular");
-        regular.setDaysLeave(25);
+        TypeEmployee developer = new TypeEmployee();
+        developer.setTypeName("Developer");
+        developer.setDaysLeave(25);
 
+        typeRepository.save(developer);
         typeRepository.save(trainee);
-        typeRepository.save(regular);
     }
 
     private Page<TypeEmployeeDto> getTypeEmployeeFilteredEqual(TypeEmployeeFilter filter) {

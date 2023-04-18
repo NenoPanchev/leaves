@@ -16,7 +16,7 @@ public class UserDto extends BaseDto {
     private String department;
     private List<RoleDto> roles;
 
-    private EmployeeInfoDto employeeInfoDto;
+    private EmployeeInfoDto employeeInfo;
 
     public UserDto() {
     }
@@ -65,11 +65,11 @@ public class UserDto extends BaseDto {
         this.department = department;
     }
 
-    public EmployeeInfoDto getEmployeeInfoDto() {
-        return employeeInfoDto;
+    public EmployeeInfoDto getEmployeeInfo() {
+        return employeeInfo;
     }
 
-    public void setEmployeeInfoDto(EmployeeInfoDto employeeInfoDto) {
-        this.employeeInfoDto = employeeInfoDto;
+    public void setEmployeeInfo(EmployeeInfoDto employeeInfoDto) {
+        this.employeeInfo = employeeInfoDto;
     }
 }

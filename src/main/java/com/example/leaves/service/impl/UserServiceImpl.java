@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
         }
         // Get types of Employee
         TypeEmployee trainee = typeEmployeeRepository.findByTypeName("Trainee");
-        TypeEmployee regular = typeEmployeeRepository.findByTypeName("Regular");
+        TypeEmployee developer = typeEmployeeRepository.findByTypeName("Developer");
 
         // Super Admin
         DepartmentEntity administration = departmentService.findByDepartment("Administration");
@@ -71,8 +71,8 @@ public class UserServiceImpl implements UserService {
 
         // Employee Info
         EmployeeInfo superAdminEmployeeInfo = new EmployeeInfo();
-        superAdminEmployeeInfo.setEmployeeType(regular);
-        superAdminEmployeeInfo.setPaidLeave(regular.getDaysLeave());
+        superAdminEmployeeInfo.setEmployeeType(developer);
+        superAdminEmployeeInfo.setPaidLeave(developer.getDaysLeave());
         superAdmin.setEmployeeInfo(superAdminEmployeeInfo);
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
@@ -87,8 +87,8 @@ public class UserServiceImpl implements UserService {
 
         // Employee Info
         EmployeeInfo adminEmployeeInfo = new EmployeeInfo();
-        adminEmployeeInfo.setEmployeeType(regular);
-        adminEmployeeInfo.setPaidLeave(regular.getDaysLeave());
+        adminEmployeeInfo.setEmployeeType(developer);
+        adminEmployeeInfo.setPaidLeave(developer.getDaysLeave());
         admin.setEmployeeInfo(adminEmployeeInfo);
 
         userRepository.save(admin);
