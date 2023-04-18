@@ -26,4 +26,5 @@ public interface EmployeeInfoService {
 
     void delete(long id);
 
+    void updatePaidLeaveAnnually();
 }

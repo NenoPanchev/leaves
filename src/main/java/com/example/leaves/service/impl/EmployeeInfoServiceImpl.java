@@ -14,6 +14,8 @@ import com.example.leaves.service.*;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,6 +29,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final UserRepository employeeRepository;
     private final UserService userService;
     private final TypeEmployeeService typeService;
+    @Value("${allowed-leave-days-to-carry-over}")
+    private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
 
     private final LeaveRequestService leaveRequestService;
     private final RoleService roleService;
@@ -129,6 +133,23 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 //     e.getEntityInfo().setDeleted(true);
 //     employeeRepository.save(e);
         employeeRepository.markAsDeleted(id);
+    }
+
+    @Override
+//    @Scheduled(cron = "0 */1 * * * *")
+    public void updatePaidLeaveAnnually() {
+        employeeRepository
+                .findAllByDeletedIsFalse()
+                .stream()
+                .map(UserEntity::getEmployeeInfo)
+                .forEach(empl -> {
+                    int remainingPaidLeave = empl.getPaidLeave();
+                    if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
+                        remainingPaidLeave = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
+                    }
+                    empl.setPaidLeave(
+                            empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
+                });
     }
 
     @Override

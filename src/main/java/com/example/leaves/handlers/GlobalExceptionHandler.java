@@ -4,6 +4,7 @@ import com.example.leaves.exceptions.BaseCustomException;
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -68,6 +69,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             return new ExceptionRestResponse(400, exception.getType(), exception.getMessage());
         }
 
+    }
+
+    @ExceptionHandler(value = ExpiredJwtException.class)
+    protected ResponseEntity<Object> handleJwtExpired(
+            RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = ex.getMessage();
+        return handleExceptionInternal(ex, bodyOfResponse,
+                new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
 
     @Value
