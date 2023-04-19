@@ -3,6 +3,7 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PdfInvalidException;
+import com.example.leaves.exceptions.RequestNotApproved;
 import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
@@ -33,11 +34,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final UserService userService;
     private final EmailService emailService;
     private final TypeEmployeeService typeService;
-    @Value("${allowed-leave-days-to-carry-over}")
-    private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
     private final EmployeeInfoRepository employeeInfoRepository;
     private final LeaveRequestService leaveRequestService;
     private final RoleService roleService;
+    @Value("${allowed-leave-days-to-carry-over}")
+    private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
 
     @Autowired
     public EmployeeInfoServiceImpl(UserRepository employeeRepository,
@@ -52,7 +53,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         this.leaveRequestService = leaveRequestService;
         this.userService = userService;
         this.roleService = roleService;
-        this.emailService=emailService;
+        this.emailService = emailService;
     }
 
 
@@ -106,6 +107,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
         LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
         UserEntity userOfRequest = leaveRequest.getEmployee().getUserInfo();
+
+        if (leaveRequest.getApproved() == null || !leaveRequest.getApproved()) {
+            throw new RequestNotApproved(leaveRequest.getId());
+        }
+
         if (!(employee.getRoles().contains(roleService.getRoleById(1L)) ||
                 employee.getRoles().contains(roleService.getRoleById(2L)))) {
             if (employee != leaveRequest.getEmployee().getUserInfo()
@@ -220,16 +226,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     employeeInfoRepository.save(empl);
                 });
     }
+
     @Override
     @Scheduled(cron = "0 0 16 18 10,11 ?")
-    public void notifyEmployeesOfTheirLeftPaidLeave(){
+    public void notifyEmployeesOfTheirLeftPaidLeave() {
 
         employeeRepository
                 .findAllByDeletedIsFalse()
                 .forEach(employee -> {
                     int remainingPaidLeave = employee.getEmployeeInfo().getPaidLeave();
-                    if (remainingPaidLeave>ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER)
-                    {
+                    if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
                         try {
                             emailService.sendMailToNotifyAboutPaidLeave(employee.getName(),
                                     employee.getEmail(),

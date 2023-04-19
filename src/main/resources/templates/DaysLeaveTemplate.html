@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <title>Simple Transactional Email</title>
     <style>
         /* -------------------------------------
@@ -242,7 +242,7 @@
             }
 
             table.body .wrapper,
-            table.body  {
+            table.body {
                 padding: 10px !important;
             }
 
@@ -269,7 +269,7 @@
                 width: 100% !important;
             }
 
-            table.body  {
+            table.body {
                 height: auto !important;
                 max-width: 100% !important;
                 width: auto !important;
@@ -325,14 +325,14 @@
 </head>
 <body>
 <!--<span class="preheader">This is preheader text. Some clients will show this text as a preview.</span>-->
-<table role="presentation" class="body">
+<table class="body" role="presentation">
     <tr>
         <td>&nbsp;</td>
         <td class="container">
             <div class="content">
 
                 <!-- START CENTERED WHITE CONTAINER -->
-                <table role="presentation" class="main">
+                <table class="main" role="presentation">
 
                     <!-- START MAIN CONTENT AREA -->
                     <tr>
@@ -342,15 +342,15 @@
                                     <td>
                                         <p th:text="${name}">Hi there,</p>
                                         <p th:text="${content}">Content</p>
-                                        <table role="presentation" class="btn btn-primary">
+                                        <table class="btn btn-primary" role="presentation">
                                             <tbody>
                                             <tr>
                                                 <td>
                                                     <table role="presentation">
                                                         <tbody>
                                                         <tr>
-                                                            <td><a th:href="${linkToAction}" target="_blank">Go to your
-                                                            Leave manager</a></td>
+                                                            <td><a target="_blank" th:href="${linkToAction}">Go to your
+                                                                Leave manager</a></td>
                                                         </tr>
                                                         </tbody>
                                                     </table>

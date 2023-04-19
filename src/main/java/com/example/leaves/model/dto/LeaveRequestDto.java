@@ -1,17 +1,18 @@
 package com.example.leaves.model.dto;
 
 import com.example.leaves.util.DatesUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 
 public class LeaveRequestDto extends BaseDto {
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvedStartDate;
-
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvedEndDate;
 
     private Boolean approved;

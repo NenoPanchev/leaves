@@ -61,6 +61,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         super.toDto(typeEmployeeDto);
         typeEmployeeDto.setTypeName(this.typeName);
         typeEmployeeDto.setDaysLeave(this.daysLeave);
+        typeEmployeeDto.setDeleted(isDeleted());
         List<EmployeeInfoDto> list = new ArrayList<>();
 
         if (this.employeeWithType != null && !getEmployeesWithType().isEmpty()) {

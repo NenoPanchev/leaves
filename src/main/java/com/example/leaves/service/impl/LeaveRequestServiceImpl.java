@@ -61,21 +61,30 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         request.toEntity(leaveRequestDto);
         request.setEmployee(employee);
         //TODO UNCOMMENT WHEN EMAIL ACCOUNT READY
-//        userService.getAllAdmins().forEach(
-//                (admin -> {
-//
-//                        try {
-//                            emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
-//                                    admin.getEmail(),
-//                                    "New Leave Request",request);
-//
-//                        } catch (MessagingException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//
-//                }
-//        ));
+
+        //TODO ASK CAN I USE IT LIKE THIS ?
+//        ExecutorService executor = Executors.newCachedThreadPool();
+//        executor.execute(() -> sendNotificationEmailToAdmins(request));
+
+//        sendNotificationEmailToAdmins(request);
         return leaveRequestRepository.save(request);
+    }
+
+    private void sendNotificationEmailToAdmins(LeaveRequest request) {
+        userService.getAllAdmins().forEach(
+                (admin -> {
+
+                    try {
+                        emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
+                                admin.getEmail(),
+                                "New Leave Request", request);
+
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+                ));
     }
 
     @Override

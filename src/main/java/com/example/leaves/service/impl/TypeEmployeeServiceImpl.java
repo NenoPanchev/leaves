@@ -65,6 +65,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         }
 
     }
+
     @Override
     public TypeEmployee getById(long typeId) {
         if (typeRepository.findById(typeId) == null) {
@@ -73,6 +74,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
             return typeRepository.findById(typeId);
         }
     }
+
     @Override
     public TypeEmployee update(TypeEmployeeDto typeDto, long id) {
 
@@ -90,6 +92,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
 
 
     }
+
     @Override
     @Transactional
     public void delete(long id) {
@@ -98,6 +101,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     }
 
     @Override
+    @Transactional
     public void unMarkAsDelete(long id) {
         typeRepository.unMarkAsRemoved(id);
     }
