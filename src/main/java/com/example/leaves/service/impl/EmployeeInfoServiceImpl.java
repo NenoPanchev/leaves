@@ -13,6 +13,7 @@ import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
+import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,32 +144,50 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         words.put("fullName", userOfRequest.getName());
         if (pdfRequestForm.isSaved()) {
 
-            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
-                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
-                words.put("egn", userOfRequest.getEmployeeInfo().getSsn());
-            }
-            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
-                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
-                words.put("location", userOfRequest.getEmployeeInfo().getAddress());
+            if (pdfRequestForm.getSsn() != null &&
+                    pdfRequestForm.getSsn().length > 0) {
+
+                words.put("egn", String.valueOf(pdfRequestForm.getSsn()));
+
+
+            } else {
+                words.put("egn", " ");
             }
 
-            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
-                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
+            if (userOfRequest.getEmployeeInfo().getAddress() != null &&
+                    !userOfRequest.getEmployeeInfo().getAddress().isEmpty()) {
+                words.put("location", userOfRequest.getEmployeeInfo().getAddress());
+            } else {
+                words.put("location", " ");
+            }
+
+            if (userOfRequest.getEmployeeInfo().getPosition() != null &&
+                    !userOfRequest.getEmployeeInfo().getPosition().isEmpty()) {
                 words.put("position", userOfRequest.getEmployeeInfo().getPosition());
+            } else {
+                words.put("position", " ");
             }
 
         } else {
 
-            if (pdfRequestForm.getSsn() != null && !pdfRequestForm.getSsn().isEmpty()) {
-                words.put("egn", pdfRequestForm.getSsn());
+            if (pdfRequestForm.getSsn() != null &&
+                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
+
+                words.put("egn", EncryptionUtil.decrypt(userOfRequest.getEmployeeInfo().getSsn()));
+            } else {
+                words.put("egn", " ");
             }
 
             if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {
                 words.put("location", pdfRequestForm.getAddress());
+            } else {
+                words.put("location", " ");
             }
 
             if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
                 words.put("position", pdfRequestForm.getPosition());
+            } else {
+                words.put("position", " ");
             }
         }
 
@@ -188,8 +207,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     private void setPersonalEmployeeInfo(PdfRequestForm pdfRequestForm, UserEntity employee) {
         if (pdfRequestForm.isSaved()) {
-            if (pdfRequestForm.getSsn() != null && !pdfRequestForm.getSsn().isEmpty()) {
-                employee.getEmployeeInfo().setSsn(pdfRequestForm.getSsn());
+            if (pdfRequestForm.getSsn() != null && pdfRequestForm.getSsn().length > 0) {
+                employee.getEmployeeInfo().setSsn(EncryptionUtil.encrypt(String.valueOf(pdfRequestForm.getSsn())));
             }
 
             if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {

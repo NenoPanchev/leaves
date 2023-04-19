@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Arrays;
+
 
 @NoArgsConstructor
 public class EmployeeInfoDto extends UserDto {
@@ -53,7 +55,7 @@ public class EmployeeInfoDto extends UserDto {
     }
 
     public String getSsn() {
-        return ssn;
+        return String.valueOf(ssn);
     }
 
     public void setSsn(String ssn) {

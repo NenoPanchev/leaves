@@ -3,6 +3,7 @@ package com.example.leaves.model.entity;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.EntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
@@ -86,6 +87,14 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return employeeType;
     }
 
+    public String getSsn() {
+        return ssn;
+    }
+
+    public void setSsn(String ssn) {
+        this.ssn = ssn;
+    }
+
     public void setEmployeeType(TypeEmployee employeeType) {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
@@ -105,7 +114,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());
         dto.setAddress(this.address);
-        dto.setSsn(this.ssn);
+        dto.setSsn(EncryptionUtil.decrypt(this.ssn));
         return dto;
     }
 

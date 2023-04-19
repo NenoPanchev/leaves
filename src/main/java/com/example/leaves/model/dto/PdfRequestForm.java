@@ -11,7 +11,7 @@ public class PdfRequestForm {
     private String year;
     private String position;
     private String address;
-    private String ssn;
+    private char[] ssn;
 
     private boolean saved;
 
