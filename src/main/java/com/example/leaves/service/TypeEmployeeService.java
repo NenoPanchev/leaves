@@ -28,4 +28,6 @@ public interface TypeEmployeeService {
     Page<TypeEmployeeDto> getAllFilterPage(TypeEmployeeFilter filter);
 
     void seedTypes();
+
+    List<String> getAllNames();
 }

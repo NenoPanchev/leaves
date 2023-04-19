@@ -148,6 +148,11 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         typeRepository.save(trainee);
     }
 
+    @Override
+    public List<String> getAllNames() {
+        return typeRepository.findAllPositionsByDeletedIsFalse();
+    }
+
     private Page<TypeEmployeeDto> getTypeEmployeeFilteredEqual(TypeEmployeeFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         return typeRepository.findAll(getSpecification(filter), pageRequest).map(TypeEmployee::toDto);
