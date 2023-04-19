@@ -83,9 +83,9 @@ public class TypeControllerImpl implements TypeController {
 
     @Override
     public ResponseEntity<List<String>> getAllPositionNames() {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(typeService.getAllNames());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(typeService.getAllNames());
     }
 
 
