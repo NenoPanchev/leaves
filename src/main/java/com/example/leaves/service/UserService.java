@@ -52,4 +52,6 @@ public interface UserService {
     UserDto findUserByEmail(String email);
 
     UserEntity getCurrentUser();
+
+    List<UserEntity> getAllAdmins();
 }

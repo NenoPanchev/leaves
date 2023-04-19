@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -391,6 +392,12 @@ public class UserServiceImpl implements UserService {
                                 .getAuthentication()
                                 .getName())
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
+    }
+
+    @Override
+    public List<UserEntity> getAllAdmins() {
+
+        return userRepository.findAllByRoleId(2L);
     }
 
     @Override

@@ -1,6 +1,20 @@
 package com.example.leaves.service;
 
+import com.example.leaves.model.entity.LeaveRequest;
+
+import javax.mail.MessagingException;
+
 public interface EmailService {
-    void sendMessage(
-            String to, String subject, String text);
+
+
+    void sendMailToNotifyAboutPaidLeave(
+            final String recipientName,
+            final String recipientEmail,
+            final String subject,
+            int paidLeaveLeft) throws MessagingException;
+
+    void sendMailToNotifyAboutNewRequest(String recipientName,
+                                         String recipientEmail,
+                                         String subject,
+                                         LeaveRequest request) throws MessagingException;
 }

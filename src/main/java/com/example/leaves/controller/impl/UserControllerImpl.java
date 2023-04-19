@@ -143,6 +143,11 @@ public class UserControllerImpl implements UserController {
         userService.getCurrentUser().toDto(userDto);
         return userDto;
     }
+
+    @Override
+    public void notifyUsersOfTheirPaidLeave() {
+        employeeInfoService.notifyEmployeesOfTheirLeftPaidLeave();
+    }
 }
 
 

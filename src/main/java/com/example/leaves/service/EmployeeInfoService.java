@@ -5,6 +5,7 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.UserEntity;
 
 import java.util.List;
+import java.util.Locale;
 
 public interface EmployeeInfoService {
 
@@ -26,5 +27,9 @@ public interface EmployeeInfoService {
 
     void delete(long id);
 
+    void notifyEmployeesOfTheirLeftPaidLeave();
+
     void updatePaidLeaveAnnually();
+
+
 }

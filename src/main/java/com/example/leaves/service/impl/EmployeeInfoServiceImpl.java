@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +27,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
+    public static final String LEFT_PAID_LEAVE_SUBJECT = "Left paid leave";
     private final UserRepository employeeRepository;
     private final UserService userService;
+    private final EmailService emailService;
     private final TypeEmployeeService typeService;
     @Value("${allowed-leave-days-to-carry-over}")
     private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
@@ -40,12 +43,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                    TypeEmployeeService typeService,
                                    LeaveRequestService leaveRequestService,
                                    UserService userService,
-                                   RoleService roleService) {
+                                   RoleService roleService,
+                                   EmailService emailService) {
         this.employeeRepository = employeeRepository;
         this.typeService = typeService;
         this.leaveRequestService = leaveRequestService;
         this.userService = userService;
         this.roleService = roleService;
+        this.emailService=emailService;
     }
 
 
@@ -195,7 +200,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 //     employeeRepository.save(e);
         employeeRepository.markAsDeleted(id);
     }
-
+//TODO Scheduler
     @Override
 //    @Scheduled(cron = "0 */1 * * * *")
     public void updatePaidLeaveAnnually() {
@@ -212,6 +217,29 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                             empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
                 });
     }
+    @Override
+    @Scheduled(cron = "0 0 16 18 10,11 ?")
+    public void notifyEmployeesOfTheirLeftPaidLeave(){
+
+        employeeRepository
+                .findAllByDeletedIsFalse()
+                .forEach(employee -> {
+                    int remainingPaidLeave = employee.getEmployeeInfo().getPaidLeave();
+                    if (remainingPaidLeave>ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER)
+                    {
+                        try {
+                            emailService.sendMailToNotifyAboutPaidLeave(employee.getName(),
+                                    employee.getEmail(),
+                                    LEFT_PAID_LEAVE_SUBJECT,
+                                    remainingPaidLeave);
+
+                        } catch (MessagingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+    }
+
 
     @Override
     public EmployeeInfoDto changeType(long employeeId, long typeId) {

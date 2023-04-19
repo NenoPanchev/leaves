@@ -12,6 +12,7 @@ import com.example.leaves.model.entity.LeaveRequest_;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.LeaveRequestRepository;
 import com.example.leaves.repository.UserRepository;
+import com.example.leaves.service.EmailService;
 import com.example.leaves.service.LeaveRequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.LeaveRequestFilter;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -35,40 +37,51 @@ import java.util.List;
 public class LeaveRequestServiceImpl implements LeaveRequestService {
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
     public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
-    private final EmailServiceImpl emailSender;
+    private final EmailService emailService;
     UserRepository employeeRepository;
     LeaveRequestRepository leaveRequestRepository;
     UserService userService;
 
 
     @Autowired
-    public LeaveRequestServiceImpl(UserRepository employeeRepository
-            , LeaveRequestRepository leaveRequestRepository, UserService userService, EmailServiceImpl emailSender) {
+    public LeaveRequestServiceImpl(UserRepository employeeRepository,
+                                   LeaveRequestRepository leaveRequestRepository,
+                                   UserService userService,
+                                   EmailService emailService) {
 
         this.employeeRepository = employeeRepository;
         this.leaveRequestRepository = leaveRequestRepository;
         this.userService = userService;
-        this.emailSender = emailSender;
+        this.emailService = emailService;
     }
 
 
     private LeaveRequest addRequestIn(EmployeeInfo employee, LeaveRequestDto leaveRequestDto) {
         LeaveRequest request = new LeaveRequest();
         request.toEntity(leaveRequestDto);
-
         request.setEmployee(employee);
-//     emailSender.sendMessage("vladimirkacharov@gmail.com","asdasd","dasdsdsds");
+        //TODO UNCOMMENT WHEN EMAIL ACCOUNT READY
+//        userService.getAllAdmins().forEach(
+//                (admin -> {
+//
+//                        try {
+//                            emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
+//                                    admin.getEmail(),
+//                                    "New Leave Request",request);
+//
+//                        } catch (MessagingException e) {
+//                            throw new RuntimeException(e);
+//                        }
+//
+//                }
+//        ));
         return leaveRequestRepository.save(request);
-
-
     }
 
     @Override
     public LeaveRequest addRequest(LeaveRequestDto leaveRequestDto) {
         UserEntity employee = getCurrentUser();
 
-
-        //TODO EXTEND FUNCTIONALITY
         //TODO THROW MORE SPECIFIC EXCEPTIONS!
         addRequestValidation(leaveRequestDto, employee);
         return addRequestIn(employee.getEmployeeInfo(), leaveRequestDto);
@@ -89,7 +102,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     private void CheckIfDateBeforeToday(LeaveRequestDto request) {
         if (request.getStartDate().isBefore(LocalDate.now())) {
             throw new PaidleaveNotEnoughException(
-                    String.format("%s@%s", request.getStartDate(),LocalDate.now()), "Add");
+                    String.format("%s@%s", request.getStartDate(), LocalDate.now()), "Add");
         }
     }
 
