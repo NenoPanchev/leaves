@@ -104,6 +104,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setDaysLeave(this.paidLeave);
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());
+        dto.setAddress(this.address);
+        dto.setSsn(this.ssn);
         return dto;
     }
 

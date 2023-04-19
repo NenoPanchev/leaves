@@ -199,6 +199,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 employee.getEmployeeInfo().setPosition(pdfRequestForm.getPosition());
             }
         }
+        employeeRepository.save(employee);
     }
 
     @Override
