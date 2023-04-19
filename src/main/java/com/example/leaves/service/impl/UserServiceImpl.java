@@ -2,6 +2,7 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
@@ -122,23 +123,24 @@ public class UserServiceImpl implements UserService {
         UserEntity entity = new UserEntity();
         entity.toEntity(dto);
         DepartmentEntity department = null;
-        if (!isEmpty(dto.getDepartment())) {
-            department = departmentService
-                    .findByDepartment(dto.getDepartment());
-            entity.setDepartment(department);
-        }
+        department = getDepartmentFromDto(dto, department);
+        entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        entity.setEmployeeInfo(new EmployeeInfo());
+        setEmployeeInfo(entity, dto.getEmployeeInfo());
 
         entity = userRepository.save(entity);
         if (!isEmpty(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
 
         }
+        entity.getEmployeeInfo().setUserInfo(entity);
+        userRepository.save(entity);
         entity.toDto(dto);
         return dto;
     }
+
+
 
     @Override
     public UserEntity findByEmail(String email) {
@@ -226,6 +228,8 @@ public class UserServiceImpl implements UserService {
             entity.setDepartment(departmentEntity);
         }
 
+        setEmployeeInfo(entity, dto.getEmployeeInfo());
+
         entity = userRepository.save(entity);
 
         sortEmployeeDepartmentRelation(entity, departmentEntity, initialEntityDepartmentName,
@@ -233,6 +237,7 @@ public class UserServiceImpl implements UserService {
         if (entity.getDepartment() == null) {
             userRepository.save(entity);
         }
+
         entity.toDto(dto);
         return dto;
     }
@@ -431,6 +436,28 @@ public class UserServiceImpl implements UserService {
             entity.setDepartment(null);
         }
 
+    }
+
+
+    private DepartmentEntity getDepartmentFromDto(UserDto dto, DepartmentEntity department) {
+        if (!isEmpty(dto.getDepartment())) {
+            department = departmentService
+                    .findByDepartment(dto.getDepartment());
+        }
+        return department;
+    }
+
+    private void setEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+        EmployeeInfo info = new EmployeeInfo();
+        TypeEmployee type;
+        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
+            type = typeEmployeeRepository.findByTypeName("Trainee");
+        } else {
+            type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+        }
+        info.setEmployeeType(type);
+        info.setPaidLeave(type.getDaysLeave());
+        entity.setEmployeeInfo(info);
     }
 
     private boolean isEmpty(String name) {
