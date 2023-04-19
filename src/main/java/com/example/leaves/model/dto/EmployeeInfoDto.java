@@ -13,5 +13,7 @@ public class EmployeeInfoDto extends UserDto {
 
     private int daysLeave;
 
+    private String typeName;
+
     private int typeDaysLeave;
 }
