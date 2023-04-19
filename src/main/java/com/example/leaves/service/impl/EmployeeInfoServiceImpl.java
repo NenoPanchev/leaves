@@ -35,7 +35,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final TypeEmployeeService typeService;
     @Value("${allowed-leave-days-to-carry-over}")
     private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
-
+    private final EmployeeInfoRepository employeeInfoRepository;
     private final LeaveRequestService leaveRequestService;
     private final RoleService roleService;
 
