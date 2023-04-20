@@ -9,6 +9,7 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.DAYS;
 import static java.time.temporal.ChronoUnit.MONTHS;
 
 @Service
@@ -270,6 +272,38 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 totalMonthsInFirstYear * employeeInfo.getEmployeeType().getDaysLeave() / 12;
         int result = (int) Math.round(totalExpectedPaidLeave);
         return result;
+    }
+
+    @Override
+    public int calculateDifferenceInPaidLeaveOnTypeChange(EmployeeInfo employeeInfo, TypeEmployee newType) {
+        int expectedDaysForInitialContract = calculateInitialPaidLeave(employeeInfo);
+
+        int currentYear = LocalDate.now().getYear();
+        int yearOfStart = employeeInfo.getContractStartDate().getYear();
+        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
+        LocalDate startDate = LocalDate.of(currentYear, 1, 1);
+        if (yearOfStart == currentYear) {
+            startDate = employeeInfo.getContractStartDate();
+        }
+        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
+        LocalDate dateOfTypeChange = LocalDate.now();
+        long actualDaysEmployed = DAYS.between(startDate, dateOfTypeChange);
+        long remainingDaysUntilNewYear = DAYS.between(dateOfTypeChange, endOfYear) + 1;
+        double earnedPaidLeaveUpUntilNow = (double) (actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave()) / totalDaysInCurrentYear;
+        double expectedPaidLeaveFromNowUntilNewYear =
+                (double) (remainingDaysUntilNewYear * newType.getDaysLeave()) / totalDaysInCurrentYear;
+        double totalExpectedPaidLeave =
+                earnedPaidLeaveUpUntilNow + expectedPaidLeaveFromNowUntilNewYear;
+        int result = (int) Math.round(totalExpectedPaidLeave);
+        int difference = result - expectedDaysForInitialContract;
+        return difference;
+    }
+
+    private int checkIfLeapYearAndGetTotalDays(int year) {
+        if (year % 4 == 0) {
+            return 366;
+        }
+        return 365;
     }
 
     @Override

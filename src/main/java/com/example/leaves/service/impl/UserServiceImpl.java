@@ -242,8 +242,10 @@ public class UserServiceImpl implements UserService {
         }
 
         if (!entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
-            TypeEmployee type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            entity.getEmployeeInfo().setEmployeeType(type);
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            int difference = employeeInfoService.calculateDifferenceInPaidLeaveOnTypeChange(entity.getEmployeeInfo(), newType);
+            entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
+            entity.getEmployeeInfo().setEmployeeType(newType);
         }
 
         if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
@@ -251,7 +253,6 @@ public class UserServiceImpl implements UserService {
             entity.getEmployeeInfo().setPaidLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
-        /// TODO: 19.04.23 г. calculate paid leave difference
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {

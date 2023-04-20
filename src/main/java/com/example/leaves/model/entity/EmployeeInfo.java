@@ -97,7 +97,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     public void setEmployeeType(TypeEmployee employeeType) {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
-        setPaidLeave(employeeType.getDaysLeave());
+//        setPaidLeave(employeeType.getDaysLeave());
     }
 
     public String getSsn() {
