@@ -225,8 +225,7 @@ public class UserServiceImpl implements UserService {
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(departmentEntity);
         }
-
-        setEmployeeInfo(entity, dto.getEmployeeInfo());
+        updateEmployeeInfo(entity, dto.getEmployeeInfo());
 
         entity = userRepository.save(entity);
 
@@ -238,6 +237,16 @@ public class UserServiceImpl implements UserService {
 
         entity.toDto(dto);
         return dto;
+    }
+
+    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())
+                || entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+            return;
+        }
+        TypeEmployee type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+        entity.getEmployeeInfo().setEmployeeType(type);
+        /// TODO: 19.04.23 г. calculate paid leave difference
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {

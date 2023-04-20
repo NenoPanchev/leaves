@@ -293,5 +293,9 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return employeeRepository.findEmployeeInfoById(employeeId).getPaidLeave();
     }
 
-
+    private int getDaysLeavePerMonthsExperience(double monthsWorked, int annualPaidLeaveByContract) {
+        double deservedPaidLeave = monthsWorked * annualPaidLeaveByContract / 12;
+        int round = (int) Math.round(deservedPaidLeave);
+        return round;
+    }
 }
