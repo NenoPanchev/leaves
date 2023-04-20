@@ -25,6 +25,7 @@ public interface UserService {
     UserDto updateUser(Long id, UserDto dto);
 
     boolean existsByEmailAndDeletedIsFalse(String email);
+
     boolean existsByEmail(String email);
 
     UserDto addType(long typeId, long userId);

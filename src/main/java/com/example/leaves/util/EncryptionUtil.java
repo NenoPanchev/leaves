@@ -19,7 +19,7 @@ public class EncryptionUtil {
 
     /* Encryption Method */
     public static String encrypt(String strToEncrypt) {
-        if (strToEncrypt!=null) {
+        if (strToEncrypt != null) {
             try {
                 /* Declare a byte array. */
                 byte[] iv = {0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0};
@@ -46,7 +46,7 @@ public class EncryptionUtil {
 
     /* Decryption Method */
     public static String decrypt(String strToDecrypt) {
-        if (strToDecrypt!=null) {
+        if (strToDecrypt != null) {
             try {
                 /* Declare a byte array. */
                 byte[] iv = {0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0};

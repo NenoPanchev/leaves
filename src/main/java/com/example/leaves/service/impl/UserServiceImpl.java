@@ -249,7 +249,7 @@ public class UserServiceImpl implements UserService {
         if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
             entity.getEmployeeInfo().setPaidLeave(
-            employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+                    employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
         /// TODO: 19.04.23 г. calculate paid leave difference
     }

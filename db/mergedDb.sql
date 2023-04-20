@@ -1,30 +1,21 @@
 create table if not exists departments
 (
     id
-    bigserial
-    constraint
-    departments_pkey
-    primary
-    key,
+                     bigserial
+        constraint
+            departments_pkey
+            primary
+                key,
     created_at
-    timestamp,
+                     timestamp,
     created_by
-    varchar
-(
-    255
-),
-    deleted boolean,
+                     varchar(255),
+    deleted          boolean,
     last_modified_at timestamp,
-    last_modified_by varchar
-(
-    255
-),
-    name varchar
-(
-    255
-) not null,
-    admin_id bigint
-    );
+    last_modified_by varchar(255),
+    name             varchar(255) not null,
+    admin_id         bigint
+);
 
 alter table departments
     owner to postgres;
@@ -32,29 +23,20 @@ alter table departments
 create table if not exists permissions
 (
     id
-    bigserial
-    constraint
-    permissions_pkey
-    primary
-    key,
+                     bigserial
+        constraint
+            permissions_pkey
+            primary
+                key,
     created_at
-    timestamp,
+                     timestamp,
     created_by
-    varchar
-(
-    255
-),
-    deleted boolean,
+                     varchar(255),
+    deleted          boolean,
     last_modified_at timestamp,
-    last_modified_by varchar
-(
-    255
-),
-    name varchar
-(
-    255
-)
-    );
+    last_modified_by varchar(255),
+    name             varchar(255)
+);
 
 alter table permissions
     owner to postgres;
@@ -62,31 +44,22 @@ alter table permissions
 create table if not exists roles
 (
     id
-    bigserial
-    constraint
-    roles_pkey
-    primary
-    key,
+                     bigserial
+        constraint
+            roles_pkey
+            primary
+                key,
     created_at
-    timestamp,
+                     timestamp,
     created_by
-    varchar
-(
-    255
-),
-    deleted boolean,
+                     varchar(255),
+    deleted          boolean,
     last_modified_at timestamp,
-    last_modified_by varchar
-(
-    255
-),
-    name varchar
-(
-    255
-) not null
-    constraint uk_ofx66keruapi6vyqpv6f2or37
-    unique
-    );
+    last_modified_by varchar(255),
+    name             varchar(255) not null
+        constraint uk_ofx66keruapi6vyqpv6f2or37
+            unique
+);
 
 alter table roles
     owner to postgres;
@@ -94,21 +67,21 @@ alter table roles
 create table if not exists roles_permissions
 (
     role_id
-    bigint
-    not
-    null
-    constraint
-    roles_permissions_roles_id_fk
-    references
-    roles,
+        bigint
+        not
+            null
+        constraint
+            roles_permissions_roles_id_fk
+            references
+                roles,
     permissions_id
-    bigint
-    not
-    null
-    constraint
-    roles_permissions_permissions_id_fk
-    references
-    permissions
+        bigint
+        not
+            null
+        constraint
+            roles_permissions_permissions_id_fk
+            references
+                permissions
 );
 
 alter table roles_permissions
@@ -117,33 +90,33 @@ alter table roles_permissions
 create table if not exists types
 (
     type_name
-    varchar
-    not
-    null,
+        varchar
+        not
+            null,
     type_days
-    integer
-    not
-    null,
+        integer
+        not
+            null,
     id
-    serial
-    constraint
-    types_pk
-    primary
-    key,
+        serial
+        constraint
+            types_pk
+            primary
+                key,
     created_at
-    timestamp,
+        timestamp,
     created_by
-    varchar,
+        varchar,
     last_modified_at
-    timestamp,
+        timestamp,
     last_modified_by
-    varchar,
+        varchar,
     deleted
-    boolean
-    default
-    false
-    not
-    null
+        boolean
+        default
+            false
+        not
+            null
 );
 
 alter table types
@@ -152,41 +125,41 @@ alter table types
 create table if not exists employee_info
 (
     id
-    serial
-    constraint
-    employee_info_pk
-    primary
-    key,
+        serial
+        constraint
+            employee_info_pk
+            primary
+                key,
     type_id
-    integer
-    constraint
-    employee_info_types_id_fk
-    references
-    types,
+        integer
+        constraint
+            employee_info_types_id_fk
+            references
+                types,
     days_leave
-    integer
-    default
-    20
-    not
-    null,
+        integer
+        default
+            20
+        not
+            null,
     contract_start_date
-    date,
+        date,
     created_at
-    timestamp,
+        timestamp,
     created_by
-    varchar,
+        varchar,
     deleted
-    boolean,
+        boolean,
     last_modified_at
-    timestamp,
+        timestamp,
     last_modified_by
-    varchar,
+        varchar,
     ssn
-    varchar,
+        varchar,
     address
-    varchar,
+        varchar,
     position
-    varchar
+        varchar
 );
 
 alter table employee_info
@@ -195,45 +168,30 @@ alter table employee_info
 create table if not exists users
 (
     id
-    bigserial
-    constraint
-    users_pkey
-    primary
-    key,
+                     bigserial
+        constraint
+            users_pkey
+            primary
+                key,
     created_at
-    timestamp,
+                     timestamp,
     created_by
-    varchar
-(
-    255
-),
-    deleted boolean,
+                     varchar(255),
+    deleted          boolean,
     last_modified_at timestamp,
-    last_modified_by varchar
-(
-    255
-),
-    email varchar
-(
-    255
-) not null
-    constraint uk_6dotkott2kjsp8vw4d0m25fb7
-    unique,
-    name varchar
-(
-    255
-),
-    password varchar
-(
-    255
-) not null,
-    department_id bigint
-    constraint users_departments_id_fk
-    references departments,
+    last_modified_by varchar(255),
+    email            varchar(255) not null
+        constraint uk_6dotkott2kjsp8vw4d0m25fb7
+            unique,
+    name             varchar(255),
+    password         varchar(255) not null,
+    department_id    bigint
+        constraint users_departments_id_fk
+            references departments,
     employee_info_id integer
-    constraint users_employee_info_id_fk
-    references employee_info
-    );
+        constraint users_employee_info_id_fk
+            references employee_info
+);
 
 alter table users
     owner to postgres;
@@ -245,21 +203,21 @@ alter table departments
 create table if not exists departments_employees
 (
     department_id
-    bigint
-    not
-    null
-    constraint
-    departments_employees_departments_id_fk
-    references
-    departments,
+        bigint
+        not
+            null
+        constraint
+            departments_employees_departments_id_fk
+            references
+                departments,
     employees_id
-    bigint
-    not
-    null
-    constraint
-    departments_employees_users_id_fk
-    references
-    users
+        bigint
+        not
+            null
+        constraint
+            departments_employees_users_id_fk
+            references
+                users
 );
 
 alter table departments_employees
@@ -268,21 +226,21 @@ alter table departments_employees
 create table if not exists users_roles
 (
     user_entity_id
-    bigint
-    not
-    null
-    constraint
-    users_roles_users_id_fk
-    references
-    users,
+        bigint
+        not
+            null
+        constraint
+            users_roles_users_id_fk
+            references
+                users,
     roles_id
-    bigint
-    not
-    null
-    constraint
-    users_roles_roles_id_fk
-    references
-    roles
+        bigint
+        not
+            null
+        constraint
+            users_roles_roles_id_fk
+            references
+                roles
 );
 
 alter table users_roles
@@ -291,45 +249,45 @@ alter table users_roles
 create table if not exists leave_requests
 (
     id
-    integer
-    generated
-    by
-    default as
-    identity
-    constraint
-    leave_requests_pk
-    primary
-    key,
+        integer
+        generated
+            by
+            default as
+            identity
+        constraint
+            leave_requests_pk
+            primary
+                key,
     approved
-    boolean,
+        boolean,
     start_date
-    date
-    not
-    null,
+        date
+        not
+            null,
     end_date
-    date
-    not
-    null,
+        date
+        not
+            null,
     employee_info_id
-    integer
-    constraint
-    leave_requests_employee_info_id_fk
-    references
-    employee_info,
+        integer
+        constraint
+            leave_requests_employee_info_id_fk
+            references
+                employee_info,
     deleted
-    boolean,
+        boolean,
     created_at
-    timestamp,
+        timestamp,
     created_by
-    varchar,
+        varchar,
     last_modified_at
-    timestamp,
+        timestamp,
     last_modified_by
-    varchar,
+        varchar,
     approved_start_date
-    date,
+        date,
     approved_end_date
-    date
+        date
 );
 
 alter table leave_requests
