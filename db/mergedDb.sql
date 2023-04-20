@@ -169,6 +169,8 @@ create table if not exists employee_info
     20
     not
     null,
+    contract_start_date
+    date,
     created_at
     timestamp,
     created_by

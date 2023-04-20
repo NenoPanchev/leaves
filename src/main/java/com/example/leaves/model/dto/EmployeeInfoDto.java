@@ -1,6 +1,9 @@
 package com.example.leaves.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 
 @NoArgsConstructor
@@ -9,6 +12,8 @@ public class EmployeeInfoDto extends UserDto {
     private long typeId;
 
     private int daysLeave;
+
+    private LocalDate contractStartDate;
 
     private String typeName;
 
@@ -64,5 +69,14 @@ public class EmployeeInfoDto extends UserDto {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
+    public LocalDate getContractStartDate() {
+        return contractStartDate;
+    }
+
+    public void setContractStartDate(LocalDate contractStartDate) {
+        this.contractStartDate = contractStartDate;
     }
 }

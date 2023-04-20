@@ -27,8 +27,11 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.time.temporal.ChronoUnit.MONTHS;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -73,8 +76,10 @@ public class UserServiceImpl implements UserService {
         // Employee Info
         EmployeeInfo superAdminEmployeeInfo = new EmployeeInfo();
         superAdminEmployeeInfo.setEmployeeType(developer);
-        superAdminEmployeeInfo.setPaidLeave(developer.getDaysLeave());
+        superAdminEmployeeInfo.setContractStartDate(LocalDate.of(2017, 1, 1));
+        superAdminEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
         superAdmin.setEmployeeInfo(superAdminEmployeeInfo);
+
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
 
@@ -89,7 +94,8 @@ public class UserServiceImpl implements UserService {
         // Employee Info
         EmployeeInfo adminEmployeeInfo = new EmployeeInfo();
         adminEmployeeInfo.setEmployeeType(developer);
-        adminEmployeeInfo.setPaidLeave(developer.getDaysLeave());
+        adminEmployeeInfo.setContractStartDate(LocalDate.of(2017, 1, 1));
+        adminEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
         admin.setEmployeeInfo(adminEmployeeInfo);
 
         userRepository.save(admin);
@@ -108,7 +114,8 @@ public class UserServiceImpl implements UserService {
         // Employee Info
         EmployeeInfo userEmployeeInfo = new EmployeeInfo();
         userEmployeeInfo.setEmployeeType(trainee);
-        userEmployeeInfo.setPaidLeave(trainee.getDaysLeave());
+        userEmployeeInfo.setContractStartDate(LocalDate.of(2019, 1, 1));
+        userEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
         user.setEmployeeInfo(userEmployeeInfo);
 
         userRepository.save(user);
@@ -126,7 +133,7 @@ public class UserServiceImpl implements UserService {
         entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        setEmployeeInfo(entity, dto.getEmployeeInfo());
+        setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
 
         entity = userRepository.save(entity);
         if (!isEmpty(dto.getDepartment())) {
@@ -454,7 +461,7 @@ public class UserServiceImpl implements UserService {
         return department;
     }
 
-    private void setEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
         EmployeeInfo info = new EmployeeInfo();
         TypeEmployee type;
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
@@ -463,11 +470,33 @@ public class UserServiceImpl implements UserService {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
         info.setEmployeeType(type);
-        info.setPaidLeave(type.getDaysLeave());
+        info.setContractStartDate(LocalDate.now());
+        info.setPaidLeave(calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
 
     private boolean isEmpty(String name) {
         return name == null || name.equals("");
+    }
+
+    private int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
+        int currentYear = LocalDate.now().getYear();
+        int yearOfStart = employeeInfo.getContractStartDate().getYear();
+
+        if (yearOfStart < currentYear) {
+            return employeeInfo.getEmployeeType().getDaysLeave();
+        }
+
+        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
+        long monthsDiff = MONTHS.between(employeeInfo.getContractStartDate(), endOfYear);
+        int dayOfContractStart = employeeInfo.getContractStartDate().getDayOfMonth();
+        int daysEmployeedInFirstMonth = 30 - dayOfContractStart;
+        double percentageOfFirstMonth = daysEmployeedInFirstMonth / 30.0;
+        double totalMonthsInFirstYear = monthsDiff + percentageOfFirstMonth;
+
+        double totalExpectedPaidLeave =
+                totalMonthsInFirstYear * employeeInfo.getEmployeeType().getDaysLeave() / 12;
+        int result = (int) Math.round(totalExpectedPaidLeave);
+        return result;
     }
 }

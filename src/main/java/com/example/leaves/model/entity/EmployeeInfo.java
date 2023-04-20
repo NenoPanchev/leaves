@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @EntityListeners(EntityListener.class)
@@ -26,6 +27,9 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @Column(name = "days_leave")
     private int paidLeave;
 
+    @Column(name = "contract_start_date")
+    private LocalDate contractStartDate;
+
     @Column(name = "ssn")
     private String ssn;
     //TODO CHANGE SSN TO CHAR ARR
@@ -41,6 +45,9 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
+    public EmployeeInfo() {
+        this.setContractStartDate(LocalDate.now());
+    }
 
     public void subtractFromAnnualPaidLeave(int days) {
         if (paidLeave - days < 0) {
@@ -115,6 +122,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setId(userInfo.getId());
         dto.setAddress(this.address);
         dto.setSsn(EncryptionUtil.decrypt(this.ssn));
+        dto.setContractStartDate(this.contractStartDate);
         return dto;
     }
 
