@@ -9,6 +9,7 @@ import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
+import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
@@ -31,8 +32,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.time.temporal.ChronoUnit.MONTHS;
-
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -40,18 +39,21 @@ public class UserServiceImpl implements UserService {
     private final DepartmentService departmentService;
     private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmployeeInfoService employeeInfoService;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
-                           @Lazy TypeEmployeeRepository typeEmployeeRepository) {
+                           @Lazy TypeEmployeeRepository typeEmployeeRepository,
+                           @Lazy EmployeeInfoService employeeInfoService) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.departmentService = departmentService;
         this.passwordEncoder = passwordEncoder;
         this.typeEmployeeRepository = typeEmployeeRepository;
+        this.employeeInfoService = employeeInfoService;
     }
 
     @Override
@@ -74,11 +76,7 @@ public class UserServiceImpl implements UserService {
         superAdmin.setDepartment(administration);
 
         // Employee Info
-        EmployeeInfo superAdminEmployeeInfo = new EmployeeInfo();
-        superAdminEmployeeInfo.setEmployeeType(developer);
-        superAdminEmployeeInfo.setContractStartDate(LocalDate.of(2017, 1, 1));
-        superAdminEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
-        superAdmin.setEmployeeInfo(superAdminEmployeeInfo);
+        createEmployeeInfoFor(superAdmin, LocalDate.of(2017, 1, 1), developer);
 
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
@@ -92,11 +90,7 @@ public class UserServiceImpl implements UserService {
         admin.setDepartment(administration);
 
         // Employee Info
-        EmployeeInfo adminEmployeeInfo = new EmployeeInfo();
-        adminEmployeeInfo.setEmployeeType(developer);
-        adminEmployeeInfo.setContractStartDate(LocalDate.of(2017, 1, 1));
-        adminEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
-        admin.setEmployeeInfo(adminEmployeeInfo);
+        createEmployeeInfoFor(admin, LocalDate.of(2017, 1, 1), developer);
 
         userRepository.save(admin);
         departmentService.addEmployeeToDepartment(admin, administration);
@@ -112,11 +106,7 @@ public class UserServiceImpl implements UserService {
         user.setDepartment(it);
 
         // Employee Info
-        EmployeeInfo userEmployeeInfo = new EmployeeInfo();
-        userEmployeeInfo.setEmployeeType(trainee);
-        userEmployeeInfo.setContractStartDate(LocalDate.of(2019, 1, 1));
-        userEmployeeInfo.setPaidLeave(calculateInitialPaidLeave(superAdminEmployeeInfo));
-        user.setEmployeeInfo(userEmployeeInfo);
+        createEmployeeInfoFor(user, LocalDate.of(2019, 1, 1), trainee);
 
         userRepository.save(user);
         departmentService.addEmployeeToDepartment(user, it);
@@ -247,12 +237,20 @@ public class UserServiceImpl implements UserService {
     }
 
     private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
-        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())
-                || entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             return;
         }
-        TypeEmployee type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-        entity.getEmployeeInfo().setEmployeeType(type);
+
+        if (!entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+            TypeEmployee type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            entity.getEmployeeInfo().setEmployeeType(type);
+        }
+
+        if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
+            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
+            entity.getEmployeeInfo().setPaidLeave(
+            employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+        }
         /// TODO: 19.04.23 г. calculate paid leave difference
     }
 
@@ -287,8 +285,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmailAndDeletedIsFalse(String email) {
         return userRepository.existsByEmailAndDeletedIsFalse(email);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     @Override
@@ -463,6 +466,8 @@ public class UserServiceImpl implements UserService {
 
     private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
         EmployeeInfo info = new EmployeeInfo();
+        LocalDate startDate = employeeInfo.getContractStartDate() != null
+                ? employeeInfo.getContractStartDate() : LocalDate.now();
         TypeEmployee type;
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             type = typeEmployeeRepository.findByTypeName("Trainee");
@@ -470,8 +475,8 @@ public class UserServiceImpl implements UserService {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
         info.setEmployeeType(type);
-        info.setContractStartDate(LocalDate.now());
-        info.setPaidLeave(calculateInitialPaidLeave(info));
+        info.setContractStartDate(startDate);
+        info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
 
@@ -479,24 +484,11 @@ public class UserServiceImpl implements UserService {
         return name == null || name.equals("");
     }
 
-    private int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
-        int currentYear = LocalDate.now().getYear();
-        int yearOfStart = employeeInfo.getContractStartDate().getYear();
-
-        if (yearOfStart < currentYear) {
-            return employeeInfo.getEmployeeType().getDaysLeave();
-        }
-
-        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
-        long monthsDiff = MONTHS.between(employeeInfo.getContractStartDate(), endOfYear);
-        int dayOfContractStart = employeeInfo.getContractStartDate().getDayOfMonth();
-        int daysEmployeedInFirstMonth = 30 - dayOfContractStart;
-        double percentageOfFirstMonth = daysEmployeedInFirstMonth / 30.0;
-        double totalMonthsInFirstYear = monthsDiff + percentageOfFirstMonth;
-
-        double totalExpectedPaidLeave =
-                totalMonthsInFirstYear * employeeInfo.getEmployeeType().getDaysLeave() / 12;
-        int result = (int) Math.round(totalExpectedPaidLeave);
-        return result;
+    private void createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type) {
+        EmployeeInfo info = new EmployeeInfo();
+        info.setEmployeeType(type);
+        info.setContractStartDate(startDate);
+        info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
+        entity.setEmployeeInfo(info);
     }
 }

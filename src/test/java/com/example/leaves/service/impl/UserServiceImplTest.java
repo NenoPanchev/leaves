@@ -187,8 +187,8 @@ class UserServiceImplTest {
 
     @Test
     public void existsByEmail() {
-        assertTrue(userService.existsByEmail(admin.getEmail()));
-        assertFalse(userService.existsByEmail("asfigaosasdfas"));
+        assertTrue(userService.existsByEmailAndDeletedIsFalse(admin.getEmail()));
+        assertFalse(userService.existsByEmailAndDeletedIsFalse("asfigaosasdfas"));
     }
 
     @Test

@@ -23,10 +23,13 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.time.temporal.ChronoUnit.MONTHS;
 
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
@@ -245,6 +248,28 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                             empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
                     employeeInfoRepository.save(empl);
                 });
+    }
+
+    @Override
+    public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
+        int currentYear = LocalDate.now().getYear();
+        int yearOfStart = employeeInfo.getContractStartDate().getYear();
+
+        if (yearOfStart < currentYear) {
+            return employeeInfo.getEmployeeType().getDaysLeave();
+        }
+
+        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
+        long monthsDiff = MONTHS.between(employeeInfo.getContractStartDate(), endOfYear);
+        int dayOfContractStart = employeeInfo.getContractStartDate().getDayOfMonth();
+        int daysEmployedInFirstMonth = 30 - dayOfContractStart;
+        double percentageOfFirstMonth = daysEmployedInFirstMonth / 30.0;
+        double totalMonthsInFirstYear = monthsDiff + percentageOfFirstMonth;
+
+        double totalExpectedPaidLeave =
+                totalMonthsInFirstYear * employeeInfo.getEmployeeType().getDaysLeave() / 12;
+        int result = (int) Math.round(totalExpectedPaidLeave);
+        return result;
     }
 
     @Override
