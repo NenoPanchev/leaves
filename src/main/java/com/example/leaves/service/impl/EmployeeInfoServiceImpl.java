@@ -256,20 +256,17 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         int yearOfStart = employeeInfo.getContractStartDate().getYear();
+        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
 
         if (yearOfStart < currentYear) {
             return employeeInfo.getEmployeeType().getDaysLeave();
         }
 
         LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
-        long monthsDiff = MONTHS.between(employeeInfo.getContractStartDate(), endOfYear);
-        int dayOfContractStart = employeeInfo.getContractStartDate().getDayOfMonth();
-        int daysEmployedInFirstMonth = 30 - dayOfContractStart;
-        double percentageOfFirstMonth = daysEmployedInFirstMonth / 30.0;
-        double totalMonthsInFirstYear = monthsDiff + percentageOfFirstMonth;
-
+        long actualDaysEmployed = DAYS.between(employeeInfo.getContractStartDate(), endOfYear) + 1;
         double totalExpectedPaidLeave =
-                totalMonthsInFirstYear * employeeInfo.getEmployeeType().getDaysLeave() / 12;
+                1.0 * actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave() / totalDaysInCurrentYear;
+
         int result = (int) Math.round(totalExpectedPaidLeave);
         return result;
     }
@@ -289,9 +286,9 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         LocalDate dateOfTypeChange = LocalDate.now();
         long actualDaysEmployed = DAYS.between(startDate, dateOfTypeChange);
         long remainingDaysUntilNewYear = DAYS.between(dateOfTypeChange, endOfYear) + 1;
-        double earnedPaidLeaveUpUntilNow = (double) (actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave()) / totalDaysInCurrentYear;
+        double earnedPaidLeaveUpUntilNow = 1.0 * actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave() / totalDaysInCurrentYear;
         double expectedPaidLeaveFromNowUntilNewYear =
-                (double) (remainingDaysUntilNewYear * newType.getDaysLeave()) / totalDaysInCurrentYear;
+                1.0 * remainingDaysUntilNewYear * newType.getDaysLeave() / totalDaysInCurrentYear;
         double totalExpectedPaidLeave =
                 earnedPaidLeaveUpUntilNow + expectedPaidLeaveFromNowUntilNewYear;
         int result = (int) Math.round(totalExpectedPaidLeave);
