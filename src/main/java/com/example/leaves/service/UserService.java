@@ -16,8 +16,8 @@ public interface UserService {
 
     UserEntity findByEmail(String email);
 
-    UserDto getUserById(long id);
-
+    UserDto getUserDtoById(long id);
+    UserEntity getUserById(long id);
     void deleteUser(Long id);
 
     void softDeleteUser(Long id);

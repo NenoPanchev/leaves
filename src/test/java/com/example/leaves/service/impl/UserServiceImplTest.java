@@ -165,14 +165,14 @@ class UserServiceImplTest {
 
     @Test
     public void getUserById() {
-        UserDto actual = userService.getUserById(2L);
+        UserDto actual = userService.getUserDtoById(2L);
         assertEquals(admin.getName(), actual.getName());
         assertEquals(admin.getEmail(), actual.getEmail());
     }
 
     @Test
     public void getUserByIdThrowsIfNonExistentUser() {
-        assertThrows(ObjectNotFoundException.class, () -> userService.getUserById(3123213L));
+        assertThrows(ObjectNotFoundException.class, () -> userService.getUserDtoById(3123213L));
     }
 
     @Test

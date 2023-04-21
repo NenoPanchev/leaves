@@ -32,5 +32,7 @@ public interface LeaveRequestService {
 
     List<LeaveRequestDto> getAllByCurrentUser();
 
+    List<LeaveRequestDto> getAllByUserId(long id);
+
 //    LeaveRequest getByDateBetween();
 }

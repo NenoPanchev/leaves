@@ -10,6 +10,7 @@ import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,7 +37,11 @@ public class RequestControllerImpl implements RequestController {
         return leaveRequestService.getAllByCurrentUser();
     }
 
+    @Override
+    public  List<LeaveRequestDto> getAllByUserId(@PathVariable long id) {
 
+        return leaveRequestService.getAllByUserId(id);
+    }
     @Override
     public List<LeaveRequestDto> getAllFilter(LeaveRequestFilter filter) {
         return leaveRequestService.getAllFilter(filter);

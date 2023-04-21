@@ -79,7 +79,6 @@ public interface UserController {
     @GetMapping("/current")
     @PreAuthorize("hasAuthority('READ')")
     UserDto getCurrentUser();
-
     @PostMapping("/notify")
     @PreAuthorize("hasAuthority('READ')")
     void notifyUsersOfTheirPaidLeave();

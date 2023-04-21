@@ -283,6 +283,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
+    public List<LeaveRequestDto> getAllByUserId(long id) {
+        List<LeaveRequestDto> list = new ArrayList<>();
+        UserEntity user = userService.getUserById(id);
+
+        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        return list;
+    }
+
+    @Override
     public Page<LeaveRequestDto> getLeaveRequestDtoFilteredPage(LeaveRequestFilter filter) {
         switch (filter.getOperation()) {
             case GREATER_THAN:

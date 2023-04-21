@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto getUserById(long id) {
+    public UserDto getUserDtoById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
             throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
         }
@@ -157,6 +157,13 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public UserEntity getUserById(long id) {
+        if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
+            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+        }
+        return  userRepository.findByIdAndDeletedIsFalse(id);
+    }
     @Override
     @Transactional
     public List<UserDto> getAllUserDtos() {
