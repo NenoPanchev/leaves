@@ -13,6 +13,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
+import com.example.leaves.service.specification.ContractService;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
@@ -40,13 +41,14 @@ public class UserServiceImpl implements UserService {
     private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
+    private final ContractService contractService;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
-                           @Lazy EmployeeInfoService employeeInfoService) {
+                           @Lazy EmployeeInfoService employeeInfoService, ContractService contractService) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -54,6 +56,7 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.typeEmployeeRepository = typeEmployeeRepository;
         this.employeeInfoService = employeeInfoService;
+        this.contractService = contractService;
     }
 
     @Override
@@ -257,7 +260,8 @@ public class UserServiceImpl implements UserService {
             entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
             entity.getEmployeeInfo().setEmployeeType(newType);
             if (shouldRemoveEmptyContract) {
-//                entity.getEmployeeInfo().removeContract();
+                ContractEntity contractToRemove = entity.getEmployeeInfo().getContracts().get(entity.getEmployeeInfo().getContracts().size() - 2);
+                contractService.deleteContract(contractToRemove);
             }
         }
 
@@ -273,7 +277,6 @@ public class UserServiceImpl implements UserService {
         ContractEntity lastContract = employeeInfo.getContracts().get(employeeInfo.getContracts().size() - 1);
         boolean shouldRemoveEmptyContract = false;
         if (lastContract.getStartDate().equals(today)) {
-//            lastContract.setTypeName(dto.getTypeName());
             lastContract.setEndDate(today);
             shouldRemoveEmptyContract = true;
         } else {

@@ -139,4 +139,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     public void removeContract(ContractEntity entity) {
         this.contracts.remove(entity);
     }
+
+    public void removeContract(int index) {
+        this.contracts.remove(index);
+    }
 }
