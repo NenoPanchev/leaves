@@ -7,10 +7,7 @@ import com.example.leaves.exceptions.RequestNotApproved;
 import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.LeaveRequest;
-import com.example.leaves.model.entity.TypeEmployee;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
@@ -254,21 +251,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
-        int currentYear = LocalDate.now().getYear();
-        int yearOfStart = employeeInfo.getContractStartDate().getYear();
-        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
-
-        if (yearOfStart < currentYear) {
-            return employeeInfo.getEmployeeType().getDaysLeave();
-        }
-
-        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
-        long actualDaysEmployed = DAYS.between(employeeInfo.getContractStartDate(), endOfYear) + 1;
-        double totalExpectedPaidLeave =
-                1.0 * actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave() / totalDaysInCurrentYear;
-
-        int result = (int) Math.round(totalExpectedPaidLeave);
-        return result;
+        return calculateTotalDays(employeeInfo.getContracts());
     }
 
     @Override
@@ -294,6 +277,51 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         int result = (int) Math.round(totalExpectedPaidLeave);
         int difference = result - expectedDaysForInitialContract;
         return difference;
+    }
+
+    @Override
+    public int findTheDifferenceTheNewContractWouldMake(EmployeeInfo employeeInfo) {
+        int totalDays = calculateTotalDays(employeeInfo.getContracts());
+        List<ContractEntity> contractsIfLastOneDidntExist = employeeInfo.getContracts();
+        contractsIfLastOneDidntExist.remove(contractsIfLastOneDidntExist.size() - 1);
+        contractsIfLastOneDidntExist.get(contractsIfLastOneDidntExist.size() - 1).setEndDate(null);
+        int daysIfThereWasNoNewContract = calculateTotalDays(contractsIfLastOneDidntExist);
+        return totalDays - daysIfThereWasNoNewContract;
+    }
+
+    private int calculateTotalDays(List<ContractEntity> contracts) {
+        int currentYear = LocalDate.now().getYear();
+        double sum = 0;
+        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
+
+        List<ContractEntity> contractsDuringCurrentYear =
+                contracts
+                        .stream()
+                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == currentYear)
+                        .collect(Collectors.toList());
+
+        for (ContractEntity contract : contractsDuringCurrentYear) {
+            sum+= calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
+        }
+
+        return (int) Math.round(sum);
+    }
+
+    private double calculateDaysPerContractPeriod(ContractEntity contract, int totalDaysInCurrentYear) {
+        int currentYear = LocalDate.now().getYear();
+        int yearOfStart = contract.getStartDate().getYear();
+        LocalDate startDate = contract.getStartDate();
+        if (yearOfStart < currentYear) {
+            startDate = LocalDate.of(currentYear, 1, 1);
+        }
+        LocalDate endDate = LocalDate.of(currentYear, 12, 31);
+        if (contract.getEndDate() != null) {
+            endDate = contract.getEndDate();
+        }
+        long days = DAYS.between(startDate, endDate) + 1;
+        int daysLeavePerContractType = typeService.getByName(contract.getTypeName()).getDaysLeave();
+        double paidLeavePerPeriod = 1.0 * days * daysLeavePerContractType / totalDaysInCurrentYear;
+        return paidLeavePerPeriod;
     }
 
     private int checkIfLeapYearAndGetTotalDays(int year) {

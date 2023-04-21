@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @EntityListeners(EntityListener.class)
@@ -44,6 +45,9 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
+
+    @OneToMany(cascade = {CascadeType.PERSIST})
+    private List<ContractEntity> contracts = new ArrayList<>();
 
     public EmployeeInfo() {
         this.setContractStartDate(LocalDate.now());
@@ -97,7 +101,9 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     public void setEmployeeType(TypeEmployee employeeType) {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
-//        setPaidLeave(employeeType.getDaysLeave());
+        if (this.getId() == null) {
+        setPaidLeave(employeeType.getDaysLeave());
+        }
     }
 
     public String getSsn() {
@@ -126,5 +132,11 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return dto;
     }
 
+    public void addContract(ContractEntity entity) {
+        this.contracts.add(entity);
+    }
 
+    public void removeContract(ContractEntity entity) {
+        this.contracts.remove(entity);
+    }
 }

@@ -293,3 +293,52 @@ create table if not exists leave_requests
 alter table leave_requests
     owner to postgres;
 
+create table if not exists contracts
+(
+    id
+                     bigserial
+        constraint
+            contracts_pk
+            primary
+                key,
+    created_at
+                     timestamp,
+    created_by
+                     varchar(255),
+    deleted          boolean,
+    last_modified_at timestamp,
+    last_modified_by varchar(255),
+    start_date date,
+    end_date date,
+    type_name varchar(255),
+    employee_info_id    bigint
+        constraint contracts_employee_info_id_fk
+            references employee_info
+);
+
+alter table contracts
+    owner to postgres;
+
+create table if not exists employee_info_contracts
+(
+    employee_info_id
+        bigint
+        not
+            null
+        constraint
+            contracts_employee_info_employee_info_id_fk
+            references
+                employee_info,
+
+    contracts_id
+        bigint
+        not
+            null
+        constraint
+            contracts_employee_info_contracts_id_fk
+            references
+                contracts
+);
+
+alter table employee_info_contracts
+    owner to postgres;

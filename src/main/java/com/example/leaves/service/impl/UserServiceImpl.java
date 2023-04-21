@@ -247,19 +247,33 @@ public class UserServiceImpl implements UserService {
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             return;
         }
+        boolean newTypeEmployee = !entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName());
+        boolean newStartDate = !entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate());
 
-        if (!entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+        if (newTypeEmployee) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            int difference = employeeInfoService.calculateDifferenceInPaidLeaveOnTypeChange(entity.getEmployeeInfo(), newType);
+            int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
             entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
+            updateContracts(entity.getEmployeeInfo(), employeeInfo);
             entity.getEmployeeInfo().setEmployeeType(newType);
         }
 
-        if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
+        if (newStartDate) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
             entity.getEmployeeInfo().setPaidLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
+    }
+
+    private void updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
+        LocalDate today = LocalDate.now();
+        ContractEntity lastContract = employeeInfo.getContracts().get(employeeInfo.getContracts().size() - 1);
+        if (lastContract.getStartDate().equals(today)) {
+            lastContract.setTypeName(dto.getTypeName());
+            return;
+        }
+        lastContract.setEndDate(today.minusDays(1));
+        employeeInfo.addContract(new ContractEntity(dto.getTypeName(), today, employeeInfo));
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -484,6 +498,7 @@ public class UserServiceImpl implements UserService {
         }
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
+        info.addContract(new ContractEntity(type.getTypeName(), startDate));
         info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
@@ -496,6 +511,7 @@ public class UserServiceImpl implements UserService {
         EmployeeInfo info = new EmployeeInfo();
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
+        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
         info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
