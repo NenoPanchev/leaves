@@ -56,4 +56,6 @@ public interface UserService {
     UserEntity getCurrentUser();
 
     List<UserEntity> getAllAdmins();
+
+    Long findIdByEmail(String name);
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 public class AuthenticationResponse {
     private final String jwt;
+    private Long id;
     private String email;
     private List<String> authorities;
 
@@ -32,4 +33,11 @@ public class AuthenticationResponse {
         this.authorities = authorities;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

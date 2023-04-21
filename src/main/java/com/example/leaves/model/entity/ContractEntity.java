@@ -36,6 +36,10 @@ public class ContractEntity extends BaseEntity{
         this.endDate = endDate;
     }
 
+    public ContractEntity(ContractEntity entityToCopy) {
+        this(entityToCopy.getTypeName(), entityToCopy.getStartDate(), entityToCopy.getEndDate(), entityToCopy.getEmployeeInfo());
+    }
+
     public EmployeeInfo getEmployeeInfo() {
         return employeeInfo;
     }

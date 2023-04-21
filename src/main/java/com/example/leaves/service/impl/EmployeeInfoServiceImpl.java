@@ -282,7 +282,12 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Override
     public int findTheDifferenceTheNewContractWouldMake(EmployeeInfo employeeInfo) {
         int totalDays = calculateTotalDays(employeeInfo.getContracts());
-        List<ContractEntity> contractsIfLastOneDidntExist = employeeInfo.getContracts();
+        List<ContractEntity> contractsIfLastOneDidntExist =
+                employeeInfo
+                        .getContracts()
+                        .stream()
+                        .map(ContractEntity::new)
+                        .collect(Collectors.toList());
         contractsIfLastOneDidntExist.remove(contractsIfLastOneDidntExist.size() - 1);
         contractsIfLastOneDidntExist.get(contractsIfLastOneDidntExist.size() - 1).setEndDate(null);
         int daysIfThereWasNoNewContract = calculateTotalDays(contractsIfLastOneDidntExist);

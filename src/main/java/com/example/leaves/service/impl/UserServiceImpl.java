@@ -252,10 +252,13 @@ public class UserServiceImpl implements UserService {
 
         if (newTypeEmployee) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            boolean shouldRemoveEmptyContract = updateContracts(entity.getEmployeeInfo(), employeeInfo);
             int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
             entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
-            updateContracts(entity.getEmployeeInfo(), employeeInfo);
             entity.getEmployeeInfo().setEmployeeType(newType);
+            if (shouldRemoveEmptyContract) {
+//                entity.getEmployeeInfo().removeContract();
+            }
         }
 
         if (newStartDate) {
@@ -265,15 +268,19 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
+    private boolean updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
         LocalDate today = LocalDate.now();
         ContractEntity lastContract = employeeInfo.getContracts().get(employeeInfo.getContracts().size() - 1);
+        boolean shouldRemoveEmptyContract = false;
         if (lastContract.getStartDate().equals(today)) {
-            lastContract.setTypeName(dto.getTypeName());
-            return;
+//            lastContract.setTypeName(dto.getTypeName());
+            lastContract.setEndDate(today);
+            shouldRemoveEmptyContract = true;
+        } else {
+            lastContract.setEndDate(today.minusDays(1));
         }
-        lastContract.setEndDate(today.minusDays(1));
         employeeInfo.addContract(new ContractEntity(dto.getTypeName(), today, employeeInfo));
+        return shouldRemoveEmptyContract;
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -442,6 +449,12 @@ public class UserServiceImpl implements UserService {
     public List<UserEntity> getAllAdmins() {
 
         return userRepository.findAllByRoleId(2L);
+    }
+
+    @Override
+    public Long findIdByEmail(String email) {
+        return userRepository.findIdByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     @Override
