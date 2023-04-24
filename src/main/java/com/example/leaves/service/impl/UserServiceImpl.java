@@ -504,8 +504,16 @@ public class UserServiceImpl implements UserService {
 
     private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
         EmployeeInfo info = new EmployeeInfo();
-        LocalDate startDate = employeeInfo.getContractStartDate() != null
-                ? employeeInfo.getContractStartDate() : LocalDate.now();
+        LocalDate startDate;
+        if (employeeInfo!=null)
+        {
+            startDate = employeeInfo.getContractStartDate() != null
+                    ? employeeInfo.getContractStartDate() : LocalDate.now();
+        }else
+        {
+            startDate=LocalDate.now();
+        }
+
         TypeEmployee type;
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             type = typeEmployeeRepository.findByTypeName("Trainee");

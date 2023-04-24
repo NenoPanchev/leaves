@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
         H2TestProfileJPAConfig.class
 })
 @RunWith(SpringRunner.class)
-@ActiveProfiles("testInMemory")
+@ActiveProfiles("test")
 class UserServiceImplTest {
     private UserEntity user, admin, testUser;
     private RoleEntity userRole, adminRole;
