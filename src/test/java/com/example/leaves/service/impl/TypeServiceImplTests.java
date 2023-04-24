@@ -4,11 +4,15 @@ package com.example.leaves.service.impl;
 import com.example.leaves.TestsHelper;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.model.dto.TypeEmployeeDto;
-import com.example.leaves.model.entity.TypeEmployee;
+import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.enums.DepartmentEnum;
+import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
+import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.TypeEmployeeService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,11 +22,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -32,19 +42,62 @@ public class TypeServiceImplTests {
     @MockBean
     TypeEmployeeRepository mockTypeRepository;
 
-    @Mock
-    UserRepository mockEmployeeRepository;
 
-    @InjectMocks
-    @Autowired
+    @MockBean
     TypeEmployeeServiceImpl mockTypeService;
 
+    @Mock
+    EmployeeInfoService employeeInfoService;
 
-    @Autowired
-    TypeEmployeeRepository repository;
-    @Autowired
-    TypeEmployeeService service;
+    @Mock
+    private PasswordEncoder mockPasswordEncoder;
+    private UserEntity user, admin, testUser;
 
+    private final List<TypeEmployee> types=new ArrayList<>();
+//    @BeforeEach
+//    void setUp() {
+//
+//
+//
+//        // Users
+//        user = new UserEntity();
+//        user.setEmail("user@user.com");
+//        user.setId(2L);
+//        user.setName("User User");
+//        user.setEmployeeInfo(new EmployeeInfo());
+//
+//
+//// Type
+//        TypeEmployee typeEmployee=new TypeEmployee();
+//        typeEmployee.setTypeName("Developer");
+//        typeEmployee.setDaysLeave(30);
+//        typeEmployee.setEmployeeWithType(new ArrayList<>());
+//        typeEmployee.getEmployeesWithType().add(user.getEmployeeInfo());
+//
+//
+//
+//
+//        TypeEmployee typeEmployee2=new TypeEmployee();
+//        typeEmployee.setTypeName("Horse");
+//        typeEmployee.setDaysLeave(35);
+//        typeEmployee.setEmployeeWithType(new ArrayList<>());
+//
+//        types.add(typeEmployee);
+//        types.add(typeEmployee2);
+//
+//        when(mockTypeRepository.findAllByDeletedIsFalse())
+//                .thenReturn(types);
+//
+//        when(mockPasswordEncoder.encode("1234"))
+//                .thenReturn("1234");
+//    }
+@BeforeEach
+void setUp() {
+
+    SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken("user@user.com", "1234"));
+
+}
     @Test
     void getAll_should_callRepository() {
         // Arrange
