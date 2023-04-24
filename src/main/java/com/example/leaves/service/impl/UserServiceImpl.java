@@ -67,14 +67,8 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // Get types of Employee
-        TypeEmployee trainee =new TypeEmployee();
-        trainee.setTypeName("Trainee");
-        trainee.setDaysLeave(20);
-        TypeEmployee developer = new TypeEmployee();
-        developer.setTypeName("Developer");
-        developer.setDaysLeave(25);
-        typeEmployeeRepository.save(trainee);
-        typeEmployeeRepository.save(developer);
+        TypeEmployee trainee = typeEmployeeRepository.findByTypeName("Trainee");
+        TypeEmployee developer = typeEmployeeRepository.findByTypeName("Developer");
 
         // Super Admin
         DepartmentEntity administration = departmentService.findByDepartment("Administration");
