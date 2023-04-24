@@ -172,11 +172,15 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
         } else {
 
-            if (pdfRequestForm.getSsn() != null &&
+            if (pdfRequestForm.getSsn() != null) {
+
+                words.put("egn", String.valueOf(pdfRequestForm.getSsn()));
+            } else if ( userOfRequest.getEmployeeInfo().getSsn()!=null&&
                     !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
 
                 words.put("egn", EncryptionUtil.decrypt(userOfRequest.getEmployeeInfo().getSsn()));
-            } else {
+            }
+            else  {
                 words.put("egn", " ");
             }
 
@@ -219,8 +223,9 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
                 employee.getEmployeeInfo().setPosition(pdfRequestForm.getPosition());
             }
+            employeeRepository.save(employee);
         }
-        employeeRepository.save(employee);
+
     }
 
     @Override

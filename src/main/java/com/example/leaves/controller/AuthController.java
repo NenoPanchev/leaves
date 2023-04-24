@@ -19,6 +19,7 @@ public interface AuthController {
     ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserDto authenticationRequest,
                                                 BindingResult bindingResult);
 
+
     @PostMapping("/refresh")
     ResponseEntity<?> refreshUserOnClientRefresh(@RequestBody RefreshRequest jwt);
 }
