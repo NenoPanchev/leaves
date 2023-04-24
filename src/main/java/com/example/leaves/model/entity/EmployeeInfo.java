@@ -46,7 +46,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
-    @OneToMany(cascade = {CascadeType.PERSIST})
+    @OneToMany(cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
 
     public EmployeeInfo() {

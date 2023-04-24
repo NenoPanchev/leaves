@@ -22,7 +22,7 @@ public abstract class BaseEntity<T extends BaseDto> {
     @Column(name = "lastModifiedAt")
     private LocalDateTime lastModifiedAt;
     @Column(name = "deleted")
-    private boolean deleted = Boolean.FALSE;
+    private boolean deleted ;
 
 
     public BaseEntity() {

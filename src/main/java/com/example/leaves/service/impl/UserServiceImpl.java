@@ -67,8 +67,8 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // Get types of Employee
-        TypeEmployee trainee = typeEmployeeRepository.findByTypeName("Trainee");
-        TypeEmployee developer = typeEmployeeRepository.findByTypeName("Developer");
+        TypeEmployee trainee = typeEmployeeRepository.findById(2L);
+        TypeEmployee developer = typeEmployeeRepository.findById(1L);
 
         // Super Admin
         DepartmentEntity administration = departmentService.findByDepartment("Administration");

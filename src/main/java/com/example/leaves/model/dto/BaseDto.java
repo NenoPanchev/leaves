@@ -11,6 +11,8 @@ public abstract class BaseDto {
     private String lastModifiedBy;
     private LocalDateTime lastModifiedAt;
 
+    private boolean isDeleted;
+
     public BaseDto() {
     }
 
@@ -56,4 +58,11 @@ public abstract class BaseDto {
         this.lastModifiedAt = lastModifiedAt;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 }

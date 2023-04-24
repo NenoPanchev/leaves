@@ -109,6 +109,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         dto.setCreatedBy(employee.getUserInfo().getName());
         dto.setApprovedEndDate(this.approvedEndDate);
         dto.setApprovedStartDate(this.approvedStartDate);
+        dto.setDeleted(isDeleted());
         if (this.approved != null) {
             dto.setApproved(this.approved);
         }
