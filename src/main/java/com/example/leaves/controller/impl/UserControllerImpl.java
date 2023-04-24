@@ -5,6 +5,7 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
@@ -23,11 +24,13 @@ import java.util.List;
 @RestController
 public class UserControllerImpl implements UserController {
     private final UserService userService;
+    private final ContractService contractService;
 
     private final EmployeeInfoService employeeInfoService;
 
-    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService) {
+    public UserControllerImpl(UserService userService, ContractService contractService, EmployeeInfoService employeeInfoService) {
         this.userService = userService;
+        this.contractService = contractService;
         this.employeeInfoService = employeeInfoService;
     }
 
@@ -98,9 +101,10 @@ public class UserControllerImpl implements UserController {
             }
         }
 
+        UserDto user = userService.updateUser(id, dto);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(userService.updateUser(id, dto));
+                .body(user);
     }
 
     @Override

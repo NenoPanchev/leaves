@@ -20,6 +20,7 @@ import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PredicateBuilderV2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -38,15 +39,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
     public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     private final EmailService emailService;
-    UserRepository employeeRepository;
-    LeaveRequestRepository leaveRequestRepository;
-    UserService userService;
+    private final UserRepository employeeRepository;
+    private final LeaveRequestRepository leaveRequestRepository;
+    private final UserService userService;
 
 
     @Autowired
     public LeaveRequestServiceImpl(UserRepository employeeRepository,
                                    LeaveRequestRepository leaveRequestRepository,
-                                   UserService userService,
+                                   @Lazy UserService userService,
                                    EmailService emailService) {
 
         this.employeeRepository = employeeRepository;

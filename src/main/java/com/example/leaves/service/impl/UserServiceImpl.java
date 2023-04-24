@@ -13,7 +13,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.service.specification.ContractService;
+import com.example.leaves.service.ContractService;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -234,17 +235,19 @@ public class UserServiceImpl implements UserService {
         }
         updateEmployeeInfo(entity, dto.getEmployeeInfo());
 
-        entity = userRepository.save(entity);
+        entity = userRepository.saveAndFlush(entity);
 
         sortEmployeeDepartmentRelation(entity, departmentEntity, initialEntityDepartmentName,
                 dto.getDepartment(), sameDepartment);
         if (entity.getDepartment() == null) {
-            userRepository.save(entity);
+            userRepository.saveAndFlush(entity);
         }
 
+        contractService.deleteDummyContracts();
         entity.toDto(dto);
         return dto;
     }
+
 
     private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
@@ -255,14 +258,10 @@ public class UserServiceImpl implements UserService {
 
         if (newTypeEmployee) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            boolean shouldRemoveEmptyContract = updateContracts(entity.getEmployeeInfo(), employeeInfo);
+            updateContracts(entity.getEmployeeInfo(), employeeInfo);
             int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
             entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
             entity.getEmployeeInfo().setEmployeeType(newType);
-            if (shouldRemoveEmptyContract) {
-                ContractEntity contractToRemove = entity.getEmployeeInfo().getContracts().get(entity.getEmployeeInfo().getContracts().size() - 2);
-                contractService.deleteContract(contractToRemove);
-            }
         }
 
         if (newStartDate) {
@@ -270,20 +269,19 @@ public class UserServiceImpl implements UserService {
             entity.getEmployeeInfo().setPaidLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
+
     }
 
-    private boolean updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
+
+    private void updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
         LocalDate today = LocalDate.now();
         ContractEntity lastContract = employeeInfo.getContracts().get(employeeInfo.getContracts().size() - 1);
-        boolean shouldRemoveEmptyContract = false;
         if (lastContract.getStartDate().equals(today)) {
             lastContract.setEndDate(today);
-            shouldRemoveEmptyContract = true;
         } else {
             lastContract.setEndDate(today.minusDays(1));
         }
         employeeInfo.addContract(new ContractEntity(dto.getTypeName(), today, employeeInfo));
-        return shouldRemoveEmptyContract;
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -522,7 +520,7 @@ public class UserServiceImpl implements UserService {
         }
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
-        info.addContract(new ContractEntity(type.getTypeName(), startDate));
+        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
         info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }

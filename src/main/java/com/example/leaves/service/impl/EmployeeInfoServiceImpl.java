@@ -299,6 +299,17 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return totalDays - daysIfThereWasNoNewContract;
     }
 
+    @Override
+    public void removeContracts(List<ContractEntity> dummyContracts) {
+        EmployeeInfo info = dummyContracts.get(0).getEmployeeInfo();
+        dummyContracts
+                .forEach(contract -> {
+                info.removeContract(contract);
+                employeeInfoRepository.save(info);
+    });
+
+    }
+
     private int calculateTotalDays(List<ContractEntity> contracts) {
         int currentYear = LocalDate.now().getYear();
         double sum = 0;
