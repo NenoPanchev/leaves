@@ -7,7 +7,9 @@ import java.util.List;
 public interface ContractService {
     void deleteContract(ContractEntity entity);
 
-    void deleteDummyContracts();
+    void deleteDummyContracts(List<ContractEntity> contracts);
 
     void saveAll(List<ContractEntity> contracts);
+
+    void save(ContractEntity contract);
 }
