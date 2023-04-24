@@ -1,10 +1,7 @@
 package com.example.leaves.service.impl;
 
 
-import com.example.leaves.exceptions.EntityNotFoundException;
-import com.example.leaves.exceptions.PdfInvalidException;
-import com.example.leaves.exceptions.RequestNotApproved;
-import com.example.leaves.exceptions.UnauthorizedException;
+import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.*;
@@ -294,7 +291,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                         .map(ContractEntity::new)
                         .collect(Collectors.toList());
         contractsIfLastOneDidntExist.remove(contractsIfLastOneDidntExist.size() - 1);
-        contractsIfLastOneDidntExist.get(contractsIfLastOneDidntExist.size() - 1).setEndDate(null);
+        contractsIfLastOneDidntExist.get(contractsIfLastOneDidntExist.size() - 1)
+                .setEndDate(null);
         int daysIfThereWasNoNewContract = calculateTotalDays(contractsIfLastOneDidntExist);
         return totalDays - daysIfThereWasNoNewContract;
     }
@@ -318,7 +316,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         List<ContractEntity> contractsDuringCurrentYear =
                 contracts
                         .stream()
-                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == currentYear)
+                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == currentYear
+                        && !c.getStartDate().equals(c.getEndDate()))
                         .collect(Collectors.toList());
 
         for (ContractEntity contract : contractsDuringCurrentYear) {

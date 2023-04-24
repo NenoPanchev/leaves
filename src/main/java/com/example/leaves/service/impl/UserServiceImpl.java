@@ -243,7 +243,6 @@ public class UserServiceImpl implements UserService {
             userRepository.saveAndFlush(entity);
         }
 
-        contractService.deleteDummyContracts();
         entity.toDto(dto);
         return dto;
     }
@@ -255,10 +254,10 @@ public class UserServiceImpl implements UserService {
         }
         boolean newTypeEmployee = !entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName());
         boolean newStartDate = !entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate());
-
+        boolean shouldDeleteDummyContracts = false;
         if (newTypeEmployee) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            updateContracts(entity.getEmployeeInfo(), employeeInfo);
+            shouldDeleteDummyContracts = updateContracts(entity.getEmployeeInfo(), employeeInfo);
             int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
             entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
             entity.getEmployeeInfo().setEmployeeType(newType);
@@ -266,22 +265,36 @@ public class UserServiceImpl implements UserService {
 
         if (newStartDate) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
+            entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
             entity.getEmployeeInfo().setPaidLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
+        if (shouldDeleteDummyContracts) {
+            contractService.deleteDummyContracts(entity.getEmployeeInfo().getContracts());
 
+        }
     }
 
 
-    private void updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
+    private boolean updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
         LocalDate today = LocalDate.now();
-        ContractEntity lastContract = employeeInfo.getContracts().get(employeeInfo.getContracts().size() - 1);
+        boolean shouldDeleteDummyContracts = false;
+        ContractEntity lastContract = employeeInfo
+                .getContracts()
+                .stream()
+                .filter(c -> c.getEndDate() == null)
+                .findFirst()
+                .orElseThrow(ObjectNotFoundException::new);
         if (lastContract.getStartDate().equals(today)) {
             lastContract.setEndDate(today);
+            shouldDeleteDummyContracts = true;
         } else {
             lastContract.setEndDate(today.minusDays(1));
         }
-        employeeInfo.addContract(new ContractEntity(dto.getTypeName(), today, employeeInfo));
+        ContractEntity newContract = new ContractEntity(dto.getTypeName(), today, employeeInfo);
+        contractService.save(newContract);
+        employeeInfo.addContract(newContract);
+        return shouldDeleteDummyContracts;
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
