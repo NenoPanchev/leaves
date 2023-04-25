@@ -6,6 +6,7 @@ import com.example.leaves.controller.AuthController;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.RefreshRequest;
+import com.example.leaves.model.payload.request.UserLoginDto;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
 import com.example.leaves.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,7 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> createAuthenticationToken(UserDto authenticationRequest, BindingResult bindingResult) {
+    public ResponseEntity<?> createAuthenticationToken(UserLoginDto authenticationRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }

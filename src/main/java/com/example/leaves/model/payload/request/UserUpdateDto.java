@@ -1,6 +1,7 @@
-package com.example.leaves.model.dto;
+package com.example.leaves.model.payload.request;
 
-import com.example.leaves.util.validators.FieldMatch;
+import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.model.dto.RoleDto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import javax.validation.Valid;
@@ -9,23 +10,15 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.util.List;
 
-@FieldMatch(
-        first = "password",
-        second = "confirmPassword",
-        message = "Passwords must match"
-)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDto extends BaseDto {
+public class UserUpdateDto {
     private String name;
     private String email;
-    private String password;
-    private String confirmPassword;
     private String department;
     private List<RoleDto> roles;
-
     private EmployeeInfoDto employeeInfo;
 
-    public UserDto() {
+    public UserUpdateDto() {
     }
 
     @Size(min = 2, max = 20, message = "Username must be between 2 and 20 characters")
@@ -45,15 +38,6 @@ public class UserDto extends BaseDto {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    @Size(min = 4, max = 20, message = "Password must be between 4 and 20 characters")
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public List<@Valid RoleDto> getRoles() {
@@ -80,11 +64,4 @@ public class UserDto extends BaseDto {
         this.employeeInfo = employeeInfoDto;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
 }

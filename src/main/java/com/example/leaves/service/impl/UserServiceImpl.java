@@ -2,10 +2,14 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.PasswordsNotMatchingException;
+import com.example.leaves.exceptions.SameNewPasswordException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.model.payload.request.PasswordChangeDto;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
@@ -17,6 +21,7 @@ import com.example.leaves.service.ContractService;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,7 +35,6 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,13 +47,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
     private final ContractService contractService;
+    private final ModelMapper modelMapper;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
-                           @Lazy EmployeeInfoService employeeInfoService, ContractService contractService) {
+                           @Lazy EmployeeInfoService employeeInfoService, ContractService contractService, ModelMapper modelMapper) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -58,6 +63,7 @@ public class UserServiceImpl implements UserService {
         this.typeEmployeeRepository = typeEmployeeRepository;
         this.employeeInfoService = employeeInfoService;
         this.contractService = contractService;
+        this.modelMapper = modelMapper;
     }
 
     @Override
@@ -213,11 +219,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto updateUser(Long id, UserDto dto) {
+    public UserDto updateUser(Long id, UserUpdateDto updateDto) {
         if (id == 1) {
             throw new IllegalArgumentException("You cannot modify SUPER_ADMIN");
         }
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+        UserDto dto = modelMapper.map(updateDto, UserDto.class);
         UserEntity entity = userRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
         String initialEntityDepartmentName = entity.getDepartment() == null ? "" : entity.getDepartment().getName();
@@ -469,6 +475,24 @@ public class UserServiceImpl implements UserService {
     public Long findIdByEmail(String email) {
         return userRepository.findIdByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    @Override
+    public void changePassword(Long id, PasswordChangeDto dto) {
+        UserEntity entity = userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        if (!dto.getNewPassword().equals(dto.getNewPasswordConfirm())) {
+            throw new PasswordsNotMatchingException("New passwords and confirmation must match!");
+        }
+        if (!passwordEncoder.matches(dto.getOldPassword(), entity.getPassword())) {
+            throw new PasswordsNotMatchingException("Incorrect old password!");
+        }
+        if (dto.getOldPassword().equals(dto.getNewPassword())) {
+            throw new SameNewPasswordException("New password must not match the previous!");
+        }
+
+        entity.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(entity);
     }
 
     @Override

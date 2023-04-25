@@ -2,6 +2,8 @@ package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.payload.request.PasswordChangeDto;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.mapstruct.Context;
 import org.springframework.core.io.ByteArrayResource;
@@ -50,7 +52,13 @@ public interface UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto dto,
+    ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserUpdateDto dto,
+                                       @PathVariable("id") Long id,
+                                       BindingResult bindingResult);
+
+    @PutMapping("/change-password/{id}")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity changePassword(@Valid @RequestBody PasswordChangeDto dto,
                                        @PathVariable("id") Long id,
                                        BindingResult bindingResult);
 

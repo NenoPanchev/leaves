@@ -5,6 +5,8 @@ import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.payload.request.PasswordChangeDto;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
@@ -91,7 +93,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<UserDto> updateUser(UserDto dto, Long id, BindingResult bindingResult) {
+    public ResponseEntity<UserDto> updateUser(UserUpdateDto dto, Long id, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
@@ -105,6 +107,17 @@ public class UserControllerImpl implements UserController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(user);
+    }
+
+    @Override
+    public ResponseEntity changePassword(PasswordChangeDto dto, Long id, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+        userService.changePassword(id, dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
     }
 
     @Override

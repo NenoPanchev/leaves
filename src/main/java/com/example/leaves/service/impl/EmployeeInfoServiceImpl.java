@@ -385,21 +385,4 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .getEmployeeInfo()
                 .toDto();
     }
-
-//    @Override
-//    public List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees() {
-//        getAll().forEach(EmployeeInfoDto::resetAnnualLeave);
-//        return getAll();
-//    }
-    //TODO
-
-    public int findAnnualPaidLeave(long employeeId) {
-        return employeeRepository.findEmployeeInfoById(employeeId).getPaidLeave();
-    }
-
-    private int getDaysLeavePerMonthsExperience(double monthsWorked, int annualPaidLeaveByContract) {
-        double deservedPaidLeave = monthsWorked * annualPaidLeaveByContract / 12;
-        int round = (int) Math.round(deservedPaidLeave);
-        return round;
-    }
 }

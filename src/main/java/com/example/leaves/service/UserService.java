@@ -3,6 +3,8 @@ package com.example.leaves.service;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.payload.request.PasswordChangeDto;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,7 +24,7 @@ public interface UserService {
 
     void softDeleteUser(Long id);
 
-    UserDto updateUser(Long id, UserDto dto);
+    UserDto updateUser(Long id, UserUpdateDto dto);
 
     boolean existsByEmailAndDeletedIsFalse(String email);
 
@@ -58,4 +60,6 @@ public interface UserService {
     List<UserEntity> getAllAdmins();
 
     Long findIdByEmail(String name);
+
+    void changePassword(Long id, PasswordChangeDto dto);
 }

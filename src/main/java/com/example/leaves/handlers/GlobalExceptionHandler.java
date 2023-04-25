@@ -1,9 +1,6 @@
 package com.example.leaves.handlers;
 
-import com.example.leaves.exceptions.BaseCustomException;
-import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.exceptions.ResourceAlreadyExistsException;
-import com.example.leaves.exceptions.ValidationException;
+import com.example.leaves.exceptions.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.Value;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = ObjectNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ResponseEntity<Object> handleObjectNotFound(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
@@ -27,6 +25,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(value = ValidationException.class)
     protected ResponseEntity<Object> handleBadRequests(
             RuntimeException ex, WebRequest request) {
@@ -34,7 +33,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
-
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(value = ResourceAlreadyExistsException.class)
     protected ResponseEntity<Object> handleExistingResources(
             RuntimeException ex, WebRequest request) {
@@ -43,6 +42,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
+    @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDenied(
             RuntimeException ex, WebRequest request) {
@@ -51,6 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(value
             = {IllegalArgumentException.class, IllegalStateException.class})
     protected ResponseEntity<Object> handleConflict(
@@ -71,12 +72,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     }
 
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(value = ExpiredJwtException.class)
     protected ResponseEntity<Object> handleJwtExpired(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = PasswordsNotMatchingException.class)
+    protected ResponseEntity<Object> handlePasswordsNotMatching(
+            RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = ex.getMessage();
+        return handleExceptionInternal(ex, bodyOfResponse,
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(value = SameNewPasswordException.class)
+    protected ResponseEntity<Object> handleSameNewPassword(
+            RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = ex.getMessage();
+        return handleExceptionInternal(ex, bodyOfResponse,
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
     @Value
