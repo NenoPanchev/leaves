@@ -488,7 +488,7 @@ public class UserServiceImpl implements UserService {
             throw new PasswordsNotMatchingException("Incorrect old password!");
         }
         if (dto.getOldPassword().equals(dto.getNewPassword())) {
-            throw new SameNewPasswordException("New password must not match the previous!");
+            throw new SameNewPasswordException("New password can not match the previous one!");
         }
 
         entity.setPassword(passwordEncoder.encode(dto.getNewPassword()));
