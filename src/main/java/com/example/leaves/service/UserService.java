@@ -19,7 +19,9 @@ public interface UserService {
     UserEntity findByEmail(String email);
 
     UserDto getUserDtoById(long id);
+
     UserEntity getUserById(long id);
+
     void deleteUser(Long id);
 
     void softDeleteUser(Long id);
@@ -62,4 +64,6 @@ public interface UserService {
     Long findIdByEmail(String name);
 
     void changePassword(Long id, PasswordChangeDto dto);
+
+    void sendChangePasswordToken(Long id);
 }

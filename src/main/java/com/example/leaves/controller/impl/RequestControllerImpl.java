@@ -38,10 +38,11 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public  List<LeaveRequestDto> getAllByUserId(@PathVariable long id) {
+    public List<LeaveRequestDto> getAllByUserId(@PathVariable long id) {
 
         return leaveRequestService.getAllByUserId(id);
     }
+
     @Override
     public List<LeaveRequestDto> getAllFilter(LeaveRequestFilter filter) {
         return leaveRequestService.getAllFilter(filter);

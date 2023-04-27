@@ -121,6 +121,14 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
+    public ResponseEntity<?> sendChangePasswordToken(Long id) {
+        userService.sendChangePasswordToken(id);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @Override
     public ResponseEntity<String> deleteUser(Long id) {
         userService.softDeleteUser(id);
         return ResponseEntity

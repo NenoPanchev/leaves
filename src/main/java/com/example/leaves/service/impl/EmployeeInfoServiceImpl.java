@@ -1,7 +1,10 @@
 package com.example.leaves.service.impl;
 
 
-import com.example.leaves.exceptions.*;
+import com.example.leaves.exceptions.EntityNotFoundException;
+import com.example.leaves.exceptions.PdfInvalidException;
+import com.example.leaves.exceptions.RequestNotApproved;
+import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.*;
@@ -25,7 +28,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static java.time.temporal.ChronoUnit.MONTHS;
 
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
@@ -172,12 +174,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             if (pdfRequestForm.getSsn() != null) {
 
                 words.put("egn", String.valueOf(pdfRequestForm.getSsn()));
-            } else if ( userOfRequest.getEmployeeInfo().getSsn()!=null&&
+            } else if (userOfRequest.getEmployeeInfo().getSsn() != null &&
                     !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
 
                 words.put("egn", EncryptionUtil.decrypt(userOfRequest.getEmployeeInfo().getSsn()));
-            }
-            else  {
+            } else {
                 words.put("egn", " ");
             }
 
@@ -302,9 +303,9 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         EmployeeInfo info = dummyContracts.get(0).getEmployeeInfo();
         dummyContracts
                 .forEach(contract -> {
-                info.removeContract(contract);
-                employeeInfoRepository.save(info);
-    });
+                    info.removeContract(contract);
+                    employeeInfoRepository.save(info);
+                });
 
     }
 
@@ -317,11 +318,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 contracts
                         .stream()
                         .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == currentYear
-                        && !c.getStartDate().equals(c.getEndDate()))
+                                && !c.getStartDate().equals(c.getEndDate()))
                         .collect(Collectors.toList());
 
         for (ContractEntity contract : contractsDuringCurrentYear) {
-            sum+= calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
+            sum += calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
         }
 
         return (int) Math.round(sum);

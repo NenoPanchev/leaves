@@ -42,9 +42,9 @@ public interface RoleController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
-    public ResponseEntity<RoleDto> updateRole(@PathVariable("id") Long id,
-                                              @Valid @RequestBody RoleDto dto,
-                                              BindingResult bindingResult);
+    ResponseEntity<RoleDto> updateRole(@PathVariable("id") Long id,
+                                       @Valid @RequestBody RoleDto dto,
+                                       BindingResult bindingResult);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")

@@ -4,7 +4,6 @@ import com.example.leaves.config.jwt.JwtUtil;
 import com.example.leaves.config.services.AppUserDetailService;
 import com.example.leaves.controller.AuthController;
 import com.example.leaves.exceptions.ValidationException;
-import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.RefreshRequest;
 import com.example.leaves.model.payload.request.UserLoginDto;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
@@ -27,7 +26,11 @@ public class AuthControllerImpl implements AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    public AuthControllerImpl(AuthenticationManager authenticationManager, AppUserDetailService userDetailService, UserService userService, JwtUtil jwtUtil) {
+    public AuthControllerImpl(AuthenticationManager authenticationManager,
+                              AppUserDetailService userDetailService,
+                              UserService userService,
+                              JwtUtil jwtUtil) {
+
         this.authenticationManager = authenticationManager;
         this.userDetailService = userDetailService;
         this.userService = userService;

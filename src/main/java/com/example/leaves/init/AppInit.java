@@ -50,7 +50,7 @@ public class AppInit implements CommandLineRunner {
         employeeInfo.setEmployeeType(trainee);
         List<ContractEntity> contracts = new ArrayList<>();
         ContractEntity first = new ContractEntity("Trainee", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 3, 31), employeeInfo);
-        ContractEntity second = new ContractEntity("Developer", LocalDate.of(2023, 4,1), LocalDate.of(2023, 6, 30), employeeInfo);
+        ContractEntity second = new ContractEntity("Developer", LocalDate.of(2023, 4, 1), LocalDate.of(2023, 6, 30), employeeInfo);
         ContractEntity third = new ContractEntity("Trainee", LocalDate.of(2023, 7, 1), LocalDate.of(2023, 9, 30), employeeInfo);
         ContractEntity fourth = new ContractEntity("Developer", LocalDate.of(2023, 10, 1), employeeInfo);
 //        contracts.add(first);
@@ -87,7 +87,7 @@ public class AppInit implements CommandLineRunner {
                         .collect(Collectors.toList());
 
         for (ContractEntity contract : contractsDuringCurrentYear) {
-            sum+= calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
+            sum += calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
         }
 
         return (int) Math.round(sum);

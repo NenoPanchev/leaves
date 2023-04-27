@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-public class ContractDto extends BaseDto{
+public class ContractDto extends BaseDto {
     private EmployeeInfoDto employeeInfo;
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private LocalDate startDate;

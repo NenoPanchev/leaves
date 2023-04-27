@@ -16,6 +16,8 @@ public class PasswordChangeDto {
     private String newPassword;
     private String newPasswordConfirm;
 
+    private String token;
+
 
     public PasswordChangeDto() {
     }
@@ -45,5 +47,13 @@ public class PasswordChangeDto {
 
     public void setNewPasswordConfirm(String newPasswordConfirm) {
         this.newPasswordConfirm = newPasswordConfirm;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

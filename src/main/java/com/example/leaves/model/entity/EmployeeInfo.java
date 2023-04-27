@@ -102,7 +102,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
         if (this.getId() == null) {
-        setPaidLeave(employeeType.getDaysLeave());
+            setPaidLeave(employeeType.getDaysLeave());
         }
     }
 

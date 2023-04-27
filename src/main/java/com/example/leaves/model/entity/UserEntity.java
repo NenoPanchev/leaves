@@ -39,6 +39,10 @@ public class UserEntity extends BaseEntity<UserDto> {
     @JoinColumn(name = "employee_info_id")
     private EmployeeInfo employeeInfo;
 
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PasswordResetToken token;
+
     public UserEntity() {
         this.roles = new ArrayList<>();
     }
@@ -130,6 +134,18 @@ public class UserEntity extends BaseEntity<UserDto> {
     public void removeRole(RoleEntity role) {
         this.roles.remove(role);
     }
+
+    public PasswordResetToken getToken() {
+        return token;
+    }
+
+    public void setToken(PasswordResetToken token) {
+        if (this.token != null) {
+            this.getToken().dismissUser();
+        }
+        this.token = token;
+    }
+
 
     public EmployeeInfo getEmployeeInfo() {
         return employeeInfo;

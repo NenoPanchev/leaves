@@ -17,4 +17,9 @@ public interface EmailService {
                                          String recipientEmail,
                                          String subject,
                                          LeaveRequest request) throws MessagingException;
+
+    void sendChangePasswordToken(
+            final String recipientName,
+            final String recipientEmail,
+            String Token) throws MessagingException;
 }

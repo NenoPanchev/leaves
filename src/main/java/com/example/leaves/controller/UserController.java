@@ -59,8 +59,12 @@ public interface UserController {
     @PutMapping("/change-password/{id}")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity changePassword(@Valid @RequestBody PasswordChangeDto dto,
-                                       @PathVariable("id") Long id,
-                                       BindingResult bindingResult);
+                                  @PathVariable("id") Long id,
+                                  BindingResult bindingResult);
+
+    @PutMapping("/change-password-token/{id}")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<?> sendChangePasswordToken(@PathVariable("id") Long id);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
@@ -87,6 +91,7 @@ public interface UserController {
     @GetMapping("/current")
     @PreAuthorize("hasAuthority('READ')")
     UserDto getCurrentUser();
+
     @PostMapping("/notify")
     @PreAuthorize("hasAuthority('READ')")
     void notifyUsersOfTheirPaidLeave();

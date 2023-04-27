@@ -23,6 +23,8 @@ public class EmailServiceImpl implements EmailService {
             " has requested a paid leave!\n" +
             "Start date: %s\n" +
             "End date: %s\n";
+    public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is:%s";
+    public static final String CHANGE_PASSWORD_TOKEN_SUBJECT = "Password Change";
     private final JavaMailSender emailSender;
     private final TemplateEngine templateEngine;
 
@@ -62,6 +64,21 @@ public class EmailServiceImpl implements EmailService {
         // Send mail
         this.emailSender.send(mimeMessage);
 
+    }
+
+    @Override
+    public void sendChangePasswordToken(String recipientName,
+                                        String recipientEmail,
+                                        String Token) throws MessagingException {
+        final Context ctx = prepareContext(recipientName,
+                String.format(CHANGE_PASSWORD_TOKEN_MSG,
+                        Token));
+
+        // Prepare message using a Spring helper
+        final MimeMessage mimeMessage = prepareMimeMsg(recipientEmail, CHANGE_PASSWORD_TOKEN_SUBJECT, ctx);
+
+        // Send mail
+        this.emailSender.send(mimeMessage);
     }
 
     private Context prepareContext(String recipientName, String Content) {

@@ -1,26 +1,21 @@
 package com.example.leaves.service.impl;
 
-import com.example.leaves.exceptions.EntityNotFoundException;
-import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.exceptions.PasswordsNotMatchingException;
-import com.example.leaves.exceptions.SameNewPasswordException;
+import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.entity.*;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
+import com.example.leaves.repository.PasswordResetTokenRepository;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.DepartmentService;
-import com.example.leaves.service.EmployeeInfoService;
-import com.example.leaves.service.RoleService;
-import com.example.leaves.service.UserService;
+import com.example.leaves.service.*;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.service.ContractService;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.TokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -35,6 +30,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,10 +43,14 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
     private final ContractService contractService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailService emailService;
     private final ModelMapper modelMapper;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
+                           @Lazy PasswordResetTokenRepository passwordResetTokenRepository,
+                           @Lazy EmailService emailService,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
@@ -64,6 +64,8 @@ public class UserServiceImpl implements UserService {
         this.employeeInfoService = employeeInfoService;
         this.contractService = contractService;
         this.modelMapper = modelMapper;
+        this.emailService = emailService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Override
@@ -172,8 +174,9 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
             throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
         }
-        return  userRepository.findByIdAndDeletedIsFalse(id);
+        return userRepository.findByIdAndDeletedIsFalse(id);
     }
+
     @Override
     @Transactional
     public List<UserDto> getAllUserDtos() {
@@ -481,6 +484,16 @@ public class UserServiceImpl implements UserService {
     public void changePassword(Long id, PasswordChangeDto dto) {
         UserEntity entity = userRepository
                 .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+
+        changePasswordTokenValidation(dto, entity);
+
+        passwordValidation(dto, entity);
+
+        entity.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(entity);
+    }
+
+    private void passwordValidation(PasswordChangeDto dto, UserEntity entity) {
         if (!dto.getNewPassword().equals(dto.getNewPasswordConfirm())) {
             throw new PasswordsNotMatchingException("New passwords and confirmation must match!");
         }
@@ -490,8 +503,47 @@ public class UserServiceImpl implements UserService {
         if (dto.getOldPassword().equals(dto.getNewPassword())) {
             throw new SameNewPasswordException("New password can not match the previous one!");
         }
+    }
 
-        entity.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+    private void changePasswordTokenValidation(PasswordChangeDto dto, UserEntity entity) {
+        if (entity.getToken() == null) {
+            throw new PasswordChangeTokenNotCreatedException("Token was not created.");
+        } else {
+
+            if (!entity.getToken().getToken().equals(dto.getToken())) {
+                throw new PasswordChangeTokenDoesNotMatchException("Tokens does not match.");
+            }
+
+            if (entity.getToken().getExpiryDate().isBefore(LocalDateTime.now())) {
+                throw new PasswordChangeTokenExpiredException("Your token is expired.");
+            }
+
+
+        }
+    }
+
+    @Override
+    public void sendChangePasswordToken(Long id) {
+
+        String token = TokenUtil.getTokenBytes();
+        UserEntity entity = userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+
+        createPasswordResetTokenForUser(entity, token);
+
+//        try {
+//            //TODO UNCOMMENT WHEN EMAIL READY
+//            emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
+//        } catch (MessagingException e) {
+//            //TODO CHANGE EXCEPTION
+//            throw new RuntimeException(e);
+//        }
+    }
+
+    private void createPasswordResetTokenForUser(UserEntity entity, String token) {
+
+        PasswordResetToken myToken = new PasswordResetToken(token, entity);
+        entity.setToken(myToken);
         userRepository.save(entity);
     }
 
@@ -540,13 +592,11 @@ public class UserServiceImpl implements UserService {
     private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
         EmployeeInfo info = new EmployeeInfo();
         LocalDate startDate;
-        if (employeeInfo!=null)
-        {
+        if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null
                     ? employeeInfo.getContractStartDate() : LocalDate.now();
-        }else
-        {
-            startDate=LocalDate.now();
+        } else {
+            startDate = LocalDate.now();
         }
 
         TypeEmployee type;

@@ -2,12 +2,15 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.ContractDto;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "contracts")
-public class ContractEntity extends BaseEntity{
+public class ContractEntity extends BaseEntity {
     @ManyToOne()
     private EmployeeInfo employeeInfo;
     @Column(nullable = false)
@@ -24,11 +27,13 @@ public class ContractEntity extends BaseEntity{
         this.typeName = typeName;
         this.startDate = startDate;
     }
+
     public ContractEntity(String typeName, LocalDate startDate, EmployeeInfo employeeInfo) {
         this.typeName = typeName;
         this.startDate = startDate;
         this.employeeInfo = employeeInfo;
     }
+
     public ContractEntity(String typeName, LocalDate startDate, LocalDate endDate, EmployeeInfo employeeInfo) {
         this.typeName = typeName;
         this.startDate = startDate;

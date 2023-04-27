@@ -1,6 +1,5 @@
 package com.example.leaves.controller;
 
-import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.RefreshRequest;
 import com.example.leaves.model.payload.request.UserLoginDto;
 import org.springframework.http.ResponseEntity;

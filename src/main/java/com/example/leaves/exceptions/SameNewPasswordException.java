@@ -1,6 +1,6 @@
 package com.example.leaves.exceptions;
 
-public class SameNewPasswordException extends BaseCustomException{
+public class SameNewPasswordException extends BaseCustomException {
     public SameNewPasswordException(String message, String type) {
         super(message, type);
     }

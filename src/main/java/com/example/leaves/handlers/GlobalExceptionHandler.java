@@ -33,6 +33,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(value = ResourceAlreadyExistsException.class)
     protected ResponseEntity<Object> handleExistingResources(

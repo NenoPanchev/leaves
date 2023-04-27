@@ -18,9 +18,11 @@ public interface RequestController {
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
     List<LeaveRequestDto> getAllByCurrentUser();
+
     @GetMapping("/employee/{id}")
     @PreAuthorize("hasAuthority('READ')")
     List<LeaveRequestDto> getAllByUserId(@PathVariable long id);
+
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
     List<LeaveRequestDto> getAllFilter(@RequestBody LeaveRequestFilter searchCriteria);

@@ -38,7 +38,7 @@ public class EncryptionUtil {
             } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException |
                      InvalidKeySpecException | BadPaddingException | IllegalBlockSizeException |
                      NoSuchPaddingException e) {
-                System.out.println("Error occured during encryption: " + e.toString());
+                System.out.println("Error occured during encryption: " + e);
             }
         }
         return null;

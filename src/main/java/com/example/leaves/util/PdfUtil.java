@@ -19,7 +19,7 @@ import java.util.Map;
 public class PdfUtil {
     private static final String OUTPUTFILE = "C:/Users/Vladimir/Desktop/ReadPdfssssddddddss.pdf";
 
-    private static String FILE = "src/main/resources/docx/отпуск.docx";
+    private static final String FILE = "src/main/resources/docx/отпуск.docx";
 
     public static byte[] replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
         try {

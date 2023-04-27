@@ -48,9 +48,9 @@ public class ContractServiceImpl implements ContractService {
                 .orElseThrow(ObjectNotFoundException::new);
         ContractEntity secondContract = contracts
                 .stream()
-                        .filter(c -> c.getStartDate().equals(today) && c.getEndDate() == null)
-                                .findFirst()
-                                        .orElseThrow(ObjectNotFoundException::new);
+                .filter(c -> c.getStartDate().equals(today) && c.getEndDate() == null)
+                .findFirst()
+                .orElseThrow(ObjectNotFoundException::new);
         if (firstContract.getTypeName().equals(secondContract.getTypeName())) {
             dummyContracts.add(secondContract);
             firstContract.setEndDate(null);
