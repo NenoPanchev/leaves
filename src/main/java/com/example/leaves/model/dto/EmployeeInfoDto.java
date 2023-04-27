@@ -12,6 +12,8 @@ public class EmployeeInfoDto extends UserDto {
     private long typeId;
 
     private int daysLeave;
+    private int carryoverDaysLeave;
+    private int currentYearDaysLeave;
 
     private LocalDate contractStartDate;
 
@@ -78,5 +80,21 @@ public class EmployeeInfoDto extends UserDto {
 
     public void setContractStartDate(LocalDate contractStartDate) {
         this.contractStartDate = contractStartDate;
+    }
+
+    public int getCarryoverDaysLeave() {
+        return carryoverDaysLeave;
+    }
+
+    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
+        this.carryoverDaysLeave = carryoverDaysLeave;
+    }
+
+    public int getCurrentYearDaysLeave() {
+        return currentYearDaysLeave;
+    }
+
+    public void setCurrentYearDaysLeave(int currentYearDaysLeave) {
+        this.currentYearDaysLeave = currentYearDaysLeave;
     }
 }

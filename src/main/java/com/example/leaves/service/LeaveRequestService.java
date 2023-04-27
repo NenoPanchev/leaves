@@ -35,4 +35,6 @@ public interface LeaveRequestService {
     List<LeaveRequestDto> getAllByUserId(long id);
 
 //    LeaveRequest getByDateBetween();
+
+    int getAllApprovedDaysInYear(int year);
 }

@@ -268,14 +268,14 @@ public class UserServiceImpl implements UserService {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
             shouldDeleteDummyContracts = updateContracts(entity.getEmployeeInfo(), employeeInfo);
             int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
-            entity.getEmployeeInfo().setPaidLeave(entity.getEmployeeInfo().getPaidLeave() + difference);
+            entity.getEmployeeInfo().setDaysLeave(entity.getEmployeeInfo().getDaysLeave() + difference);
             entity.getEmployeeInfo().setEmployeeType(newType);
         }
 
         if (newStartDate) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
             entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().setPaidLeave(
+            entity.getEmployeeInfo().setDaysLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
         }
         if (shouldDeleteDummyContracts) {
@@ -608,7 +608,7 @@ public class UserServiceImpl implements UserService {
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
+        info.setDaysLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
 
@@ -621,7 +621,7 @@ public class UserServiceImpl implements UserService {
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        info.setPaidLeave(employeeInfoService.calculateInitialPaidLeave(info));
+        info.setDaysLeave(employeeInfoService.calculateInitialPaidLeave(info));
         entity.setEmployeeInfo(info);
     }
 }

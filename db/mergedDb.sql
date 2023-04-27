@@ -142,6 +142,18 @@ create table if not exists employee_info
             20
         not
             null,
+    carryover_days_leave
+        integer
+        default
+            0
+        not
+            null,
+    current_year_days_leave
+        integer
+        default
+            20
+        not
+            null,
     contract_start_date
         date,
     created_at

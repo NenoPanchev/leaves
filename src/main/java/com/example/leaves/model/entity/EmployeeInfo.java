@@ -26,8 +26,11 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @JsonBackReference
     private TypeEmployee employeeType;
     @Column(name = "days_leave")
-    private int paidLeave;
-
+    private int daysLeave;
+    @Column(name = "carryover_days_leave")
+    private int carryoverDaysLeave;
+    @Column(name = "current_year_days_leave")
+    private int currentYearDaysLeave;
     @Column(name = "contract_start_date")
     private LocalDate contractStartDate;
 
@@ -54,10 +57,16 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     }
 
     public void subtractFromAnnualPaidLeave(int days) {
-        if (paidLeave - days < 0) {
-            throw new PaidleaveNotEnoughException(days, this.paidLeave);
+        if (daysLeave - days < 0) {
+            throw new PaidleaveNotEnoughException(days, this.daysLeave);
         } else {
-            setPaidLeave(paidLeave - days);
+            setDaysLeave(daysLeave - days);
+            if (days >= this.carryoverDaysLeave) {
+                setCurrentYearDaysLeave(this.daysLeave + this.carryoverDaysLeave - days);
+                setCarryoverDaysLeave(0);
+            } else {
+                setCarryoverDaysLeave(this.carryoverDaysLeave - days);
+            }
         }
 
     }
@@ -70,12 +79,28 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         this.userInfo = userInfo;
     }
 
-    public int getPaidLeave() {
-        return paidLeave;
+    public int getDaysLeave() {
+        return daysLeave;
     }
 
-    public void setPaidLeave(int paidLeave) {
-        this.paidLeave = paidLeave;
+    public void setDaysLeave(int paidLeave) {
+        this.daysLeave = daysLeave;
+    }
+
+    public int getCarryoverDaysLeave() {
+        return carryoverDaysLeave;
+    }
+
+    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
+        this.carryoverDaysLeave = carryoverDaysLeave;
+    }
+
+    public int getCurrentYearDaysLeave() {
+        return currentYearDaysLeave;
+    }
+
+    public void setCurrentYearDaysLeave(int currentYearDaysLeave) {
+        this.currentYearDaysLeave = currentYearDaysLeave;
     }
 
     public void removeRequest(LeaveRequest leaveRequest) {
@@ -87,7 +112,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     }
 
     public boolean checkIfPossibleToSubtractFromAnnualPaidLeave(int days) {
-        return paidLeave - days >= 0 && days > 0;
+        return daysLeave - days >= 0 && days > 0;
     }
 
     public List<LeaveRequest> getRequests() {
@@ -102,7 +127,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
         if (this.getId() == null) {
-            setPaidLeave(employeeType.getDaysLeave());
+            setDaysLeave(employeeType.getDaysLeave());
         }
     }
 
@@ -115,7 +140,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     }
 
     public void resetAnnualLeave() {
-        setPaidLeave(employeeType.getDaysLeave());
+        setDaysLeave(employeeType.getDaysLeave());
     }
 
     public EmployeeInfoDto toDto() {
@@ -123,7 +148,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setTypeId(this.getEmployeeType().getId());
         dto.setTypeName(this.getEmployeeType().getTypeName());
         dto.setTypeDaysLeave(this.employeeType.getDaysLeave());
-        dto.setDaysLeave(this.paidLeave);
+        dto.setDaysLeave(this.daysLeave);
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());
         dto.setAddress(this.address);

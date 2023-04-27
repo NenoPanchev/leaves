@@ -16,6 +16,7 @@ import com.example.leaves.service.EmailService;
 import com.example.leaves.service.LeaveRequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.util.DatesUtil;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PredicateBuilderV2;
@@ -119,7 +120,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     private void CheckIfEmployeeHasEnoughDaysPaidLeave(UserEntity employee, LeaveRequest request) {
         if (!(employee.getEmployeeInfo().checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
             throw new PaidleaveNotEnoughException(
-                    String.format("%s@%s", request.getDaysRequested(), employee.getEmployeeInfo().getPaidLeave())
+                    String.format("%s@%s", request.getDaysRequested(), employee.getEmployeeInfo().getDaysLeave())
                     , "Add");
         }
     }
@@ -290,6 +291,26 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
+    }
+
+    @Override
+    public int getAllApprovedDaysInYear(int year) {
+        int daysSpentDuringYear = 0;
+        List<LeaveRequest> allApprovedInYear = leaveRequestRepository.findAllApprovedInYear(year);
+        for (LeaveRequest leaveRequest : allApprovedInYear) {
+            if (leaveRequest.getStartDate().getYear() == year - 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year - 1, 1, 1), leaveRequest.getEndDate());
+                daysSpentDuringYear += countOfBusinessDays.size();
+            }
+            if (leaveRequest.getEndDate().getYear() == year + 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(leaveRequest.getStartDate(), LocalDate.of(year + 1, 12, 31));
+                daysSpentDuringYear += countOfBusinessDays.size();
+            }
+            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate());
+            daysSpentDuringYear += localDates.size();
+
+        }
+        return daysSpentDuringYear;
     }
 
     @Override

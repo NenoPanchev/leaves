@@ -4,6 +4,8 @@ import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -37,4 +39,9 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
 //    void softDeleteAllProcessedRequests();
 
 
+    @Query("SELECT l FROM LeaveRequest l " +
+            "WHERE (YEAR(l.startDate) = :year " +
+            "OR YEAR(l.endDate) = :year) " +
+            "AND l.approved = true ")
+    List<LeaveRequest> findAllApprovedInYear(@Param("year") int year);
 }

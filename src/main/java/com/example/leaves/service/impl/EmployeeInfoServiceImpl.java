@@ -242,11 +242,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .stream()
                 .map(UserEntity::getEmployeeInfo)
                 .forEach(empl -> {
-                    int remainingPaidLeave = empl.getPaidLeave();
+                    int remainingPaidLeave = empl.getDaysLeave();
                     if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
                         remainingPaidLeave = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
                     }
-                    empl.setPaidLeave(
+                    empl.setDaysLeave(
                             empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
                     employeeInfoRepository.save(empl);
                 });
@@ -359,7 +359,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeRepository
                 .findAllByDeletedIsFalse()
                 .forEach(employee -> {
-                    int remainingPaidLeave = employee.getEmployeeInfo().getPaidLeave();
+                    int remainingPaidLeave = employee.getEmployeeInfo().getDaysLeave();
                     if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
                         try {
                             emailService.sendMailToNotifyAboutPaidLeave(employee.getName(),
