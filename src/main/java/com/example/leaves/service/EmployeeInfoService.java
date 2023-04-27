@@ -35,9 +35,9 @@ public interface EmployeeInfoService {
 
     int calculateInitialPaidLeave(EmployeeInfo employeeInfo);
 
-    int calculateDifferenceInPaidLeaveOnTypeChange(EmployeeInfo employeeInfo, TypeEmployee type);
-
-    int findTheDifferenceTheNewContractWouldMake(EmployeeInfo employeeInfo);
+    int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
 
     void removeContracts(List<ContractEntity> dummyContracts);
+
+    void getAnnualLeavesInfo(EmployeeInfo employeeInfo);
 }

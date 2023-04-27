@@ -264,19 +264,32 @@ public class UserServiceImpl implements UserService {
         boolean newTypeEmployee = !entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName());
         boolean newStartDate = !entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate());
         boolean shouldDeleteDummyContracts = false;
-        if (newTypeEmployee) {
+        if (newTypeEmployee && !newStartDate) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
             shouldDeleteDummyContracts = updateContracts(entity.getEmployeeInfo(), employeeInfo);
-            int difference = employeeInfoService.findTheDifferenceTheNewContractWouldMake(entity.getEmployeeInfo());
-            entity.getEmployeeInfo().setDaysLeave(entity.getEmployeeInfo().getDaysLeave() + difference);
+            int currentTotalAvailableDays = employeeInfoService
+                    .getCurrentTotalAvailableDays(entity.getEmployeeInfo());
+            entity.getEmployeeInfo().setCurrentYearDaysLeave(currentTotalAvailableDays);
             entity.getEmployeeInfo().setEmployeeType(newType);
         }
 
-        if (newStartDate) {
+        if (newStartDate && !newTypeEmployee) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
             entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().setDaysLeave(
+            entity.getEmployeeInfo().setCurrentYearDaysLeave(
                     employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+        }
+
+        if (newStartDate && newTypeEmployee) {
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
+            entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
+            entity.getEmployeeInfo().getContracts().get(0).setTypeName(newType.getTypeName());
+
+            entity.getEmployeeInfo().setCurrentYearDaysLeave(
+                    employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+            entity.getEmployeeInfo().setEmployeeType(newType);
+
         }
         if (shouldDeleteDummyContracts) {
             contractService.deleteDummyContracts(entity.getEmployeeInfo().getContracts());
@@ -590,7 +603,6 @@ public class UserServiceImpl implements UserService {
     }
 
     private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
-        EmployeeInfo info = new EmployeeInfo();
         LocalDate startDate;
         if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null
@@ -605,11 +617,7 @@ public class UserServiceImpl implements UserService {
         } else {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
-        info.setEmployeeType(type);
-        info.setContractStartDate(startDate);
-        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        info.setDaysLeave(employeeInfoService.calculateInitialPaidLeave(info));
-        entity.setEmployeeInfo(info);
+        createEmployeeInfoFor(entity, startDate, type);
     }
 
     private boolean isEmpty(String name) {
@@ -621,7 +629,8 @@ public class UserServiceImpl implements UserService {
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        info.setDaysLeave(employeeInfoService.calculateInitialPaidLeave(info));
+        int days = employeeInfoService.calculateInitialPaidLeave(info);
+        info.setCurrentYearDaysLeave(days);
         entity.setEmployeeInfo(info);
     }
 }

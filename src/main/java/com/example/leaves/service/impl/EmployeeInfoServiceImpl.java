@@ -246,56 +246,24 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
                         remainingPaidLeave = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
                     }
-                    empl.setDaysLeave(
-                            empl.getEmployeeType().getDaysLeave() + remainingPaidLeave);
+                    empl.setCarryoverDaysLeave(remainingPaidLeave);
+                    empl.setCurrentYearDaysLeave( empl.getEmployeeType().getDaysLeave());
                     employeeInfoRepository.save(empl);
                 });
     }
 
     @Override
     public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
-        return calculateTotalDays(employeeInfo.getContracts());
-    }
-
-    @Override
-    public int calculateDifferenceInPaidLeaveOnTypeChange(EmployeeInfo employeeInfo, TypeEmployee newType) {
-        int expectedDaysForInitialContract = calculateInitialPaidLeave(employeeInfo);
-
         int currentYear = LocalDate.now().getYear();
-        int yearOfStart = employeeInfo.getContractStartDate().getYear();
-        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
-        LocalDate startDate = LocalDate.of(currentYear, 1, 1);
-        if (yearOfStart == currentYear) {
-            startDate = employeeInfo.getContractStartDate();
-        }
-        LocalDate endOfYear = LocalDate.of(currentYear, 12, 31);
-        LocalDate dateOfTypeChange = LocalDate.now();
-        long actualDaysEmployed = DAYS.between(startDate, dateOfTypeChange);
-        long remainingDaysUntilNewYear = DAYS.between(dateOfTypeChange, endOfYear) + 1;
-        double earnedPaidLeaveUpUntilNow = 1.0 * actualDaysEmployed * employeeInfo.getEmployeeType().getDaysLeave() / totalDaysInCurrentYear;
-        double expectedPaidLeaveFromNowUntilNewYear =
-                1.0 * remainingDaysUntilNewYear * newType.getDaysLeave() / totalDaysInCurrentYear;
-        double totalExpectedPaidLeave =
-                earnedPaidLeaveUpUntilNow + expectedPaidLeaveFromNowUntilNewYear;
-        int result = (int) Math.round(totalExpectedPaidLeave);
-        int difference = result - expectedDaysForInitialContract;
-        return difference;
+        return calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
     }
 
     @Override
-    public int findTheDifferenceTheNewContractWouldMake(EmployeeInfo employeeInfo) {
-        int totalDays = calculateTotalDays(employeeInfo.getContracts());
-        List<ContractEntity> contractsIfLastOneDidntExist =
-                employeeInfo
-                        .getContracts()
-                        .stream()
-                        .map(ContractEntity::new)
-                        .collect(Collectors.toList());
-        contractsIfLastOneDidntExist.remove(contractsIfLastOneDidntExist.size() - 1);
-        contractsIfLastOneDidntExist.get(contractsIfLastOneDidntExist.size() - 1)
-                .setEndDate(null);
-        int daysIfThereWasNoNewContract = calculateTotalDays(contractsIfLastOneDidntExist);
-        return totalDays - daysIfThereWasNoNewContract;
+    public int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo) {
+        int currentYear = LocalDate.now().getYear();
+        int totalContractDays = calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
+        int spentDays = leaveRequestService.getAllApprovedDaysInYear(currentYear);
+        return totalContractDays - spentDays;
     }
 
     @Override
@@ -309,15 +277,20 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     }
 
-    private int calculateTotalDays(List<ContractEntity> contracts) {
-        int currentYear = LocalDate.now().getYear();
+    @Override
+    public void getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
+        List<ContractEntity> contracts = employeeInfo.getContracts();
+
+    }
+
+    private int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year) {
         double sum = 0;
-        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(currentYear);
+        int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(year);
 
         List<ContractEntity> contractsDuringCurrentYear =
                 contracts
                         .stream()
-                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == currentYear
+                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == year
                                 && !c.getStartDate().equals(c.getEndDate()))
                         .collect(Collectors.toList());
 

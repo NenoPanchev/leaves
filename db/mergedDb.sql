@@ -136,12 +136,6 @@ create table if not exists employee_info
             employee_info_types_id_fk
             references
                 types,
-    days_leave
-        integer
-        default
-            20
-        not
-            null,
     carryover_days_leave
         integer
         default
