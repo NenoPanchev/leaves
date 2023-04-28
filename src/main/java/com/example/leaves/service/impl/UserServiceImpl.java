@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService {
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(departmentEntity);
         }
-        updateEmployeeInfo(entity, dto.getEmployeeInfo());
+        updateEmployeeInfo(entity, dto.getEmployeeInfo(), updateDto.getContractChange());
 
         entity = userRepository.saveAndFlush(entity);
 
@@ -257,13 +257,21 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo, String contractChange) {
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             return;
         }
         boolean newTypeEmployee = !entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName());
         boolean newStartDate = !entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate());
         boolean shouldDeleteDummyContracts = false;
+        if (contractChange.equals("Initial")) {
+            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
+            entity.getEmployeeInfo().setCurrentYearDaysLeave(
+                    employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+        } else if (contractChange.equals("New")) {
+
+        }
+
         if (newTypeEmployee && !newStartDate) {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
             shouldDeleteDummyContracts = updateContracts(entity.getEmployeeInfo(), employeeInfo);

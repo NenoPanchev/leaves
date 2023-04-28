@@ -302,7 +302,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 totalDaysFromContracts += days;
             }
             // Create and add Leave Annual Report
-            createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts, leavesAnnualReportList);
+            createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts, leavesAnnualReportList, employeeInfo.getCarryoverDaysLeave());
 
         }
         Collections.reverse(leavesAnnualReportList);
@@ -382,7 +382,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return contractBreakdown;
     }
 
-    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList) {
+    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear) {
         LeavesAnnualReport report = new LeavesAnnualReport();
         report.setContractBreakdowns(contractBreakdownList);
         report.setYear(year);
@@ -391,6 +391,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         int fromPreviousYear = 0;
         if (leavesAnnualReportList.size() > 0) {
             fromPreviousYear = leavesAnnualReportList.get(leavesAnnualReportList.size() - 1).getCarryoverDays();
+        } else {
+            fromPreviousYear = fromLastYear;
         }
         report.setFromPreviousYear(fromPreviousYear);
         report.setContractDays(totalDaysFromContracts);

@@ -15,6 +15,7 @@ public class UserUpdateDto {
     private String name;
     private String email;
     private String department;
+    private String contractChange;
     private List<RoleDto> roles;
     private EmployeeInfoDto employeeInfo;
 
@@ -64,4 +65,11 @@ public class UserUpdateDto {
         this.employeeInfo = employeeInfoDto;
     }
 
+    public String getContractChange() {
+        return contractChange;
+    }
+
+    public void setContractChange(String contractChange) {
+        this.contractChange = contractChange;
+    }
 }
