@@ -11,6 +11,8 @@ import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
+import com.example.leaves.service.impl.PasswordChangeTokenDoesNotMatchException;
+import com.example.leaves.util.BindingResultUtil;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -111,10 +113,17 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public ResponseEntity changePassword(PasswordChangeDto dto, Long id, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            throw new ValidationException(bindingResult);
-        }
+
         userService.changePassword(id, dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @Override
+    public ResponseEntity validatePassword(String password, Long id) {
+
+        userService.validatePassword(id, password);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .build();

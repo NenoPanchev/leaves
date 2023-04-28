@@ -553,6 +553,18 @@ public class UserServiceImpl implements UserService {
 //        }
     }
 
+    @Override
+    public void validatePassword(Long id, String password) {
+        UserEntity entity = userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        if (password == null || password.isEmpty()) {
+            throw new PasswordsNotMatchingException("Incorrect old password!");
+        }
+        if (!passwordEncoder.matches(password, entity.getPassword())) {
+            throw new PasswordsNotMatchingException("Incorrect old password!");
+        }
+    }
+
     private void createPasswordResetTokenForUser(UserEntity entity, String token) {
 
         PasswordResetToken myToken = new PasswordResetToken(token, entity);

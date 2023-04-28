@@ -364,4 +364,3 @@ create table if not exists password_reset_tokens
 
 alter table password_reset_tokens
     owner to postgres;
-
