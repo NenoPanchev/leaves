@@ -6,6 +6,7 @@ import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
 
 import java.util.List;
 
@@ -38,6 +39,5 @@ public interface EmployeeInfoService {
     int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
 
     void removeContracts(List<ContractEntity> dummyContracts);
-
-    void getAnnualLeavesInfo(EmployeeInfo employeeInfo);
+    List<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id);
 }

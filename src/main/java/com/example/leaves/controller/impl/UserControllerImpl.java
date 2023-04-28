@@ -7,6 +7,7 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
@@ -181,6 +182,14 @@ public class UserControllerImpl implements UserController {
     @Override
     public void notifyUsersOfTheirPaidLeave() {
         employeeInfoService.notifyEmployeesOfTheirLeftPaidLeave();
+    }
+
+    @Override
+    public ResponseEntity<List<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id));
+
     }
 }
 
