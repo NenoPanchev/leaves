@@ -250,7 +250,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
+    public int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         return calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
     }

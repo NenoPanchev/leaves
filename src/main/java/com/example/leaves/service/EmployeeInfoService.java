@@ -4,7 +4,6 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 
@@ -34,7 +33,7 @@ public interface EmployeeInfoService {
 
     void updatePaidLeaveAnnually();
 
-    int calculateInitialPaidLeave(EmployeeInfo employeeInfo);
+    int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo);
 
     int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
 
