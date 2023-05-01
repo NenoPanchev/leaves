@@ -36,9 +36,6 @@ public class ContractServiceImpl implements ContractService {
                 .filter(contract -> contract.getStartDate().equals(contract.getEndDate()))
                 .collect(Collectors.toList());
 
-//        if (dummyContracts.size() == 0) {
-//            return;
-//        }
         ContractEntity firstContract = contracts
                 .stream()
                 .filter(c -> c.getEndDate() != null &&
