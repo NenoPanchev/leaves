@@ -1,30 +1,32 @@
 package com.example.leaves.service.impl;
 
 
-import com.example.leaves.exceptions.EntityNotFoundException;
-import com.example.leaves.exceptions.PdfInvalidException;
-import com.example.leaves.exceptions.RequestNotApproved;
-import com.example.leaves.exceptions.UnauthorizedException;
+import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.*;
+import com.example.leaves.model.payload.response.ContractBreakdown;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
+import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -253,7 +255,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public int calculateInitialPaidLeave(EmployeeInfo employeeInfo) {
+    public int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         return calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
     }
@@ -278,31 +280,80 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public void getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
-        List<ContractEntity> contracts = employeeInfo.getContracts();
+    public Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter) {
+        EmployeeInfo employeeInfo = employeeInfoRepository
+                .findByUserInfoId(id)
+                .orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        List<LeavesAnnualReport> annualLeavesList = getAnnualLeavesInfo(employeeInfo);
+        List<LeavesAnnualReport> content = annualLeavesList
+                .subList(
+                        Math.min(annualLeavesList.size(), filter.getOffset()),
+                        Math.min(annualLeavesList.size(), filter.getOffset() + filter.getLimit()));
+        OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        Page<LeavesAnnualReport> page = new PageImpl<>(content, pageable, annualLeavesList.size());
 
+        return page;
+    }
+
+
+    private List<LeavesAnnualReport> getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
+        List<Integer> yearsList = getAllYearsOfEmployment(employeeInfo.getContracts());
+        List<LeavesAnnualReport> leavesAnnualReportList = new ArrayList<>();
+
+        // Get Breakdown for every year
+        for (Integer year : yearsList) {
+            List<ContractEntity> allContractsInYear = getAllContractsInYear(employeeInfo.getContracts(), year);
+            List<ContractBreakdown> contractBreakdownList = new ArrayList<>();
+            int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(year);
+            double totalDaysFromContracts = 0;
+
+            // Get Breakdown for each contract in a year
+            for (ContractEntity contract : allContractsInYear) {
+                double days = calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear, year);
+                ContractBreakdown contractBreakdown = getContactBreakdown(contract, days);
+                contractBreakdownList.add(contractBreakdown);
+                totalDaysFromContracts += days;
+            }
+            // Create and add Leave Annual Report
+            createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts, leavesAnnualReportList, employeeInfo.getCarryoverDaysLeave());
+
+        }
+        Collections.reverse(leavesAnnualReportList);
+        return leavesAnnualReportList;
+    }
+
+    private List<Integer> getAllYearsOfEmployment(List<ContractEntity> contracts) {
+        Set<Integer> years = new LinkedHashSet<>();
+        contracts
+                .stream()
+                .map(c -> c.getStartDate().getYear())
+                .forEach(years::add);
+        List<Integer> yearsList = new ArrayList<>(years);
+        Integer lastYear = yearsList.get(yearsList.size() - 1);
+        int currentYear = LocalDate.now().getYear();
+        if (lastYear != currentYear) {
+            for (int i = lastYear + 1; i <= currentYear; i++) {
+                yearsList.add(i);
+            }
+        }
+        return yearsList;
     }
 
     private int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year) {
         double sum = 0;
         int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(year);
 
-        List<ContractEntity> contractsDuringCurrentYear =
-                contracts
-                        .stream()
-                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == year
-                                && !c.getStartDate().equals(c.getEndDate()))
-                        .collect(Collectors.toList());
+        List<ContractEntity> contractsDuringCurrentYear = getAllContractsInYear(contracts, year);
 
         for (ContractEntity contract : contractsDuringCurrentYear) {
-            sum += calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear);
+            sum += calculateDaysPerContractPeriod(contract, totalDaysInCurrentYear, year);
         }
 
         return (int) Math.round(sum);
     }
 
-    private double calculateDaysPerContractPeriod(ContractEntity contract, int totalDaysInCurrentYear) {
-        int currentYear = LocalDate.now().getYear();
+    private double calculateDaysPerContractPeriod(ContractEntity contract, int totalDaysInCurrentYear, int currentYear) {
+//        int currentYear = LocalDate.now().getYear();
         int yearOfStart = contract.getStartDate().getYear();
         LocalDate startDate = contract.getStartDate();
         if (yearOfStart < currentYear) {
@@ -318,11 +369,54 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return paidLeavePerPeriod;
     }
 
+    private List<ContractEntity> getAllContractsInYear(List<ContractEntity> contracts, int year) {
+        List<ContractEntity> contractsDuringCurrentYear =
+                contracts
+                        .stream()
+                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == year
+                                && !c.getStartDate().equals(c.getEndDate()))
+                        .collect(Collectors.toList());
+        return contractsDuringCurrentYear;
+    }
+
     private int checkIfLeapYearAndGetTotalDays(int year) {
         if (year % 4 == 0) {
             return 366;
         }
         return 365;
+    }
+
+    private ContractBreakdown getContactBreakdown(ContractEntity contract, double days) {
+        ContractBreakdown contractBreakdown = new ContractBreakdown();
+        contractBreakdown.setStartDate(contract.getStartDate());
+        contractBreakdown.setEndDate(contract.getEndDate());
+        contractBreakdown.setTypeName(contract.getTypeName());
+        contractBreakdown.setDaysGained(days);
+        return contractBreakdown;
+    }
+
+    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear) {
+        LeavesAnnualReport report = new LeavesAnnualReport();
+        report.setContractBreakdowns(contractBreakdownList);
+        report.setYear(year);
+        report.setDaysUsed(leaveRequestService.getAllApprovedDaysInYear(year));
+
+        int fromPreviousYear = 0;
+        if (leavesAnnualReportList.size() > 0) {
+            fromPreviousYear = leavesAnnualReportList.get(leavesAnnualReportList.size() - 1).getCarryoverDays();
+        } else {
+            fromPreviousYear = fromLastYear;
+        }
+        report.setFromPreviousYear(fromPreviousYear);
+        report.setContractDays(totalDaysFromContracts);
+        int carryoverDays = report.getFromPreviousYear() + (int) Math.round(report.getContractDays())
+                - report.getDaysUsed();
+        if (carryoverDays > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
+            carryoverDays = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
+        }
+
+        report.setCarryoverDays(carryoverDays);
+        leavesAnnualReportList.add(report);
     }
 
     @Override

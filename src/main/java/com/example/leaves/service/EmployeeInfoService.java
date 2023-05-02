@@ -4,8 +4,10 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
+import com.example.leaves.service.filter.LeavesReportFilter;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -33,11 +35,10 @@ public interface EmployeeInfoService {
 
     void updatePaidLeaveAnnually();
 
-    int calculateInitialPaidLeave(EmployeeInfo employeeInfo);
+    int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo);
 
     int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
 
     void removeContracts(List<ContractEntity> dummyContracts);
-
-    void getAnnualLeavesInfo(EmployeeInfo employeeInfo);
+    Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
 }

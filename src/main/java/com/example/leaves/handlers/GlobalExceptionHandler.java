@@ -62,6 +62,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(value
+            = {IllegalContractStartDateException.class})
+    protected ResponseEntity<Object> handleInvalidContractStartDate(
+            RuntimeException ex, WebRequest request) {
+        String bodyOfResponse = ex.getMessage();
+        return handleExceptionInternal(ex, bodyOfResponse,
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
     @ExceptionHandler(BaseCustomException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionRestResponse handleCustomException(BaseCustomException exception) {

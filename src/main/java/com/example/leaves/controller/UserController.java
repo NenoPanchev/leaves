@@ -4,6 +4,8 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
+import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.service.filter.UserFilter;
 import org.mapstruct.Context;
 import org.springframework.core.io.ByteArrayResource;
@@ -101,5 +103,7 @@ public interface UserController {
     @PreAuthorize("hasAuthority('READ')")
     void notifyUsersOfTheirPaidLeave();
 
-
+    @PostMapping("/leaves-report/{id}")
+    @PreAuthorize("hasAnyAuthority('READ')")
+    ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(@PathVariable("id") Long id, @RequestBody LeavesReportFilter filter);
 }

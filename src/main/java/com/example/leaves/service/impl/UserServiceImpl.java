@@ -242,7 +242,7 @@ public class UserServiceImpl implements UserService {
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(departmentEntity);
         }
-        updateEmployeeInfo(entity, dto.getEmployeeInfo());
+        updateEmployeeInfo(entity, dto.getEmployeeInfo(), updateDto.getContractChange());
 
         entity = userRepository.saveAndFlush(entity);
 
@@ -257,66 +257,87 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo, String contractChange) {
         if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
             return;
         }
-        boolean newTypeEmployee = !entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName());
-        boolean newStartDate = !entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate());
-        boolean shouldDeleteDummyContracts = false;
-        if (newTypeEmployee && !newStartDate) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            shouldDeleteDummyContracts = updateContracts(entity.getEmployeeInfo(), employeeInfo);
-            int currentTotalAvailableDays = employeeInfoService
-                    .getCurrentTotalAvailableDays(entity.getEmployeeInfo());
-            entity.getEmployeeInfo().setCurrentYearDaysLeave(currentTotalAvailableDays);
-            entity.getEmployeeInfo().setEmployeeType(newType);
+        if (contractChange.equals("Initial")) {
+            editInitialContract(entity.getEmployeeInfo(), employeeInfo);
+        } else if (contractChange.equals("New")) {
+            ContractEntity lastContract = entity
+                    .getEmployeeInfo()
+                    .getContracts()
+                    .stream()
+                    .filter(c -> c.getEndDate() == null)
+                    .findFirst()
+                    .orElseThrow(ObjectNotFoundException::new);
+            boolean isLastContractStartDate = lastContract.getStartDate().equals(employeeInfo.getContractStartDate());
+            boolean isAfterLastContractStartDate = employeeInfo.getContractStartDate().isAfter(lastContract.getStartDate());
+            if (isLastContractStartDate) {
+                editLastContract(entity.getEmployeeInfo(), employeeInfo, lastContract);
+            } else {
+                if (isAfterLastContractStartDate) {
+                    addNewContract(entity.getEmployeeInfo(), employeeInfo);
+                } else {
+                    throw new IllegalContractStartDateException("New contract start date must be in present or future");
+                }
+            }
         }
+        entity.getEmployeeInfo().setCurrentYearDaysLeave(
+                employeeInfoService.calculateCurrentYearPaidLeave(entity.getEmployeeInfo()));
+    }
 
-        if (newStartDate && !newTypeEmployee) {
-            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().setCurrentYearDaysLeave(
-                    employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
+    private void editInitialContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
+        ContractEntity initialContract = entityInfo.getContracts().get(0);
+
+        if (isNewStartDate(initialContract, infoDto)) {
+            entityInfo.setContractStartDate(infoDto.getContractStartDate());
+            initialContract.setStartDate(infoDto.getContractStartDate());
         }
+        if (isNewTypeEmployee(initialContract, infoDto)) {
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
+            initialContract.setTypeName(infoDto.getTypeName());
 
-        if (newStartDate && newTypeEmployee) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
-            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().getContracts().get(0).setStartDate(employeeInfo.getContractStartDate());
-            entity.getEmployeeInfo().getContracts().get(0).setTypeName(newType.getTypeName());
-
-            entity.getEmployeeInfo().setCurrentYearDaysLeave(
-                    employeeInfoService.calculateInitialPaidLeave(entity.getEmployeeInfo()));
-            entity.getEmployeeInfo().setEmployeeType(newType);
-
-        }
-        if (shouldDeleteDummyContracts) {
-            contractService.deleteDummyContracts(entity.getEmployeeInfo().getContracts());
-
+            if (entityInfo.getContracts().size() == 1) {
+                entityInfo.setEmployeeType(newType);
+            }
         }
     }
 
+    private void editLastContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto, ContractEntity lastContract) {
+        if (isNewTypeEmployee(lastContract, infoDto)) {
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
+            lastContract.setTypeName(infoDto.getTypeName());
+            entityInfo.setEmployeeType(newType);
+            contractService.deleteDummyContracts(entityInfo.getContracts(), infoDto.getContractStartDate());
+        }
+    }
 
-    private boolean updateContracts(EmployeeInfo employeeInfo, EmployeeInfoDto dto) {
-        LocalDate today = LocalDate.now();
-        boolean shouldDeleteDummyContracts = false;
-        ContractEntity lastContract = employeeInfo
+    private void addNewContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
+        ContractEntity lastContract = entityInfo
                 .getContracts()
                 .stream()
                 .filter(c -> c.getEndDate() == null)
                 .findFirst()
                 .orElseThrow(ObjectNotFoundException::new);
-        if (lastContract.getStartDate().equals(today)) {
-            lastContract.setEndDate(today);
-            shouldDeleteDummyContracts = true;
-        } else {
-            lastContract.setEndDate(today.minusDays(1));
+
+        if (!isNewTypeEmployee(lastContract, infoDto)) {
+            throw new IllegalArgumentException("New contract must have new type");
         }
-        ContractEntity newContract = new ContractEntity(dto.getTypeName(), today, employeeInfo);
+
+        lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));
+        entityInfo.setEmployeeType(typeEmployeeRepository.findByTypeName(infoDto.getTypeName()));
+        ContractEntity newContract = new ContractEntity(infoDto.getTypeName(), infoDto.getContractStartDate(), entityInfo);
         contractService.save(newContract);
-        employeeInfo.addContract(newContract);
-        return shouldDeleteDummyContracts;
+        entityInfo.addContract(newContract);
+    }
+
+    private boolean isNewTypeEmployee(ContractEntity contract, EmployeeInfoDto dto) {
+        return !contract.getTypeName().equals(dto.getTypeName());
+    }
+
+    private boolean isNewStartDate(ContractEntity contract, EmployeeInfoDto dto) {
+        return !contract.getStartDate().equals(dto.getContractStartDate());
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -641,7 +662,7 @@ public class UserServiceImpl implements UserService {
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        int days = employeeInfoService.calculateInitialPaidLeave(info);
+        int days = employeeInfoService.calculateCurrentYearPaidLeave(info);
         info.setCurrentYearDaysLeave(days);
         entity.setEmployeeInfo(info);
     }

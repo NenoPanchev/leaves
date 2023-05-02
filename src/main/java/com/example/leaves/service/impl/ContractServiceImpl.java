@@ -30,25 +30,21 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public void deleteDummyContracts(List<ContractEntity> contracts) {
+    public void deleteDummyContracts(List<ContractEntity> contracts, LocalDate contractStartDate) {
         List<ContractEntity> dummyContracts = contracts
                 .stream()
                 .filter(contract -> contract.getStartDate().equals(contract.getEndDate()))
                 .collect(Collectors.toList());
 
-        if (dummyContracts.size() == 0) {
-            return;
-        }
-        LocalDate today = LocalDate.now();
         ContractEntity firstContract = contracts
                 .stream()
                 .filter(c -> c.getEndDate() != null &&
-                        c.getEndDate().equals(today.minusDays(1)))
+                        c.getEndDate().equals(contractStartDate.minusDays(1)))
                 .findFirst()
                 .orElseThrow(ObjectNotFoundException::new);
         ContractEntity secondContract = contracts
                 .stream()
-                .filter(c -> c.getStartDate().equals(today) && c.getEndDate() == null)
+                .filter(c -> c.getStartDate().equals(contractStartDate) && c.getEndDate() == null)
                 .findFirst()
                 .orElseThrow(ObjectNotFoundException::new);
         if (firstContract.getTypeName().equals(secondContract.getTypeName())) {

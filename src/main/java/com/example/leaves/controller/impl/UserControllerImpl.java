@@ -7,9 +7,11 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.service.filter.UserFilter;
 import com.example.leaves.service.impl.PasswordChangeTokenDoesNotMatchException;
 import com.example.leaves.util.BindingResultUtil;
@@ -181,6 +183,14 @@ public class UserControllerImpl implements UserController {
     @Override
     public void notifyUsersOfTheirPaidLeave() {
         employeeInfoService.notifyEmployeesOfTheirLeftPaidLeave();
+    }
+
+    @Override
+    public ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id, LeavesReportFilter filter) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id, filter));
+
     }
 }
 
