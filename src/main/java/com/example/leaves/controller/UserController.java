@@ -65,11 +65,16 @@ public interface UserController {
                                   @PathVariable("id") Long id,
                                   BindingResult bindingResult);
 
-    @PutMapping("/validate-password/{id}")
+    @PutMapping("/{id}/validate-password")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity validatePassword(@RequestBody String password,
                                   @PathVariable("id") Long id);
-    @PutMapping("/change-password-token/{id}")
+
+    @PutMapping("/{id}/validate-password-token")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity validateChangePasswordToken(@RequestBody String token,
+                                    @PathVariable("id") Long id);
+    @PutMapping("{id}/change-password-token")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<?> sendChangePasswordToken(@PathVariable("id") Long id);
 

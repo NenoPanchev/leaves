@@ -68,4 +68,6 @@ public interface UserService {
     void sendChangePasswordToken(Long id);
 
     void validatePassword(Long id, String password);
+
+    void validatePasswordToken(Long id, String token);
 }

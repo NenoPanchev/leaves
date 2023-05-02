@@ -516,8 +516,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(Long id, PasswordChangeDto dto) {
-        UserEntity entity = userRepository
-                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        UserEntity entity = getUserEntity(id);
 
         changePasswordTokenValidation(dto, entity);
 
@@ -560,8 +559,7 @@ public class UserServiceImpl implements UserService {
     public void sendChangePasswordToken(Long id) {
 
         String token = TokenUtil.getTokenBytes();
-        UserEntity entity = userRepository
-                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        UserEntity entity = getUserEntity(id);
 
         createPasswordResetTokenForUser(entity, token);
 
@@ -576,14 +574,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void validatePassword(Long id, String password) {
-        UserEntity entity = userRepository
-                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        UserEntity entity = getUserEntity(id);
         if (password == null || password.isEmpty()) {
             throw new PasswordsNotMatchingException("Incorrect old password!");
         }
         if (!passwordEncoder.matches(password, entity.getPassword())) {
             throw new PasswordsNotMatchingException("Incorrect old password!");
         }
+    }
+
+    @Override
+    public void validatePasswordToken(Long id, String token) {
+        UserEntity entity = getUserEntity(id);
+
+        if (token == null || token.isEmpty()) {
+            throw new PasswordsNotMatchingException("Token can`t be empty!");
+        }
+        if (!entity.getToken().getToken().equals(token)) {
+            throw new PasswordChangeTokenDoesNotMatchException("Tokens does not match.");
+        }
+        if (entity.getToken().getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new PasswordChangeTokenExpiredException("Your token is expired.");
+        }
+    }
+
+    private UserEntity getUserEntity(Long id) {
+        UserEntity entity = userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        return entity;
     }
 
     private void createPasswordResetTokenForUser(UserEntity entity, String token) {

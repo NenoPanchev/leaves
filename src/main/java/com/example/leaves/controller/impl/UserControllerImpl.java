@@ -132,6 +132,15 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
+    public ResponseEntity validateChangePasswordToken(String token, Long id) {
+        //TODO WHY IS TOKEN ""token""
+        userService.validatePasswordToken(id, token.substring(1,token.length()-1));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .build();
+    }
+
+    @Override
     public ResponseEntity<?> sendChangePasswordToken(Long id) {
         userService.sendChangePasswordToken(id);
         return ResponseEntity
