@@ -5,5 +5,6 @@ public enum SearchOperation {
     LESS_THAN,
     GREATER_THAN,
     GREATER_THAN_EQUAL,
-    LESS_THAN_EQUAL
+    LESS_THAN_EQUAL,
+    RANGE
 }

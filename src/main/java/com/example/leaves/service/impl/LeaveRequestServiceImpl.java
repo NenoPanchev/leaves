@@ -320,6 +320,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 return getLeaveRequestDtoFilteredGraterThan(filter);
             case LESS_THAN:
                 return getLeaveRequestDtoFilteredLessThan(filter);
+            case RANGE:
+                //TODO NOT WORKING
+                return getLeaveRequestDtoFilteredRange(filter);
             default:
                 return getLeaveRequestDtoFilteredEqual(filter);
         }
@@ -350,6 +353,142 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
+    private Page<LeaveRequestDto> getLeaveRequestDtoFilteredRange(LeaveRequestFilter filter) {
+        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        if (filter.getEndDate().size()==0)
+        {
+            //START DATE - START DATE RANGE
+
+            return leaveRequestRepository.findAll(getSpecificationStartDateRange(filter)
+                            .or(ifApprovedHasNullStartDateRange(filter)), pageRequest)
+                    .map(LeaveRequest::toDto);
+
+        } else if (filter.getStartDate().size()==0) {
+
+            //END DATE - END DATE RANGE
+            return leaveRequestRepository.findAll(getSpecificationEndDateRange(filter)
+                            .or(ifApprovedHasNullEndDateRange(filter)), pageRequest)
+                    .map(LeaveRequest::toDto);
+        }
+        else
+        {
+            //START DATE - END DATE RANGE
+            return leaveRequestRepository.findAll(getSpecificationRange(filter)
+                            .or(ifApprovedHasNullRange(filter)), pageRequest)
+                    .map(LeaveRequest::toDto);
+        }
+
+
+
+    }
+    private Specification<LeaveRequest> getSpecificationStartDateRange(LeaveRequestFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.startDate, filter.getStartDate().get(0))
+                    .lessThan(LeaveRequest_.startDate, filter.getStartDate().get(1))
+                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt,filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+    }
+    private Specification<LeaveRequest> ifApprovedHasNullStartDateRange(LeaveRequestFilter filter) {
+
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.startDate, filter.getStartDate().get(0))
+                    .lessThan(LeaveRequest_.startDate, filter.getStartDate().get(1))
+                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt, filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+
+    }
+    private Specification<LeaveRequest> getSpecificationEndDateRange(LeaveRequestFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.endDate, filter.getEndDate().get(0))
+                    .lessThan(LeaveRequest_.endDate, filter.getEndDate().get(1))
+                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt,filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+    }
+    private Specification<LeaveRequest> ifApprovedHasNullEndDateRange(LeaveRequestFilter filter) {
+
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.endDate, filter.getEndDate().get(0))
+                    .lessThan(LeaveRequest_.endDate, filter.getEndDate().get(1))
+                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt, filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+
+    }
+    private Specification<LeaveRequest> getSpecificationRange(LeaveRequestFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt,filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+    }
+    private Specification<LeaveRequest> ifApprovedHasNullRange(LeaveRequestFilter filter) {
+
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .in(LeaveRequest_.createdAt, filter.getDateCreated())
+                    .in(LeaveRequest_.lastModifiedAt, filter.getLastUpdated())
+                    .in(LeaveRequest_.createdBy, filter.getCreatedBy())
+                    .equal(LeaveRequest_.deleted, filter.getDeleted())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return criteriaBuilder.and(predicates);
+        };
+
+    }
 
     private Specification<LeaveRequest> getSpecificationLessThanDates(LeaveRequestFilter filter) {
         return (root, query, criteriaBuilder) ->
