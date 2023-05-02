@@ -321,7 +321,6 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             case LESS_THAN:
                 return getLeaveRequestDtoFilteredLessThan(filter);
             case RANGE:
-                //TODO NOT WORKING
                 return getLeaveRequestDtoFilteredRange(filter);
             default:
                 return getLeaveRequestDtoFilteredEqual(filter);
