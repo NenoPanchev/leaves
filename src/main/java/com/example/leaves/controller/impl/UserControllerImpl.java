@@ -11,6 +11,7 @@ import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.service.filter.UserFilter;
 import com.example.leaves.service.impl.PasswordChangeTokenDoesNotMatchException;
 import com.example.leaves.util.BindingResultUtil;
@@ -185,10 +186,10 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<List<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id) {
+    public ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id, LeavesReportFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id));
+                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id, filter));
 
     }
 }

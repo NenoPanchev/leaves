@@ -10,11 +10,16 @@ import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
+import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -275,11 +280,19 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public List<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id) {
+    public Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter) {
         EmployeeInfo employeeInfo = employeeInfoRepository
                 .findByUserInfoId(id)
                 .orElseThrow(() -> new ObjectNotFoundException("User not found"));
-        return getAnnualLeavesInfo(employeeInfo);
+        List<LeavesAnnualReport> annualLeavesList = getAnnualLeavesInfo(employeeInfo);
+        List<LeavesAnnualReport> content = annualLeavesList
+                .subList(
+                        Math.min(annualLeavesList.size(), filter.getOffset()),
+                        Math.min(annualLeavesList.size(), filter.getOffset() + filter.getLimit()));
+        OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        Page<LeavesAnnualReport> page = new PageImpl<>(content, pageable, annualLeavesList.size());
+
+        return page;
     }
 
 
