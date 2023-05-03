@@ -1,15 +1,10 @@
 create table if not exists departments
 (
-    id
-                     bigserial
-        constraint
-            departments_pkey
-            primary
-                key,
-    created_at
-                     timestamp,
-    created_by
-                     varchar(255),
+    id               bigserial
+        constraint departments_pkey
+            primary key,
+    created_at       timestamp,
+    created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
@@ -22,16 +17,11 @@ alter table departments
 
 create table if not exists permissions
 (
-    id
-                     bigserial
-        constraint
-            permissions_pkey
-            primary
-                key,
-    created_at
-                     timestamp,
-    created_by
-                     varchar(255),
+    id               bigserial
+        constraint permissions_pkey
+            primary key,
+    created_at       timestamp,
+    created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
@@ -43,16 +33,11 @@ alter table permissions
 
 create table if not exists roles
 (
-    id
-                     bigserial
-        constraint
-            roles_pkey
-            primary
-                key,
-    created_at
-                     timestamp,
-    created_by
-                     varchar(255),
+    id               bigserial
+        constraint roles_pkey
+            primary key,
+    created_at       timestamp,
+    created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
@@ -66,22 +51,12 @@ alter table roles
 
 create table if not exists roles_permissions
 (
-    role_id
-        bigint
-        not
-            null
-        constraint
-            roles_permissions_roles_id_fk
-            references
-                roles,
-    permissions_id
-        bigint
-        not
-            null
-        constraint
-            roles_permissions_permissions_id_fk
-            references
-                permissions
+    role_id        bigint not null
+        constraint roles_permissions_roles_id_fk
+            references roles,
+    permissions_id bigint not null
+        constraint roles_permissions_permissions_id_fk
+            references permissions
 );
 
 alter table roles_permissions
@@ -89,34 +64,16 @@ alter table roles_permissions
 
 create table if not exists types
 (
-    type_name
-        varchar
-        not
-            null,
-    type_days
-        integer
-        not
-            null,
-    id
-        serial
-        constraint
-            types_pk
-            primary
-                key,
-    created_at
-        timestamp,
-    created_by
-        varchar,
-    last_modified_at
-        timestamp,
-    last_modified_by
-        varchar,
-    deleted
-        boolean
-        default
-            false
-        not
-            null
+    type_name        varchar               not null,
+    type_days        integer               not null,
+    id               serial
+        constraint types_pk
+            primary key,
+    created_at       timestamp,
+    created_by       varchar,
+    last_modified_at timestamp,
+    last_modified_by varchar,
+    deleted          boolean default false not null
 );
 
 alter table types
@@ -124,48 +81,23 @@ alter table types
 
 create table if not exists employee_info
 (
-    id
-        serial
-        constraint
-            employee_info_pk
-            primary
-                key,
-    type_id
-        integer
-        constraint
-            employee_info_types_id_fk
-            references
-                types,
-    carryover_days_leave
-        integer
-        default
-            0
-        not
-            null,
-    current_year_days_leave
-        integer
-        default
-            20
-        not
-            null,
-    contract_start_date
-        date,
-    created_at
-        timestamp,
-    created_by
-        varchar,
-    deleted
-        boolean,
-    last_modified_at
-        timestamp,
-    last_modified_by
-        varchar,
-    ssn
-        varchar,
-    address
-        varchar,
-    position
-        varchar
+    id                      serial
+        constraint employee_info_pk
+            primary key,
+    type_id                 integer
+        constraint employee_info_types_id_fk
+            references types,
+    carryover_days_leave    integer default 0  not null,
+    current_year_days_leave integer default 20 not null,
+    contract_start_date     date,
+    created_at              timestamp,
+    created_by              varchar,
+    deleted                 boolean,
+    last_modified_at        timestamp,
+    last_modified_by        varchar,
+    ssn                     varchar,
+    address                 varchar,
+    position                varchar
 );
 
 alter table employee_info
@@ -173,16 +105,11 @@ alter table employee_info
 
 create table if not exists users
 (
-    id
-                     bigserial
-        constraint
-            users_pkey
-            primary
-                key,
-    created_at
-                     timestamp,
-    created_by
-                     varchar(255),
+    id               bigserial
+        constraint users_pkey
+            primary key,
+    created_at       timestamp,
+    created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
@@ -208,22 +135,12 @@ alter table departments
 
 create table if not exists departments_employees
 (
-    department_id
-        bigint
-        not
-            null
-        constraint
-            departments_employees_departments_id_fk
-            references
-                departments,
-    employees_id
-        bigint
-        not
-            null
-        constraint
-            departments_employees_users_id_fk
-            references
-                users
+    department_id bigint not null
+        constraint departments_employees_departments_id_fk
+            references departments,
+    employees_id  bigint not null
+        constraint departments_employees_users_id_fk
+            references users
 );
 
 alter table departments_employees
@@ -231,22 +148,12 @@ alter table departments_employees
 
 create table if not exists users_roles
 (
-    user_entity_id
-        bigint
-        not
-            null
-        constraint
-            users_roles_users_id_fk
-            references
-                users,
-    roles_id
-        bigint
-        not
-            null
-        constraint
-            users_roles_roles_id_fk
-            references
-                roles
+    user_entity_id bigint not null
+        constraint users_roles_users_id_fk
+            references users,
+    roles_id       bigint not null
+        constraint users_roles_roles_id_fk
+            references roles
 );
 
 alter table users_roles
@@ -254,46 +161,22 @@ alter table users_roles
 
 create table if not exists leave_requests
 (
-    id
-        integer
-        generated
-            by
-            default as
-            identity
-        constraint
-            leave_requests_pk
-            primary
-                key,
-    approved
-        boolean,
-    start_date
-        date
-        not
-            null,
-    end_date
-        date
-        not
-            null,
-    employee_info_id
-        integer
-        constraint
-            leave_requests_employee_info_id_fk
-            references
-                employee_info,
-    deleted
-        boolean,
-    created_at
-        timestamp,
-    created_by
-        varchar,
-    last_modified_at
-        timestamp,
-    last_modified_by
-        varchar,
-    approved_start_date
-        date,
-    approved_end_date
-        date
+    id                  integer generated by default as identity
+        constraint leave_requests_pk
+            primary key,
+    approved            boolean,
+    start_date          date not null,
+    end_date            date not null,
+    employee_info_id    integer
+        constraint leave_requests_employee_info_id_fk
+            references employee_info,
+    deleted             boolean,
+    created_at          timestamp,
+    created_by          varchar,
+    last_modified_at    timestamp,
+    last_modified_by    varchar,
+    approved_start_date date,
+    approved_end_date   date
 );
 
 alter table leave_requests
@@ -301,54 +184,24 @@ alter table leave_requests
 
 create table if not exists contracts
 (
-    id
-                        bigserial
-        constraint
-            contracts_pk
-            primary
-                key,
-    created_at
-                        timestamp,
-    created_by
-                        varchar(255),
+    id               bigserial
+        constraint contracts_pk
+            primary key,
+    created_at       timestamp,
+    created_by       varchar(255),
     deleted          boolean,
     last_modified_at timestamp,
     last_modified_by varchar(255),
-    start_date date,
-    end_date date,
-    type_name varchar(255),
-    employee_info_id    bigint
+    start_date       date,
+    end_date         date,
+    type_name        varchar(255),
+    employee_info_id bigint
         constraint contracts_employee_info_id_fk
             references employee_info
 );
 
 alter table contracts
     owner to postgres;
-
-create table if not exists employee_info_contracts
-(
-    employee_info_id
-        bigint
-        not
-            null
-        constraint
-            contracts_employee_info_employee_info_id_fk
-            references
-                employee_info,
-
-    contracts_id
-        bigint
-        not
-            null
-        constraint
-            contracts_employee_info_contracts_id_fk
-            references
-                contracts
-);
-
-alter table employee_info_contracts
-    owner to postgres;
-
 
 create table if not exists password_reset_tokens
 (
@@ -364,3 +217,4 @@ create table if not exists password_reset_tokens
 
 alter table password_reset_tokens
     owner to postgres;
+

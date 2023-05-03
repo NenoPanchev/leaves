@@ -9,6 +9,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "types", schema = "public")
+@NamedEntityGraph(
+        name = "type",
+        attributeNodes = {
+                @NamedAttributeNode("employeeWithType")
+        }
+)
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
 public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
@@ -18,7 +24,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
     @Column(name = "type_days")
     private int daysLeave;
 
-    @OneToMany(mappedBy = "employeeType", fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeType")
     private List<EmployeeInfo> employeeWithType;
 
     public List<EmployeeInfo> getEmployeesWithType() {

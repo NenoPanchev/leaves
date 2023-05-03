@@ -9,6 +9,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@NamedEntityGraph(
+        name = "requestFull",
+        attributeNodes = {
+                @NamedAttributeNode("employee")
+        }
+)
 @Table(name = "leave_requests", schema = "public")
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
 public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
@@ -28,7 +34,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     private Boolean approved;
 
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "employee_info_id")
     @JsonBackReference
     private EmployeeInfo employee;

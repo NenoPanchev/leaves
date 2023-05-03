@@ -35,35 +35,35 @@ public class AppInit implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        permissionService.seedPermissions();
-        roleService.seedRoles();
-        departmentService.seedDepartments();
-        typeEmployeeService.seedTypes();
-        userService.seedUsers();
-        departmentService.assignDepartmentAdmins();
-        holidaysUtil.setHolidayDates();
-
-        EmployeeInfo employeeInfo = new EmployeeInfo();
-        TypeEmployee developer = typeEmployeeService.getByName("Developer");
-        TypeEmployee trainee = typeEmployeeService.getByName("Trainee");
-
-        employeeInfo.setEmployeeType(trainee);
-        List<ContractEntity> contracts = new ArrayList<>();
-        ContractEntity first = new ContractEntity("Trainee", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 3, 31), employeeInfo);
-        ContractEntity second = new ContractEntity("Developer", LocalDate.of(2023, 4, 1), LocalDate.of(2023, 6, 30), employeeInfo);
-        ContractEntity third = new ContractEntity("Trainee", LocalDate.of(2023, 7, 1), LocalDate.of(2023, 9, 30), employeeInfo);
-        ContractEntity fourth = new ContractEntity("Developer", LocalDate.of(2023, 10, 1), employeeInfo);
-//        contracts.add(first);
-//        contracts.add(second);
-//        contracts.add(third);
-//        contracts.add(fourth);
-
-        ContractEntity fifth = new ContractEntity("Developer", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 6, 30), employeeInfo);
-        ContractEntity sixth = new ContractEntity("Trainee", LocalDate.of(2023, 7, 1), employeeInfo);
-        contracts.add(fifth);
-        contracts.add(sixth);
-        employeeInfo.setContracts(contracts);
-        findTheDifferenceTheNewContractWouldMake(employeeInfo);
+//        permissionService.seedPermissions();
+//        roleService.seedRoles();
+//        departmentService.seedDepartments();
+//        typeEmployeeService.seedTypes();
+//        userService.seedUsers();
+//        departmentService.assignDepartmentAdmins();
+//        holidaysUtil.setHolidayDates();
+//
+//        EmployeeInfo employeeInfo = new EmployeeInfo();
+//        TypeEmployee developer = typeEmployeeService.getByName("Developer");
+//        TypeEmployee trainee = typeEmployeeService.getByName("Trainee");
+//
+//        employeeInfo.setEmployeeType(trainee);
+//        List<ContractEntity> contracts = new ArrayList<>();
+//        ContractEntity first = new ContractEntity("Trainee", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 3, 31), employeeInfo);
+//        ContractEntity second = new ContractEntity("Developer", LocalDate.of(2023, 4, 1), LocalDate.of(2023, 6, 30), employeeInfo);
+//        ContractEntity third = new ContractEntity("Trainee", LocalDate.of(2023, 7, 1), LocalDate.of(2023, 9, 30), employeeInfo);
+//        ContractEntity fourth = new ContractEntity("Developer", LocalDate.of(2023, 10, 1), employeeInfo);
+////        contracts.add(first);
+////        contracts.add(second);
+////        contracts.add(third);
+////        contracts.add(fourth);
+//
+//        ContractEntity fifth = new ContractEntity("Developer", LocalDate.of(2023, 1, 1), LocalDate.of(2023, 6, 30), employeeInfo);
+//        ContractEntity sixth = new ContractEntity("Trainee", LocalDate.of(2023, 7, 1), employeeInfo);
+//        contracts.add(fifth);
+//        contracts.add(sixth);
+//        employeeInfo.setContracts(contracts);
+//        findTheDifferenceTheNewContractWouldMake(employeeInfo);
     }
 
     private int findTheDifferenceTheNewContractWouldMake(EmployeeInfo employeeInfo) {

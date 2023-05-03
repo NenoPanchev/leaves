@@ -13,15 +13,23 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @EntityListeners(EntityListener.class)
+@NamedEntityGraph(
+        name = "fullInfo",
+        attributeNodes = {
+                @NamedAttributeNode("employeeType"),
+                @NamedAttributeNode("leaveRequests")
+        }
+)
 @Entity
 @Getter
 @Setter
 @Table(name = "employee_info", schema = "public")
 public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "type_id")
     @JsonBackReference
     private TypeEmployee employeeType;
@@ -43,12 +51,12 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @Column(name = "position")
     private String position;
     @OneToMany(mappedBy = "employee")
-    private List<LeaveRequest> leaveRequests;
+    private Set<LeaveRequest> leaveRequests;
 
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeInfo",cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
 
     public EmployeeInfo() {
@@ -109,7 +117,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return this.getDaysLeave() - days >= 0 && days > 0;
     }
 
-    public List<LeaveRequest> getRequests() {
+    public Set<LeaveRequest> getRequests() {
         return leaveRequests;
     }
 

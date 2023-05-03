@@ -13,13 +13,19 @@ import java.util.List;
                 @AttributeOverride(name = "id", column = @Column(name = "id"))
         }
 )
+@NamedEntityGraph(
+        name = "role",
+        attributeNodes = {
+                @NamedAttributeNode("permissions")
+        }
+)
 @Entity
 @Table(name = "roles", schema = "public")
 public class RoleEntity extends BaseEntity<RoleDto> {
     @Column(name = "name")
     private String name;
     @JsonIgnore
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "roles_permissions",
             joinColumns = @JoinColumn(name = "role_id"),
             inverseJoinColumns = @JoinColumn(name = "permissions_id"))
