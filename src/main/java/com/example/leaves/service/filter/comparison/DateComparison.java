@@ -16,5 +16,5 @@ import java.time.LocalDate;
 public class DateComparison {
     private Operator operator;
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
-    private LocalDate value;
+    private LocalDate date;
 }

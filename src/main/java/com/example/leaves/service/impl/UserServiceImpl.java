@@ -433,6 +433,9 @@ public class UserServiceImpl implements UserService {
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
                     .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
+                    .joinDeepLike(UserEntity_.employeeInfo, EmployeeInfo_.employeeType,
+                            filter.getPosition(),
+                            TypeEmployee_.TYPE_NAME)
                     .joinCompareDates(UserEntity_.employeeInfo,
                             filter.getStartDateComparisons(),
                             EmployeeInfo_.CONTRACT_START_DATE)
