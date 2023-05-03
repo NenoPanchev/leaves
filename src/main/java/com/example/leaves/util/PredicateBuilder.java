@@ -197,7 +197,7 @@ public class PredicateBuilder<ENTITY> {
 
             for (IntegerComparison comparison : comparisons) {
                 Integer value = comparison.getValue();
-                Predicate predicate = getPredicateForIntegerComparisonByOperator(comparison.getOperator(), sum, value);
+                Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), sum, value);
                 this.predicates.add(predicate);
             }
         }
@@ -213,7 +213,7 @@ public class PredicateBuilder<ENTITY> {
                     .get(fieldName).as(LocalDate.class);
             for (DateComparison comparison : comparisons) {
                 LocalDate value = comparison.getDate();
-                Predicate predicate = getPredicateForDateComparisonByOperator(comparison.getOperator(), date, value);
+                Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), date, value);
 
                 this.predicates.add(predicate);
             }
@@ -221,45 +221,26 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
-    private Predicate getPredicateForDateComparisonByOperator(Operator operator, Expression<LocalDate> date, LocalDate value) {
+    private <T extends Comparable> Predicate getPredicateForComparisonByOperator(Operator operator, Expression<T> fieldValue, T filterValue) {
         Predicate predicate = null;
         switch (operator) {
             case GREATER_OR_EQUAL:
-                predicate = builder.greaterThanOrEqualTo(date, value);
+                predicate = builder.greaterThanOrEqualTo(fieldValue, filterValue);
                 break;
             case GREATER:
-                predicate = builder.greaterThan(date, value);
+                predicate = builder.greaterThan(fieldValue, filterValue);
                 break;
             case EQUAL:
-                predicate = builder.equal(date, value);
+                predicate = builder.equal(fieldValue, filterValue);
+                break;
+            case NOT_EQUAL:
+                predicate = builder.notEqual(fieldValue, filterValue);
                 break;
             case LESS:
-                predicate = builder.lessThan(date, value);
+                predicate = builder.lessThan(fieldValue, filterValue);
                 break;
             case LESS_OR_EQUAL:
-                predicate = builder.lessThanOrEqualTo(date, value);
-                break;
-        }
-        return predicate;
-    }
-
-    private Predicate getPredicateForIntegerComparisonByOperator(Operator operator, Expression<Integer> sum, Integer value) {
-        Predicate predicate = null;
-        switch (operator) {
-            case GREATER_OR_EQUAL:
-                predicate = builder.greaterThanOrEqualTo(sum, value);
-                break;
-            case GREATER:
-                predicate = builder.greaterThan(sum, value);
-                break;
-            case EQUAL:
-                predicate = builder.equal(sum, value);
-                break;
-            case LESS:
-                predicate = builder.lessThan(sum, value);
-                break;
-            case LESS_OR_EQUAL:
-                predicate = builder.lessThanOrEqualTo(sum, value);
+                predicate = builder.lessThanOrEqualTo(fieldValue, filterValue);
                 break;
         }
         return predicate;
