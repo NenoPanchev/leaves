@@ -13,7 +13,6 @@ import com.example.leaves.service.*;
 import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PdfUtil;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -328,14 +328,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .stream()
                 .map(c -> c.getStartDate().getYear())
                 .forEach(years::add);
-        List<Integer> yearsList = new ArrayList<>(years);
-        Integer lastYear = yearsList.get(yearsList.size() - 1);
-        int currentYear = LocalDate.now().getYear();
-        if (lastYear != currentYear) {
-            for (int i = lastYear + 1; i <= currentYear; i++) {
-                yearsList.add(i);
-            }
+
+        Integer firstYear = Collections.min(years);
+        Integer lastYear = Collections.max(years);
+            for (int i = firstYear; i <= lastYear; i++) {
+                years.add(i);
         }
+        List<Integer> yearsList = new ArrayList<>(years);
+        yearsList.sort(Integer::compareTo);
         return yearsList;
     }
 
@@ -360,7 +360,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             startDate = LocalDate.of(currentYear, 1, 1);
         }
         LocalDate endDate = LocalDate.of(currentYear, 12, 31);
-        if (contract.getEndDate() != null) {
+        if (contract.getEndDate() != null && contract.getEndDate().getYear() == currentYear) {
             endDate = contract.getEndDate();
         }
         long days = DAYS.between(startDate, endDate) + 1;
@@ -373,10 +373,19 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         List<ContractEntity> contractsDuringCurrentYear =
                 contracts
                         .stream()
-                        .filter(c -> c.getEndDate() == null || c.getEndDate().getYear() == year
-                                && !c.getStartDate().equals(c.getEndDate()))
+                        .filter(c -> isValidContractInYear(c, year))
                         .collect(Collectors.toList());
         return contractsDuringCurrentYear;
+    }
+
+    private boolean isValidContractInYear(ContractEntity c, int year) {
+        boolean endsThisYear = c.getEndDate() != null && c.getEndDate().getYear() == year;
+        boolean startsThisYear = c.getStartDate().getYear() == year;
+        boolean thisYearIsBetween = c.getStartDate().getYear() < year
+                && (c.getEndDate() != null && c.getEndDate().getYear() > year);
+        boolean isLastContract = c.getStartDate().getYear() == year
+                && c.getEndDate() == null;
+        return endsThisYear || startsThisYear || thisYearIsBetween || isLastContract;
     }
 
     private int checkIfLeapYearAndGetTotalDays(int year) {
@@ -404,9 +413,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         int fromPreviousYear = 0;
         if (leavesAnnualReportList.size() > 0) {
             fromPreviousYear = leavesAnnualReportList.get(leavesAnnualReportList.size() - 1).getCarryoverDays();
-        } else {
-            fromPreviousYear = fromLastYear;
         }
+
         report.setFromPreviousYear(fromPreviousYear);
         report.setContractDays(totalDaysFromContracts);
         int carryoverDays = report.getFromPreviousYear() + (int) Math.round(report.getContractDays())
