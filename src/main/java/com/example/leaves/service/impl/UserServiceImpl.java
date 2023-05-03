@@ -433,8 +433,16 @@ public class UserServiceImpl implements UserService {
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
                     .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
+                    .joinCompareDates(UserEntity_.employeeInfo,
+                            filter.getStartDateComparisons(),
+                            EmployeeInfo_.CONTRACT_START_DATE)
+                    .joinCompareIntegerWithSumOfTwoFields(UserEntity_.employeeInfo,
+                            filter.getDaysLeaveComparisons(),
+                            EmployeeInfo_.CURRENT_YEAR_DAYS_LEAVE,
+                            EmployeeInfo_.CARRYOVER_DAYS_LEAVE)
                     .build()
                     .toArray(new Predicate[0]);
+
 
             return query.where(predicates)
                     .distinct(true)
