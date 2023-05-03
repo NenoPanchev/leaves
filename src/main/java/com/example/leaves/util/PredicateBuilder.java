@@ -55,6 +55,19 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
+    public <T, Y> PredicateBuilder<ENTITY> joinDeepLike(final SingularAttribute<?, T> attribute,
+                                                 final SingularAttribute<?, Y> secondAttribute,
+                                                 final String value,
+                                                 final String fieldName) {
+        if (value != null && !value.isEmpty()) {
+            final Join<ENTITY, T> firstJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
+            final Join<T, Y> secondJoin = firstJoin.join((SingularAttribute<? super T, Y>) secondAttribute);
+            this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(secondJoin.get(fieldName))),
+                    "%" + value.toUpperCase().trim() + "%"));
+        }
+        return this;
+    }
+
     public <T, D> PredicateBuilder<ENTITY> joinIn(final ListAttribute<?, T> attribute,
                                                   final Collection<D> list,
                                                   final String fieldName) {
@@ -199,7 +212,7 @@ public class PredicateBuilder<ENTITY> {
                     .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
                     .get(fieldName).as(LocalDate.class);
             for (DateComparison comparison : comparisons) {
-                LocalDate value = comparison.getValue();
+                LocalDate value = comparison.getDate();
                 Predicate predicate = getPredicateForDateComparisonByOperator(comparison.getOperator(), date, value);
 
                 this.predicates.add(predicate);
