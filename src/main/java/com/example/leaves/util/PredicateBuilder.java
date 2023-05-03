@@ -1,12 +1,16 @@
 package com.example.leaves.util;
 
 
+import com.example.leaves.service.filter.comparison.DateComparison;
+import com.example.leaves.service.filter.comparison.IntegerComparison;
+import com.example.leaves.service.filter.enums.Operator;
 import org.springframework.expression.Operation;
 import org.springframework.util.CollectionUtils;
 
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,6 +118,152 @@ public class PredicateBuilder<ENTITY> {
         }
         return this;
     }
+
+    public <T> PredicateBuilder<ENTITY> joinGraterThanOrEqualToDate(final SingularAttribute<?, T> attribute, final LocalDate value, final String fieldName) {
+        if (value != null) {
+            Expression<LocalDate> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName).as(LocalDate.class);
+            this.predicates.add(builder.greaterThanOrEqualTo(exp, value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinLessThanOrEqualToDate(final SingularAttribute<?, T> attribute, final LocalDate value, final String fieldName) {
+        if (value != null) {
+            Expression<LocalDate> exp = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName).as(LocalDate.class);
+            this.predicates.add(builder.lessThanOrEqualTo(exp, value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinGraterThanOrEqualToSumOfTwoFields(final SingularAttribute<?, T> attribute,
+                                                                                             final Integer value,
+                                                                                             final String firstFieldName,
+                                                                                             final String secondFieldName) {
+        if (value != null) {
+            Expression<Integer> firstValue = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(firstFieldName).as(Integer.class);
+            Expression<Integer> secondValue = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(secondFieldName).as(Integer.class);
+
+            Expression<Integer> sum = builder.sum(firstValue, secondValue);
+
+            this.predicates.add(builder.greaterThanOrEqualTo(sum, value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinLessThanOrEqualToSumOfTwoFields(final SingularAttribute<?, T> attribute,
+                                                                              final Integer value,
+                                                                              final String firstFieldName,
+                                                                              final String secondFieldName) {
+        if (value != null) {
+            Expression<Integer> firstValue = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(firstFieldName).as(Integer.class);
+            Expression<Integer> secondValue = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(secondFieldName).as(Integer.class);
+
+            this.predicates.add(builder.lessThanOrEqualTo(builder.sum(firstValue, secondValue), value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinCompareIntegerWithSumOfTwoFields(final SingularAttribute<?, T> attribute,
+                                                                             final List<IntegerComparison> comparisons,
+                                                                             final String firstFieldName,
+                                                                             final String secondFieldName) {
+        if (comparisons != null && comparisons.size() > 0) {
+            Expression<Integer> sum = getSumOfTwoIntegerFieldsAsExpression(attribute, firstFieldName, secondFieldName);
+
+            for (IntegerComparison comparison : comparisons) {
+                Integer value = comparison.getValue();
+                Predicate predicate = getPredicateForIntegerComparisonByOperator(comparison.getOperator(), sum, value);
+                this.predicates.add(predicate);
+            }
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> joinCompareDates(final SingularAttribute<?, T> attribute,
+                                                                             final List<DateComparison> comparisons,
+                                                                             final String fieldName) {
+        if (comparisons != null && comparisons.size() > 0) {
+            Expression<LocalDate> date = root
+                    .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                    .get(fieldName).as(LocalDate.class);
+            for (DateComparison comparison : comparisons) {
+                LocalDate value = comparison.getValue();
+                Predicate predicate = getPredicateForDateComparisonByOperator(comparison.getOperator(), date, value);
+
+                this.predicates.add(predicate);
+            }
+        }
+        return this;
+    }
+
+    private Predicate getPredicateForDateComparisonByOperator(Operator operator, Expression<LocalDate> date, LocalDate value) {
+        Predicate predicate = null;
+        switch (operator) {
+            case GREATER_OR_EQUAL:
+                predicate = builder.greaterThanOrEqualTo(date, value);
+                break;
+            case GREATER:
+                predicate = builder.greaterThan(date, value);
+                break;
+            case EQUAL:
+                predicate = builder.equal(date, value);
+                break;
+            case LESS:
+                predicate = builder.lessThan(date, value);
+                break;
+            case LESS_OR_EQUAL:
+                predicate = builder.lessThanOrEqualTo(date, value);
+                break;
+        }
+        return predicate;
+    }
+
+    private Predicate getPredicateForIntegerComparisonByOperator(Operator operator, Expression<Integer> sum, Integer value) {
+        Predicate predicate = null;
+        switch (operator) {
+            case GREATER_OR_EQUAL:
+                predicate = builder.greaterThanOrEqualTo(sum, value);
+                break;
+            case GREATER:
+                predicate = builder.greaterThan(sum, value);
+                break;
+            case EQUAL:
+                predicate = builder.equal(sum, value);
+                break;
+            case LESS:
+                predicate = builder.lessThan(sum, value);
+                break;
+            case LESS_OR_EQUAL:
+                predicate = builder.lessThanOrEqualTo(sum, value);
+                break;
+        }
+        return predicate;
+    }
+
+    private <T> Expression<Integer> getSumOfTwoIntegerFieldsAsExpression(SingularAttribute<?, T> attribute, String firstFieldName, String secondFieldName) {
+        Expression<Integer> firstValue = root
+                .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                .get(firstFieldName).as(Integer.class);
+        Expression<Integer> secondValue = root
+                .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
+                .get(secondFieldName).as(Integer.class);
+
+        Expression<Integer> sum = builder.sum(firstValue, secondValue);
+        return sum;
+    }
+
 
     public <T extends Number> PredicateBuilder<?> compare(final SingularAttribute<?, T> attribute,
                                                           final Operation operation, T value) {
