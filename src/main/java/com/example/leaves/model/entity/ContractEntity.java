@@ -78,9 +78,23 @@ public class ContractEntity extends BaseEntity {
     }
 
     public void toDto(ContractDto dto) {
+        if (dto == null) {
+            return;
+        }
+        super.toDto(dto);
         dto.setEmployeeInfo(this.employeeInfo.toDto());
         dto.setStartDate(this.startDate);
         dto.setEndDate(this.endDate);
         dto.setTypeName(this.typeName);
+    }
+
+    public void toEntity(ContractDto dto) {
+        if (dto == null) {
+            return;
+        }
+        super.toEntity(dto);
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.typeName = dto.getTypeName();
     }
 }

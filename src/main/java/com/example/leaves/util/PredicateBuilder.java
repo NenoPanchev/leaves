@@ -44,6 +44,17 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
+    public <T, Y> PredicateBuilder<ENTITY> joinDeepEquals(final SingularAttribute<?, T> attribute,
+                                                        final SingularAttribute<?, Y> secondAttribute,
+                                                        final Long value,
+                                                        final String fieldName) {
+        if (value != null) {
+            final Join<ENTITY, T> firstJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
+            final Join<T, Y> secondJoin = firstJoin.join((SingularAttribute<? super T, Y>) secondAttribute);
+            this.predicates.add(this.builder.equal((secondJoin.get(fieldName)),value));
+        }
+        return this;
+    }
     public <T> PredicateBuilder<ENTITY> joinLike(final SingularAttribute<?, T> attribute,
                                                  final String value,
                                                  final String fieldName) {
@@ -214,6 +225,20 @@ public class PredicateBuilder<ENTITY> {
             for (DateComparison comparison : comparisons) {
                 LocalDate value = comparison.getDate();
                 Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), date, value);
+
+                this.predicates.add(predicate);
+            }
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<ENTITY> compareDates(final SingularAttribute<?, T> attribute,
+                                                         final List<DateComparison> comparisons) {
+        if (comparisons != null && comparisons.size() > 0) {
+            Path<LocalDate> path = this.root.get((SingularAttribute<? super ENTITY, LocalDate>) attribute);
+            for (DateComparison comparison : comparisons) {
+                LocalDate value = comparison.getDate();
+                Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), path, value);
 
                 this.predicates.add(predicate);
             }

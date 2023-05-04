@@ -1,13 +1,21 @@
 package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.model.entity.ContractEntity;
+import com.example.leaves.model.dto.ContractDto;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.ContractRepository;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.filter.ContractFilter;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.PredicateBuilder;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -64,5 +72,90 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public void save(ContractEntity contract) {
         contractRepository.save(contract);
+    }
+
+    @Override
+    public void deleteContractById(Long id) {
+        contractRepository.deleteById(id);
+    }
+
+    @Override
+    public Page<ContractDto> getContractsPageByUserId(Long id, ContractFilter filter) {
+        Page<ContractDto> page = null;
+        filter.setSort("");
+        if (filter.getLimit() != null && filter.getLimit() > 0) {
+            OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+            page = contractRepository
+                    .findAll(getSpecification(id, filter), pageable)
+                    .map(c -> {
+                        ContractDto dto = new ContractDto();
+                        c.toDto(dto);
+                        return dto;
+                    });
+        }
+        return page;
+    }
+
+    @Override
+    public ContractDto updateContractById(Long id, ContractDto dto) {
+        if (dto.getEndDate() != null && dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("Contract end date must be after start date");
+        }
+        ContractEntity entity = contractRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+        List<ContractEntity> allOtherContractsOfSameEmployeeInfo = contractRepository.findAllOtherContractsOfSameEmployeeInfo(id, entity.getEmployeeInfo().getId());
+
+        if (anyDateIsBetweenOtherContractDates(dto, allOtherContractsOfSameEmployeeInfo)) {
+            throw new IllegalArgumentException("Contract date cannot be between other contract dates");
+        }
+        entity.toEntity(dto);
+        contractRepository.save(entity);
+        entity.toDto(dto);
+        employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());
+        return dto;
+    }
+
+    private boolean anyDateIsBetweenOtherContractDates(ContractDto dto, List<ContractEntity> allOtherContractsOfSameEmployeeInfo) {
+        boolean illegal = false;
+//        ContractEntity lastContract = allOtherContractsOfSameEmployeeInfo
+//                .stream()
+//                .filter(c -> c.getEndDate() == null)
+//                .findFirst()
+//                .orElseThrow(ObjectNotFoundException::new);
+//        allOtherContractsOfSameEmployeeInfo.remove(lastContract);
+
+        for (ContractEntity contract : allOtherContractsOfSameEmployeeInfo) {
+            if (isIllegal(dto.getStartDate(), contract) || isIllegal(dto.getEndDate(), contract)) {
+                illegal = true;
+            }
+        }
+        return illegal;
+    }
+
+    private boolean isIllegal(LocalDate date, ContractEntity entity) {
+        if (date == null) {
+            return false;
+        }
+        return date.isAfter(entity.getStartDate()) && (entity.getEndDate() != null && date.isBefore(entity.getEndDate()));
+    }
+
+    private Specification<ContractEntity> getSpecification(Long id, ContractFilter filter) {
+        return (root, query, criteriaBuilder) ->
+        {
+            Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
+                    .joinDeepEquals(ContractEntity_.employeeInfo,
+                            EmployeeInfo_.userInfo, id, UserEntity_.ID)
+                    .compareDates(ContractEntity_.startDate, filter.getStartDateComparisons())
+                    .equals(ContractEntity_.deleted, filter.isDeleted())
+                    .compareDates(ContractEntity_.endDate, filter.getEndDateComparisons())
+                    .like(ContractEntity_.typeName, filter.getTypeName())
+                    .build()
+                    .toArray(new Predicate[0]);
+
+            return query.where(predicates)
+                    .distinct(true)
+                    .orderBy(criteriaBuilder.desc(root.get(ContractEntity_.startDate)))
+                    .getGroupRestriction();
+        };
     }
 }
