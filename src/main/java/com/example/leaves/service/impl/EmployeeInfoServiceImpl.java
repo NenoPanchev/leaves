@@ -26,7 +26,6 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -264,7 +263,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         int totalContractDays = calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
-        int spentDays = leaveRequestService.getAllApprovedDaysInYear(currentYear);
+        int spentDays = leaveRequestService.getAllApprovedDaysInYear(currentYear, employeeInfo.getId());
         return totalContractDays - spentDays;
     }
 
@@ -315,7 +314,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 totalDaysFromContracts += days;
             }
             // Create and add Leave Annual Report
-            createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts, leavesAnnualReportList, employeeInfo.getCarryoverDaysLeave());
+            createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts,
+                    leavesAnnualReportList, employeeInfo.getCarryoverDaysLeave(), employeeInfo.getId());
 
         }
         Collections.reverse(leavesAnnualReportList);
@@ -328,9 +328,12 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .stream()
                 .map(c -> c.getStartDate().getYear())
                 .forEach(years::add);
-
+        int currentYear = LocalDate.now().getYear();
         Integer firstYear = Collections.min(years);
         Integer lastYear = Collections.max(years);
+        if (years.size() == 1 && firstYear <= currentYear) {
+            lastYear = currentYear;
+        }
             for (int i = firstYear; i <= lastYear; i++) {
                 years.add(i);
         }
@@ -383,7 +386,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         boolean startsThisYear = c.getStartDate().getYear() == year;
         boolean thisYearIsBetween = c.getStartDate().getYear() < year
                 && (c.getEndDate() != null && c.getEndDate().getYear() > year);
-        boolean isLastContract = c.getStartDate().getYear() == year
+        boolean isLastContract = c.getStartDate().getYear() <= year
                 && c.getEndDate() == null;
         return endsThisYear || startsThisYear || thisYearIsBetween || isLastContract;
     }
@@ -404,11 +407,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return contractBreakdown;
     }
 
-    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear) {
+    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear, Long id) {
         LeavesAnnualReport report = new LeavesAnnualReport();
         report.setContractBreakdowns(contractBreakdownList);
         report.setYear(year);
-        report.setDaysUsed(leaveRequestService.getAllApprovedDaysInYear(year));
+        report.setDaysUsed(leaveRequestService.getAllApprovedDaysInYear(year, id));
 
         int fromPreviousYear = 0;
         if (leavesAnnualReportList.size() > 0) {
