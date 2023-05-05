@@ -26,4 +26,7 @@ public interface ContractService {
     ContractDto createContract(Long userId, ContractDto dto);
 
     ContractDto getContractByID(Long id);
+
+    ContractEntity getTheLastContract(List<ContractEntity> contracts);
+    boolean aDateIsBetweenOtherContractDates(LocalDate date, List<ContractEntity> allOtherContractsOfSameEmployeeInfo);
 }

@@ -409,6 +409,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear, Long id) {
         LeavesAnnualReport report = new LeavesAnnualReport();
+        contractBreakdownList.sort((a, b) -> b.getStartDate().compareTo(a.getStartDate()));
         report.setContractBreakdowns(contractBreakdownList);
         report.setYear(year);
         report.setDaysUsed(leaveRequestService.getAllApprovedDaysInYear(year, id));

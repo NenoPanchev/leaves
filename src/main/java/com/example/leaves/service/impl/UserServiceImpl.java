@@ -261,14 +261,7 @@ public class UserServiceImpl implements UserService {
         if (contractChange.equals("Initial")) {
             editInitialContract(entity.getEmployeeInfo(), employeeInfo);
         } else if (contractChange.equals("New")) {
-            ContractEntity lastContract = entity
-                    .getEmployeeInfo()
-                    .getContracts()
-                    .stream()
-                    .filter(c -> c.getEndDate() == null)
-                    .findFirst()
-                    .orElseThrow(ObjectNotFoundException::new);
-
+            ContractEntity lastContract = contractService.getTheLastContract(entity.getEmployeeInfo().getContracts());
 
             boolean isLastContractStartDate = lastContract.getStartDate().equals(employeeInfo.getContractStartDate());
 
@@ -281,7 +274,7 @@ public class UserServiceImpl implements UserService {
                 if (isAfterLastContractStartDate) {
                     addNewContract(entity.getEmployeeInfo(), employeeInfo);
                 } else {
-                    throw new IllegalContractStartDateException("New contract start date must be in present or future");
+                    throw new IllegalContractStartDateException("New contract start date must be in present or future and not between other contract dates");
                 }
             }
         }
@@ -316,18 +309,19 @@ public class UserServiceImpl implements UserService {
     }
 
     private void addNewContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
-        ContractEntity lastContract = entityInfo
-                .getContracts()
-                .stream()
-                .filter(c -> c.getEndDate() == null)
-                .findFirst()
-                .orElseThrow(ObjectNotFoundException::new);
+        ContractEntity lastContract = contractService.getTheLastContract(entityInfo.getContracts());
+
 
         if (!isNewTypeEmployee(lastContract, infoDto)) {
             throw new IllegalArgumentException("New contract must have different type");
         }
 
-        lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));
+        if (lastContract.getEndDate() == null) {
+            lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));
+        }
+        if (contractService.aDateIsBetweenOtherContractDates(infoDto.getContractStartDate(), entityInfo.getContracts())) {
+            throw new IllegalArgumentException("Contract date cannot be between other contract dates");
+        }
         entityInfo.setEmployeeType(typeEmployeeRepository.findByTypeName(infoDto.getTypeName()));
         ContractEntity newContract = new ContractEntity(infoDto.getTypeName(), infoDto.getContractStartDate(), entityInfo);
         contractService.save(newContract);
