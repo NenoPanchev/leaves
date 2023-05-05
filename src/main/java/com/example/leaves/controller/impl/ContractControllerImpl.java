@@ -28,6 +28,13 @@ public class ContractControllerImpl implements ContractController {
     }
 
     @Override
+    public ResponseEntity<ContractDto> viewOne(Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(contractService.getContractByID(id));
+    }
+
+    @Override
     public ResponseEntity<ContractDto> create(ContractDto dto, Long id, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);

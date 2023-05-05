@@ -147,6 +147,15 @@ public class ContractServiceImpl implements ContractService {
         return dto;
     }
 
+    @Override
+    public ContractDto getContractByID(Long id) {
+        ContractEntity entity = contractRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+        ContractDto dto = new ContractDto();
+        entity.toDto(dto);
+        return dto;
+    }
+
     private boolean anyDateIsBetweenOtherContractDates(ContractDto dto, List<ContractEntity> allOtherContractsOfSameEmployeeInfo) {
         boolean illegal = false;
 //        ContractEntity lastContract = allOtherContractsOfSameEmployeeInfo

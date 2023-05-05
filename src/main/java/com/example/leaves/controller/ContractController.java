@@ -20,15 +20,15 @@ public interface ContractController {
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<Page<ContractDto>> getContractsPage(@PathVariable("id") Long id, @RequestBody ContractFilter filter);
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<ContractDto> viewOne(@PathVariable("id") Long id);
+
     @PostMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<ContractDto> create(@Valid @RequestBody ContractDto dto,
                                        @PathVariable("id") Long id,
                                          BindingResult bindingResult);
-
-//    @GetMapping("/{id}")
-//    @PreAuthorize("hasAuthority('READ')")
-//    ResponseEntity<DepartmentDto> getDepartment(@PathVariable("id") Long id);
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('WRITE')")
