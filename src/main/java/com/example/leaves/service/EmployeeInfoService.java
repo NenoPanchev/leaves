@@ -41,4 +41,6 @@ public interface EmployeeInfoService {
 
     void removeContracts(List<ContractEntity> dummyContracts);
     Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
+
+    void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo);
 }

@@ -324,7 +324,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(ObjectNotFoundException::new);
 
         if (!isNewTypeEmployee(lastContract, infoDto)) {
-            throw new IllegalArgumentException("New contract must have new type");
+            throw new IllegalArgumentException("New contract must have different type");
         }
 
         lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));

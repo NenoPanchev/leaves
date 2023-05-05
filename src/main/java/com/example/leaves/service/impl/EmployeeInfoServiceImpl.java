@@ -269,6 +269,13 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return page;
     }
 
+    @Override
+    public void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo) {
+        int days = calculateCurrentYearPaidLeave(employeeInfo);
+        employeeInfo.setCurrentYearDaysLeave(days);
+        employeeInfoRepository.save(employeeInfo);
+    }
+
 
     private List<LeavesAnnualReport> getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
         List<Integer> yearsList = getAllYearsOfEmployment(employeeInfo.getContracts());
