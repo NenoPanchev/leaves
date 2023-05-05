@@ -114,6 +114,15 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
+    public ResponseEntity<UserDto> updatePersonalInfo(UserUpdateDto dto) {
+
+        UserDto user = userService.updatePersonalInfo(dto);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(user);
+    }
+
+    @Override
     public ResponseEntity changePassword(PasswordChangeDto dto, Long id, BindingResult bindingResult) {
 
         userService.changePassword(id, dto);

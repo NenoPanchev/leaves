@@ -70,4 +70,6 @@ public interface UserService {
     void validatePassword(Long id, String password);
 
     void validatePasswordToken(Long id, String token);
+
+    UserDto updatePersonalInfo(UserUpdateDto dto);
 }

@@ -12,10 +12,7 @@ import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilder;
-import com.example.leaves.util.TokenUtil;
+import com.example.leaves.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -271,8 +268,13 @@ public class UserServiceImpl implements UserService {
                     .filter(c -> c.getEndDate() == null)
                     .findFirst()
                     .orElseThrow(ObjectNotFoundException::new);
+
+
             boolean isLastContractStartDate = lastContract.getStartDate().equals(employeeInfo.getContractStartDate());
+
             boolean isAfterLastContractStartDate = employeeInfo.getContractStartDate().isAfter(lastContract.getStartDate());
+
+
             if (isLastContractStartDate) {
                 editLastContract(entity.getEmployeeInfo(), employeeInfo, lastContract);
             } else {
@@ -607,6 +609,20 @@ public class UserServiceImpl implements UserService {
         if (entity.getToken().getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new PasswordChangeTokenExpiredException("Your token is expired.");
         }
+    }
+
+    @Override
+    public UserDto updatePersonalInfo(UserUpdateDto dto) {
+        UserEntity entity = getCurrentUser();
+        if (!entity.getEmail().equals(dto.getEmail()))
+        {
+            throw new UnauthorizedException("You can't change others personal info!");
+        }
+        entity.getEmployeeInfo().setSsn(EncryptionUtil.encrypt(String.valueOf(dto.getEmployeeInfo().getSsn())));
+        entity.getEmployeeInfo().setAddress(dto.getEmployeeInfo().getAddress());
+        UserDto outDto=new UserDto();
+        userRepository.save(entity).toDto(outDto);
+        return outDto;
     }
 
     private UserEntity getUserEntity(Long id) {

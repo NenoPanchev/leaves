@@ -23,11 +23,11 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     List<LeaveRequest> findAllByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
 
     List<LeaveRequest> findAllByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
-//    @EntityGraph(value = "requestFull")
+    @EntityGraph(value = "requestFull")
     LeaveRequest findFirstByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
-//    @EntityGraph(value = "requestFull")
+    @EntityGraph(value = "requestFull")
     boolean existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
-//    @EntityGraph(value = "requestFull")
+    @EntityGraph(value = "requestFull")
     List<LeaveRequest> findAllByEmployeeAndDeletedIsFalse(EmployeeInfo employee);
 //    @EntityGraph(value = "requestFull")
     List<LeaveRequest> findAllByDeletedIsFalse();

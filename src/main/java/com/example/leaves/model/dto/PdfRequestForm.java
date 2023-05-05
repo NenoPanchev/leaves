@@ -9,10 +9,6 @@ public class PdfRequestForm {
 
     private String requestToName;
     private String year;
-    private String position;
-    private String address;
-    private char[] ssn;
-
-    private boolean saved;
+    private boolean usePersonalInfo;
 
 }

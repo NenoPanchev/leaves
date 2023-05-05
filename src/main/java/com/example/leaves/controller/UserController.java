@@ -58,6 +58,9 @@ public interface UserController {
                                        @PathVariable("id") Long id,
                                        BindingResult bindingResult);
 
+    @PutMapping("/personal-info")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<UserDto> updatePersonalInfo(@Valid @RequestBody UserUpdateDto dto);
     @PutMapping("/change-password/{id}")
     @PreAuthorize("hasAuthority('READ')")
     //TODO ASK BINDING RESULT VALIDATION BETTER OR FRONTEND

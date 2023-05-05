@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "contracts")
 public class ContractEntity extends BaseEntity {
-    @ManyToOne
+    @ManyToOne()
     private EmployeeInfo employeeInfo;
     @Column(nullable = false)
     private LocalDate startDate;

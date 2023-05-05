@@ -4,7 +4,10 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.ContractEntity;
+import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.payload.response.ContractBreakdown;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.repository.EmployeeInfoRepository;
@@ -25,6 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -123,7 +127,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             }
         }
 
-        setPersonalEmployeeInfo(pdfRequestForm, userOfRequest);
+//        setPersonalEmployeeInfo(pdfRequestForm, userOfRequest);
 
 
         Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, leaveRequest, userOfRequest);
@@ -137,19 +141,18 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
 
     }
-
     private Map<String, String> setEmployeePersonalInfoMap(PdfRequestForm pdfRequestForm,
                                                            LeaveRequest leaveRequest,
                                                            UserEntity userOfRequest) {
         Map<String, String> words = new HashMap<>();
 
         words.put("fullName", userOfRequest.getName());
-        if (pdfRequestForm.isSaved()) {
+        if (pdfRequestForm.isUsePersonalInfo()) {
 
-            if (pdfRequestForm.getSsn() != null &&
-                    pdfRequestForm.getSsn().length > 0) {
+            if (userOfRequest.getEmployeeInfo().getSsn() != null &&
+                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
 
-                words.put("egn", String.valueOf(pdfRequestForm.getSsn()));
+                words.put("egn", EncryptionUtil.decrypt(userOfRequest.getEmployeeInfo().getSsn()));
 
 
             } else {
@@ -172,28 +175,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
         } else {
 
-            if (pdfRequestForm.getSsn() != null) {
 
-                words.put("egn", String.valueOf(pdfRequestForm.getSsn()));
-            } else if (userOfRequest.getEmployeeInfo().getSsn() != null &&
-                    !userOfRequest.getEmployeeInfo().getSsn().isEmpty()) {
-
-                words.put("egn", EncryptionUtil.decrypt(userOfRequest.getEmployeeInfo().getSsn()));
-            } else {
                 words.put("egn", " ");
-            }
 
-            if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {
-                words.put("location", pdfRequestForm.getAddress());
-            } else {
+
+
                 words.put("location", " ");
-            }
 
-            if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
-                words.put("position", pdfRequestForm.getPosition());
-            } else {
+
                 words.put("position", " ");
-            }
+
         }
 
 
@@ -201,37 +192,21 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
         words.put("year", pdfRequestForm.getYear());
 
-        words.put("startDate", String.valueOf(leaveRequest.getApprovedStartDate()));
+        words.put("startDate", leaveRequest.getApprovedStartDate()
+                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
-        words.put("endDate", String.valueOf(leaveRequest.getApprovedEndDate().plusDays(1)));
+        words.put("endDate", leaveRequest.getApprovedEndDate()
+                .plusDays(1)
+                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
         words.put("daysNumber", String.valueOf(leaveRequest.getDaysRequested()));
 
         return words;
     }
 
-    private void setPersonalEmployeeInfo(PdfRequestForm pdfRequestForm, UserEntity employee) {
-        if (pdfRequestForm.isSaved()) {
-            if (pdfRequestForm.getSsn() != null && pdfRequestForm.getSsn().length > 0) {
-                employee.getEmployeeInfo().setSsn(EncryptionUtil.encrypt(String.valueOf(pdfRequestForm.getSsn())));
-            }
-
-            if (pdfRequestForm.getAddress() != null && !pdfRequestForm.getAddress().isEmpty()) {
-                employee.getEmployeeInfo().setAddress(pdfRequestForm.getAddress());
-            }
-            if (pdfRequestForm.getPosition() != null && !pdfRequestForm.getPosition().isEmpty()) {
-                employee.getEmployeeInfo().setPosition(pdfRequestForm.getPosition());
-            }
-            employeeRepository.save(employee);
-        }
-
-    }
 
     @Override
     public void delete(long id) {
-//     Employee e=   employeeRepository.findById(id);
-//     e.getEntityInfo().setDeleted(true);
-//     employeeRepository.save(e);
         employeeRepository.markAsDeleted(id);
     }
 
@@ -248,7 +223,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                         remainingPaidLeave = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
                     }
                     empl.setCarryoverDaysLeave(remainingPaidLeave);
-                    empl.setCurrentYearDaysLeave( empl.getEmployeeType().getDaysLeave());
+                    empl.setCurrentYearDaysLeave(empl.getEmployeeType().getDaysLeave());
                     employeeInfoRepository.save(empl);
                 });
     }
@@ -334,8 +309,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         if (years.size() == 1 && firstYear <= currentYear) {
             lastYear = currentYear;
         }
-            for (int i = firstYear; i <= lastYear; i++) {
-                years.add(i);
+        for (int i = firstYear; i <= lastYear; i++) {
+            years.add(i);
         }
         List<Integer> yearsList = new ArrayList<>(years);
         yearsList.sort(Integer::compareTo);
