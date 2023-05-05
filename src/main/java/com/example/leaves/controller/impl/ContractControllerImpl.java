@@ -29,7 +29,13 @@ public class ContractControllerImpl implements ContractController {
 
     @Override
     public ResponseEntity<ContractDto> create(ContractDto dto, Long id, BindingResult bindingResult) {
-        return null;
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(contractService.createContract(id, dto));
     }
 
     @Override

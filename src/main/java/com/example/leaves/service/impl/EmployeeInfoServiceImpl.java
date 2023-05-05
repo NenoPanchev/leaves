@@ -276,6 +276,24 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeInfoRepository.save(employeeInfo);
     }
 
+    @Override
+    public EmployeeInfo getById(Long id) {
+        return employeeInfoRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+    }
+
+    @Override
+    public Long getIdByUserId(Long userId) {
+        return employeeInfoRepository.findIdByUserId(userId)
+                .orElseThrow(ObjectNotFoundException::new);
+    }
+
+    @Override
+    public EmployeeInfo getByContractId(Long id) {
+        return employeeInfoRepository.findByContractId(id)
+                .orElseThrow(ObjectNotFoundException::new);
+    }
+
 
     private List<LeavesAnnualReport> getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
         List<Integer> yearsList = getAllYearsOfEmployment(employeeInfo.getContracts());

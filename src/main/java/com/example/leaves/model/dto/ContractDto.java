@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -18,5 +20,7 @@ public class ContractDto extends BaseDto {
     private LocalDate startDate;
     @JsonFormat(pattern = "dd.MM.yyyy", shape = JsonFormat.Shape.STRING)
     private LocalDate endDate;
+    @NotEmpty
+    @NotNull
     private String typeName;
 }

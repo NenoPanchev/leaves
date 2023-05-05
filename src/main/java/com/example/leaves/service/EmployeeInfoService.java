@@ -43,4 +43,9 @@ public interface EmployeeInfoService {
     Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
 
     void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo);
+    EmployeeInfo getById(Long id);
+
+    Long getIdByUserId(Long userId);
+
+    EmployeeInfo getByContractId(Long id);
 }

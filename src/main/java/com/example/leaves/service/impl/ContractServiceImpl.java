@@ -6,6 +6,7 @@ import com.example.leaves.model.entity.*;
 import com.example.leaves.repository.ContractRepository;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.ContractFilter;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PredicateBuilder;
@@ -14,10 +15,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +26,12 @@ import java.util.stream.Collectors;
 public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final EmployeeInfoService employeeInfoService;
+    private final TypeEmployeeService typeEmployeeService;
 
-    public ContractServiceImpl(ContractRepository contractRepository, @Lazy EmployeeInfoService employeeInfoService) {
+    public ContractServiceImpl(ContractRepository contractRepository, @Lazy EmployeeInfoService employeeInfoService, TypeEmployeeService typeEmployeeService) {
         this.contractRepository = contractRepository;
         this.employeeInfoService = employeeInfoService;
+        this.typeEmployeeService = typeEmployeeService;
     }
 
     @Override
@@ -76,6 +79,20 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public void deleteContractById(Long id) {
+        EmployeeInfo employeeInfo = employeeInfoService.getByContractId(id);
+        ContractEntity entity = contractRepository.findById(id)
+                .orElseThrow(ObjectNotFoundException::new);
+        employeeInfo.removeContract(entity);
+        deleteById(id);
+        if (employeeInfo.getContracts().size() > 0) {
+            employeeInfo.setEmployeeType(typeEmployeeService.getByName(
+                    getTheLastContract(employeeInfo.getContracts()).getTypeName()
+            ));
+        }
+        employeeInfoService.recalculateCurrentYearDaysAfterChanges(employeeInfo);
+    }
+
+    private void deleteById(Long id) {
         contractRepository.deleteById(id);
     }
 
@@ -110,6 +127,21 @@ public class ContractServiceImpl implements ContractService {
         }
         entity.toEntity(dto);
         contractRepository.save(entity);
+        entity.toDto(dto);
+        employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());
+        return dto;
+    }
+
+    @Override
+    public ContractDto createContract(Long userId, ContractDto dto) {
+        Long employeeInfoId = employeeInfoService.getIdByUserId(userId);
+        EmployeeInfo employeeInfo = employeeInfoService.getById(employeeInfoId);
+        employeeInfo.setEmployeeType(typeEmployeeService.getByName((dto.getTypeName())));
+        ContractEntity entity = new ContractEntity();
+        entity.toEntity(dto);
+        entity.setEmployeeInfo(employeeInfo);
+        contractRepository.save(entity);
+        employeeInfo.addContract(entity);
         entity.toDto(dto);
         employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());
         return dto;
@@ -157,5 +189,12 @@ public class ContractServiceImpl implements ContractService {
                     .orderBy(criteriaBuilder.desc(root.get(ContractEntity_.startDate)))
                     .getGroupRestriction();
         };
+    }
+
+    private ContractEntity getTheLastContract(List<ContractEntity> contracts) {
+        ContractEntity lastContract = contracts
+                .stream().max(Comparator.comparing(ContractEntity::getStartDate))
+                .orElseThrow(ArrayIndexOutOfBoundsException::new);
+        return lastContract;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 
 public interface ContractRepository extends JpaRepository<ContractEntity, Long>, JpaSpecificationExecutor<ContractEntity> {
@@ -20,4 +21,5 @@ public interface ContractRepository extends JpaRepository<ContractEntity, Long>,
             "WHERE e.id = :employeeInfoId " +
             "AND c.id != :contractId ")
     List<ContractEntity> findAllOtherContractsOfSameEmployeeInfo(@Param("contractId") Long contractId, @Param("employeeInfoId") Long employeeInfoId);
+
 }

@@ -22,4 +22,6 @@ public interface ContractService {
     Page<ContractDto> getContractsPageByUserId(Long id, ContractFilter filter);
 
     ContractDto updateContractById(Long id, ContractDto dto);
+
+    ContractDto createContract(Long userId, ContractDto dto);
 }
