@@ -72,4 +72,6 @@ public interface UserService {
     void validatePasswordToken(Long id, String token);
 
     UserDto updatePersonalInfo(UserUpdateDto dto);
+
+    String findNameByEmail(String email);
 }

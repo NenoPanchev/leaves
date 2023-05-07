@@ -619,6 +619,12 @@ public class UserServiceImpl implements UserService {
         return outDto;
     }
 
+    @Override
+    public String findNameByEmail(String email) {
+        return userRepository.findNameByEmail(email)
+                .orElseThrow(ObjectNotFoundException::new);
+    }
+
     private UserEntity getUserEntity(Long id) {
         UserEntity entity = userRepository
                 .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));

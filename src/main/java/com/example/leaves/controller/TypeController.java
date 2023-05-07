@@ -21,7 +21,7 @@ public interface TypeController {
     List<TypeEmployeeDto> getAllFilter(@RequestBody TypeEmployeeFilter filter);
 
     @PostMapping("/Page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     Page<TypeEmployeeDto> getPageFiltered(@RequestBody TypeEmployeeFilter filter);
 
     @PostMapping
