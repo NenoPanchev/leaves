@@ -27,7 +27,7 @@ public interface DepartmentController {
     ResponseEntity<List<DepartmentDto>> getFilteredDepartments(@RequestBody DepartmentFilter filter);
 
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Page<DepartmentDto>> getDepartmentsPage(@RequestBody DepartmentFilter departmentFilter);
 
     @PostMapping

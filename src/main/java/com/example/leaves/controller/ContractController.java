@@ -17,7 +17,7 @@ import java.util.List;
 @RequestMapping("/contracts")
 public interface ContractController {
     @PostMapping("/{id}/page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Page<ContractDto>> getContractsPage(@PathVariable("id") Long id, @RequestBody ContractFilter filter);
 
     @GetMapping("/{id}")
