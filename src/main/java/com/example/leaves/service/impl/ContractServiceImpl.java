@@ -146,6 +146,10 @@ public class ContractServiceImpl implements ContractService {
         if (lastContract.getTypeName().equals(dto.getTypeName())) {
             throw new IllegalArgumentException("New position must be different");
         }
+        if (lastContract.getEndDate() == null) {
+            lastContract.setEndDate(dto.getStartDate().minusDays(1));
+            contractRepository.save(lastContract);
+        }
         employeeInfo.setEmployeeType(typeEmployeeService.getByName((dto.getTypeName())));
         ContractEntity entity = new ContractEntity();
         entity.toEntity(dto);
