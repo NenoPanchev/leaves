@@ -267,6 +267,12 @@ public class PredicateBuilder<ENTITY> {
             case LESS_OR_EQUAL:
                 predicate = builder.lessThanOrEqualTo(fieldValue, filterValue);
                 break;
+            case NULL:
+                predicate = builder.isNull(fieldValue);
+                break;
+            case NOT_NULL:
+                predicate = builder.isNotNull(fieldValue);
+                break;
         }
         return predicate;
     }
