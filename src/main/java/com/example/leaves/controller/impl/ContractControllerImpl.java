@@ -5,7 +5,6 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.ContractDto;
 import com.example.leaves.service.ContractService;
 import com.example.leaves.service.filter.ContractFilter;
-import com.example.leaves.service.filter.DepartmentFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

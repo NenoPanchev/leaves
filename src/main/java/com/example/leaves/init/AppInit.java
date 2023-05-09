@@ -1,19 +1,9 @@
 package com.example.leaves.init;
 
-import com.example.leaves.model.entity.ContractEntity;
-import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.service.*;
 import com.example.leaves.util.HolidaysUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static java.time.temporal.ChronoUnit.DAYS;
 
 @Component
 public class AppInit implements CommandLineRunner {

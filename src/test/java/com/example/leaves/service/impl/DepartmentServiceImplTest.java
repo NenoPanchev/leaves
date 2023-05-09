@@ -9,6 +9,7 @@ import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
+import com.example.leaves.service.impl.DepartmentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

@@ -5,6 +5,7 @@ import com.example.leaves.model.dto.TypeEmployeeDto;
 import com.example.leaves.model.entity.enums.SearchOperation;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
+import com.example.leaves.service.impl.TypeEmployeeServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

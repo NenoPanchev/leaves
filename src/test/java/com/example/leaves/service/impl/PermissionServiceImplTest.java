@@ -4,6 +4,7 @@ import com.example.leaves.model.entity.PermissionEntity;
 import com.example.leaves.model.entity.enums.PermissionEnum;
 import com.example.leaves.repository.PermissionRepository;
 import com.example.leaves.service.PermissionService;
+import com.example.leaves.service.impl.PermissionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

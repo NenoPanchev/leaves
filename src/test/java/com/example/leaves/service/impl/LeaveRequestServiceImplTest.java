@@ -6,18 +6,12 @@ import com.example.leaves.exceptions.RequestAlreadyProcessed;
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.LeaveRequest;
-import com.example.leaves.model.entity.enums.SearchOperation;
 import com.example.leaves.repository.LeaveRequestRepository;
-import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.EmployeeInfoService;
-import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.service.impl.LeaveRequestServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +20,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

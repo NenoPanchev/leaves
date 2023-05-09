@@ -1,6 +1,5 @@
 package com.example.leaves.model.payload.response;
 
-import com.example.leaves.model.dto.ContractDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
