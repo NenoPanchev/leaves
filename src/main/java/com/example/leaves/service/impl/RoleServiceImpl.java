@@ -14,6 +14,7 @@ import com.example.leaves.service.PermissionService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
+import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
@@ -131,6 +132,13 @@ public class RoleServiceImpl implements RoleService {
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
     }
 
+    @Override
+    public RoleEntity getRoleById(Long id) {
+        return roleRepository
+                .findByIdAndDeletedIsFalse(id)
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("Role with id: %d does not exist", id)));
+    }
+
 
     @Override
     @Transactional
@@ -212,6 +220,24 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<String> getAllRoleNames() {
         return roleRepository.findAllNamesByDeletedIsFalse();
+    }
+
+    @Override
+    public Page<RoleDto> getRolesPage(RoleFilter roleFilter) {
+        Page<RoleDto> page = null;
+        if (roleFilter.getLimit() != null && roleFilter.getLimit() > 0) {
+            int offset = roleFilter.getOffset() == null ? 0 : roleFilter.getOffset();
+            int limit = roleFilter.getLimit();
+            OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(roleFilter);
+            page = roleRepository
+                    .findAll(getSpecification(roleFilter), pageable)
+                    .map(pg -> {
+                        RoleDto dto = new RoleDto();
+                        pg.toDto(dto);
+                        return dto;
+                    });
+        }
+        return page;
     }
 
     @Override

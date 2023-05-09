@@ -3,7 +3,6 @@ package com.example.leaves.controller;
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,11 @@ public interface RequestController {
 
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByEmployee(@RequestParam long employeeId);
+    List<LeaveRequestDto> getAllByCurrentUser();
+
+    @GetMapping("/employee/{id}")
+    @PreAuthorize("hasAuthority('READ')")
+    List<LeaveRequestDto> getAllByUserId(@PathVariable long id);
 
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
@@ -38,15 +41,15 @@ public interface RequestController {
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest( @PathVariable long id);
+    void approveRequest(@PathVariable long id, @RequestBody LeaveRequestDto leaveRequestDto);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")
-    void disapproveRequest( @PathVariable int id);
+    void disapproveRequest(@PathVariable int id);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
-    void delete( @PathVariable long id);
+    void delete(@PathVariable long id);
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
@@ -55,6 +58,7 @@ public interface RequestController {
     //    @DeleteMapping("/clear")
 //    void clearAllProcessedRequests(@RequestHeader HttpHeaders headers);
     @PostMapping("/Page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
+
 }

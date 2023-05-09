@@ -26,4 +26,8 @@ public interface TypeEmployeeService {
     TypeEmployee getByName(String name);
 
     Page<TypeEmployeeDto> getAllFilterPage(TypeEmployeeFilter filter);
+
+    void seedTypes();
+
+    List<String> getAllNames();
 }

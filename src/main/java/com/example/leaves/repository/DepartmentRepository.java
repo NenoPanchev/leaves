@@ -1,10 +1,7 @@
 package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.DepartmentEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -41,13 +38,11 @@ public interface DepartmentRepository extends JpaRepository<DepartmentEntity, Lo
             "SET d.deleted = true " +
             "WHERE d.id = :id")
     void softDeleteById(@Param("id") Long id);
-
+    @EntityGraph(value = "fullDepartment")
     List<DepartmentEntity> findAllByDeletedIsFalseOrderById();
 
     @Query("SELECT d.name from DepartmentEntity d " +
             "WHERE d.deleted = false ")
     List<String> findAllNamesByDeletedIsFalse();
-
-    List<DepartmentEntity> findAllByDeletedIsFalse();
 
 }

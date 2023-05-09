@@ -2,7 +2,6 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.LeaveRequestDto;
 import com.example.leaves.model.entity.LeaveRequest;
-import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.data.domain.Page;
 
@@ -11,7 +10,7 @@ import java.util.List;
 public interface LeaveRequestService {
     LeaveRequest addRequest(LeaveRequestDto leaveRequestDto);
 
-    LeaveRequest approveRequest(long id);
+    LeaveRequest approveRequest(long id, LeaveRequestDto leaveRequestDto);
 
     LeaveRequest disapproveRequest(long id);
 
@@ -31,6 +30,11 @@ public interface LeaveRequestService {
 
     LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto);
 
-    List<LeaveRequestDto> getAllByEmployee(Long employeeId);
+    List<LeaveRequestDto> getAllByCurrentUser();
 
+    List<LeaveRequestDto> getAllByUserId(long id);
+
+//    LeaveRequest getByDateBetween();
+
+    int getAllApprovedDaysInYear(int year, Long id);
 }

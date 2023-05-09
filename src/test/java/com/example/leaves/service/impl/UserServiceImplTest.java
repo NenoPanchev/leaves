@@ -10,6 +10,7 @@ import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.model.entity.enums.PermissionEnum;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.PermissionService;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.when;
         H2TestProfileJPAConfig.class
 })
 @RunWith(SpringRunner.class)
-@ActiveProfiles("testInMemory")
+@ActiveProfiles("test")
 class UserServiceImplTest {
     private UserEntity user, admin, testUser;
     private RoleEntity userRole, adminRole;
@@ -165,14 +166,14 @@ class UserServiceImplTest {
 
     @Test
     public void getUserById() {
-        UserDto actual = userService.getUserById(2L);
+        UserDto actual = userService.getUserDtoById(2L);
         assertEquals(admin.getName(), actual.getName());
         assertEquals(admin.getEmail(), actual.getEmail());
     }
 
     @Test
     public void getUserByIdThrowsIfNonExistentUser() {
-        assertThrows(ObjectNotFoundException.class, () -> userService.getUserById(3123213L));
+        assertThrows(ObjectNotFoundException.class, () -> userService.getUserDtoById(3123213L));
     }
 
     @Test
@@ -187,8 +188,8 @@ class UserServiceImplTest {
 
     @Test
     public void existsByEmail() {
-        assertTrue(userService.existsByEmail(admin.getEmail()));
-        assertFalse(userService.existsByEmail("asfigaosasdfas"));
+        assertTrue(userService.existsByEmailAndDeletedIsFalse(admin.getEmail()));
+        assertFalse(userService.existsByEmailAndDeletedIsFalse("asfigaosasdfas"));
     }
 
     @Test
@@ -233,9 +234,8 @@ class UserServiceImplTest {
 
     @Test
     public void updateUser() {
-        UserDto dto = new UserDto();
+        UserUpdateDto dto = new UserUpdateDto();
         dto.setName("New User");
-        dto.setPassword("1234");
         UserDto actual = userService.updateUser(3L, dto);
         assertEquals(dto.getName(), actual.getName());
 
@@ -252,14 +252,13 @@ class UserServiceImplTest {
 
     @Test
     public void updateUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserDto()));
+        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserUpdateDto()));
     }
 
     @Test
     public void updateUserThrowsIfNonExistent() {
-        UserDto userDto = new UserDto();
+        UserUpdateDto userDto = new UserUpdateDto();
         userDto.setName("aaaaaaa");
-        userDto.setPassword("aaaaaaa");
         assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, userDto));
     }
 

@@ -28,14 +28,14 @@ public class TypeServiceImplTestHDb {
     void getAllLeaveRequestsFilteredWithFalseNullAndFalse() {
         TypeEmployeeFilter filter = new TypeEmployeeFilter();
         List<String> typeNames = new ArrayList<>();
-        typeNames.add("cow");
+        typeNames.add("Developer");
         typeNames.add("horse");
         filter.setTypeName(typeNames);
         List<TypeEmployeeDto> actual = service.getAllFilter(filter);
-
+        Assertions.assertTrue(actual.size() > 0);
         for (TypeEmployeeDto dto : actual
         ) {
-            Assertions.assertTrue(dto.getTypeName().equals("cow") || dto.getTypeName().equals("horse"));
+            Assertions.assertEquals("Developer", dto.getTypeName());
         }
         Assertions.assertTrue(actual.size() > 0);
 
@@ -50,6 +50,8 @@ public class TypeServiceImplTestHDb {
         daysLeave.add(25);
         filter.setDaysLeave(daysLeave);
         List<TypeEmployeeDto> actual = service.getAllFilter(filter);
+
+        Assertions.assertTrue(actual.size() > 0);
         for (TypeEmployeeDto dto : actual
         ) {
             Assertions.assertTrue(dto.getDaysLeave() <= 25);
@@ -66,6 +68,7 @@ public class TypeServiceImplTestHDb {
         daysLeave.add(25);
         filter.setDaysLeave(daysLeave);
         List<TypeEmployeeDto> actual = service.getAllFilter(filter);
+        Assertions.assertTrue(actual.size() > 0);
         for (TypeEmployeeDto dto : actual
         ) {
             Assertions.assertTrue(dto.getDaysLeave() >= 25);

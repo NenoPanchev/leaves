@@ -21,7 +21,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public void seedPermissions() {
-        if (permissionRepository.count() > 0) {
+        if (permissionRepository.findAll().size() > 0) {
             return;
         }
         Arrays.stream(PermissionEnum.values())

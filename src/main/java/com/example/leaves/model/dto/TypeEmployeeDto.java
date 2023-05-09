@@ -9,6 +9,8 @@ public class TypeEmployeeDto extends BaseDto {
 
     private List<EmployeeInfoDto> employeeWithType;
 
+    private boolean isDeleted;
+
 
     public TypeEmployeeDto() {
     }
@@ -40,5 +42,13 @@ public class TypeEmployeeDto extends BaseDto {
 
     public void setEmployeeWithType(List<EmployeeInfoDto> employeeWithType) {
         this.employeeWithType = employeeWithType;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

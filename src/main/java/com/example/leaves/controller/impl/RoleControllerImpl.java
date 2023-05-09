@@ -6,6 +6,7 @@ import com.example.leaves.exceptions.ValidationException;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.filter.RoleFilter;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -40,6 +41,13 @@ public class RoleControllerImpl implements RoleController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(roleService.getAllRolesFiltered(roleFilter));
+    }
+
+    @Override
+    public ResponseEntity<Page<RoleDto>> getRolesPage(RoleFilter roleFilter) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(roleService.getRolesPage(roleFilter));
     }
 
     @Override

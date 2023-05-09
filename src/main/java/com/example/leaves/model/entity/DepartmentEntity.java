@@ -8,6 +8,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
+@NamedEntityGraph(
+        name = "fullDepartment",
+        attributeNodes = {
+                @NamedAttributeNode("admin"),
+                @NamedAttributeNode("employees"),
+        }
+)
 @Table(name = "departments", schema = "public")
 public class DepartmentEntity extends BaseEntity {
     @Column(unique = true, nullable = false, name = "name")
@@ -16,7 +23,7 @@ public class DepartmentEntity extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private UserEntity admin;
-    @OneToMany(mappedBy = "department")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "department")
     private List<UserEntity> employees = new ArrayList<>();
 
     public DepartmentEntity() {

@@ -1,9 +1,14 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.model.dto.PdfRequestForm;
+import com.example.leaves.model.entity.ContractEntity;
+import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.payload.response.LeavesAnnualReport;
+import com.example.leaves.service.filter.LeavesReportFilter;
+import org.springframework.data.domain.Page;
 
-import java.io.File;
 import java.util.List;
 
 public interface EmployeeInfoService {
@@ -13,7 +18,7 @@ public interface EmployeeInfoService {
 
 //    List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees();
 
-    public File getPdfOfRequest(UserEntity employee, long requestId);
+    byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
 
     List<EmployeeInfoDto> getAll();
 
@@ -26,4 +31,21 @@ public interface EmployeeInfoService {
 
     void delete(long id);
 
+    void notifyEmployeesOfTheirLeftPaidLeave();
+
+    void updatePaidLeaveAnnually();
+
+    int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo);
+
+    int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
+
+    void removeContracts(List<ContractEntity> dummyContracts);
+    Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
+
+    void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo);
+    EmployeeInfo getById(Long id);
+
+    Long getIdByUserId(Long userId);
+
+    EmployeeInfo getByContractId(Long id);
 }

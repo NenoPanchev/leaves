@@ -10,6 +10,7 @@ import com.example.leaves.service.filter.LeaveRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,11 +32,16 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByEmployee(long employeeId) {
+    public List<LeaveRequestDto> getAllByCurrentUser() {
 
-        return leaveRequestService.getAllByEmployee(employeeId);
+        return leaveRequestService.getAllByCurrentUser();
     }
 
+    @Override
+    public List<LeaveRequestDto> getAllByUserId(@PathVariable long id) {
+
+        return leaveRequestService.getAllByUserId(id);
+    }
 
     @Override
     public List<LeaveRequestDto> getAllFilter(LeaveRequestFilter filter) {
@@ -59,9 +65,9 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public void approveRequest(long id) {
+    public void approveRequest(long id, LeaveRequestDto leaveRequestDto) {
         try {
-            leaveRequestService.approveRequest(id);
+            leaveRequestService.approveRequest(id, leaveRequestDto);
         } catch (RequestAlreadyProcessed | PaidleaveNotEnoughException e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage(), e);
         }
@@ -98,7 +104,6 @@ public class RequestControllerImpl implements RequestController {
     public Page<LeaveRequestDto> getPageFiltered(LeaveRequestFilter filter) {
         return leaveRequestService.getLeaveRequestDtoFilteredPage(filter);
     }
-
 //    @Override
 //    public void clearAllProcessedRequests(HttpHeaders headers) {
 //        Employee employee = AuthenticationHelper.tryGetUser(headers);

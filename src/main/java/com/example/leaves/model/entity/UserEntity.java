@@ -11,7 +11,7 @@ import java.util.List;
         name = "full",
         attributeNodes = {
                 @NamedAttributeNode("roles"),
-                @NamedAttributeNode("department")
+                @NamedAttributeNode("department"),
         }
 )
 @AttributeOverrides(
@@ -28,16 +28,20 @@ public class UserEntity extends BaseEntity<UserDto> {
     private String email;
     @Column(nullable = false, name = "password")
     private String password;
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
     @ManyToMany
     private List<RoleEntity> roles;
 
 
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_info_id")
     private EmployeeInfo employeeInfo;
+
+
+    @OneToOne(fetch = FetchType.EAGER,mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PasswordResetToken token;
 
     public UserEntity() {
         this.roles = new ArrayList<>();
@@ -113,6 +117,8 @@ public class UserEntity extends BaseEntity<UserDto> {
             roleDtoList.add(roleDto);
         }
         dto.setRoles(roleDtoList);
+
+        dto.setEmployeeInfo(this.employeeInfo.toDto());
     }
 
     public void toEntity(UserDto dto) {
@@ -128,6 +134,18 @@ public class UserEntity extends BaseEntity<UserDto> {
     public void removeRole(RoleEntity role) {
         this.roles.remove(role);
     }
+
+    public PasswordResetToken getToken() {
+        return token;
+    }
+
+    public void setToken(PasswordResetToken token) {
+        if (this.token != null) {
+            this.getToken().dismissUser();
+        }
+        this.token = token;
+    }
+
 
     public EmployeeInfo getEmployeeInfo() {
         return employeeInfo;

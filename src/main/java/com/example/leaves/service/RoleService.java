@@ -3,6 +3,7 @@ package com.example.leaves.service;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.service.filter.RoleFilter;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -20,6 +21,8 @@ public interface RoleService {
 
     RoleDto findRoleById(Long id);
 
+    RoleEntity getRoleById(Long id);
+
     void deleteRole(Long id);
 
     void softDeleteRole(Long id);
@@ -33,4 +36,6 @@ public interface RoleService {
     Specification<RoleEntity> getSpecification(final RoleFilter filter);
 
     List<String> getAllRoleNames();
+
+    Page<RoleDto> getRolesPage(RoleFilter filter);
 }

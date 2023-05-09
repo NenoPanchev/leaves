@@ -1,127 +1,107 @@
 package com.example.leaves.util;
 
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.PdfStamper;
-import org.springframework.stereotype.Component;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.pdf.BaseFont;
+import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.xwpf.converter.pdf.PdfConverter;
+import org.apache.poi.xwpf.converter.pdf.PdfOptions;
+import org.apache.poi.xwpf.usermodel.*;
 
-import java.io.File;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
-@Component
+
 public class PdfUtil {
-    private static final String OUTPUTFILE = "C:/Users/Vladimir/Desktop/ReadPdf.pdf";
-    private static final Font catFont = new Font(Font.FontFamily.TIMES_ROMAN, 18,
-            Font.BOLD);
-    private static final Font redFont = new Font(Font.FontFamily.TIMES_ROMAN, 12,
-            Font.NORMAL, BaseColor.RED);
-    private static final Font subFont = new Font(Font.FontFamily.TIMES_ROMAN, 16,
-            Font.BOLD);
-    private static final Font smallBold = new Font(Font.FontFamily.TIMES_ROMAN, 12,
-            Font.BOLD);
-    private static String FILE = "C:/Users/Vladimir/Desktop/отпуск.pdf";
+    private static final String OUTPUTFILE = "C:/Users/Vladimir/Desktop/ReadPdfssssddddddss.pdf";
 
+    private static final String FILE = "src/main/resources/docx/отпуск.docx";
 
-    public static File getPdfFile(String fullName, String egn, String Location,
-                                  String position, String requestTo, String daysLeave,
-                                  String year, String dateFrom, String dateTo) throws IOException, DocumentException {
+    public static byte[] replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
+        try {
 
-        //Create PdfReader instance.
-        PdfReader pdfReader =
-                new PdfReader(FILE);
-        File tempFile = File.createTempFile("Tempfile", ".pdf");
-        //Create PdfStamper instance.
-        PdfStamper pdfStamper = new PdfStamper(pdfReader,
-                Files.newOutputStream(Paths.get(OUTPUTFILE)));
+            /**
+             * if uploaded doc then use HWPF else if uploaded Docx file use
+             * XWPFDocument
+             */
+            //File tempFile = File.createTempFile("Request", ".pdf");
 
-        //Create BaseFont instance.
-        BaseFont baseFont = BaseFont.createFont(
-                BaseFont.TIMES_ROMAN,
-                BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+            XWPFDocument doc = new XWPFDocument(
+                    OPCPackage.open(FILE));
+            for (XWPFParagraph p : doc.getParagraphs()) {
+                List<XWPFRun> runs = p.getRuns();
+                if (runs != null) {
+                    for (XWPFRun r : runs) {
+                        replaceWords(words, r);
+                    }
+                }
+            }
 
-        //Get the number of pages in pdf.
-        int pages = pdfReader.getNumberOfPages();
+            for (XWPFTable tbl : doc.getTables()) {
+                for (XWPFTableRow row : tbl.getRows()) {
+                    for (XWPFTableCell cell : row.getTableCells()) {
+                        for (XWPFParagraph p : cell.getParagraphs()) {
+                            for (XWPFRun r : p.getRuns()) {
+                                replaceWords(words, r);
+                            }
+                        }
+                    }
+                }
+            }
+            //final FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/docx/отпуск4.pdf");
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PdfOptions options = PdfOptions.create();
+            options.fontProvider(getFontProvider());
 
-        //write fullName on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "Gosho", 110, 644);
+            PdfConverter.getInstance().convert(doc, baos, options);
+            return baos.toByteArray();
+        } finally {
 
-        //write egn on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "egn", 85, 610);
-
-        //write Location on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "Location", 295, 610);
-
-        //write position on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "position", 130, 575);
-
-        //write requestTo on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "requestTo", 210, 515);
-
-        //write daysLeave on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "daysLeave", 260, 485);
-
-        //write year on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "year", 80, 473);
-
-        //write dateFrom on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "dateFrom", 201, 473);
-
-        //write dateTo on pdf
-        writeTextOnPdf(pdfStamper, baseFont, 1, "dateTo", 450, 473);
-
-        //draw line
-        drawLineOnPdf(pdfStamper, baseFont, 1, 450, 473, true);
-
-        //Close the pdfStamper.
-        pdfStamper.close();
-        return new File(tempFile.getPath());
-
-    }
-
-    private static void writeTextOnPdf(PdfStamper pdfStamper, BaseFont baseFont, int pageNum, String text, float x, float y) {
-//Contain the pdf data.
-        PdfContentByte pageContentByte =
-                pdfStamper.getOverContent(pageNum);
-
-        pageContentByte.beginText();
-//Set text font and size.
-        pageContentByte.setFontAndSize(baseFont, 14);
-
-        pageContentByte.setTextMatrix(x, y);
-
-//Write text
-        pageContentByte.showText(text);
-        pageContentByte.endText();
-    }
-
-    private static void drawLineOnPdf(PdfStamper pdfStamper, BaseFont baseFont,
-                                      int pageNum, float x,
-                                      float y, boolean isPaid) throws DocumentException, IOException {
-        if (isPaid) {
-            //Contain the pdf data.
-            PdfContentByte pageContentByte =
-                    pdfStamper.getOverContent(pageNum);
-
-            pageContentByte.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, false), 24);
-            pageContentByte.moveTo(443, 487);
-            pageContentByte.lineTo(390, 487);
-            pageContentByte.stroke();
-
-        } else {
-            PdfContentByte pageContentByte =
-                    pdfStamper.getOverContent(pageNum);
-
-            pageContentByte.setFontAndSize(BaseFont.createFont(BaseFont.HELVETICA, BaseFont.WINANSI, false), 24);
-            pageContentByte.moveTo(380, 487);
-            pageContentByte.lineTo(338, 487);
-            pageContentByte.stroke();
         }
-
     }
+
+    private static void replaceWords(Map<String, String> words, XWPFRun r) {
+        String text = r.getText(0);
+        for (String key : words.keySet()
+        ) {
+            if (text != null && text.contains(key)) {
+                text = text.replace(key, words.get(key));
+                r.setText(text, 0);
+            }
+        }
+    }
+
+    private static IFontProvider getFontProvider() {
+        return (familyName, encoding, size, style, color) -> {
+            try {
+                if (familyName.equalsIgnoreCase("Times New Roman")) {
+                    BaseFont baseFont;
+                    if (style == Font.BOLD) {
+                        baseFont = BaseFont.createFont("ttf/Times New RomanB.ttf", encoding, BaseFont.EMBEDDED);
+                    } else {
+                        baseFont = BaseFont.createFont("ttf/Times New Roman.ttf", encoding, BaseFont.EMBEDDED);
+                    }
+                    return new Font(baseFont, size, style, color);
+                } else if (familyName.equalsIgnoreCase("Calibri") || encoding.equalsIgnoreCase(BaseFont.IDENTITY_H)) {
+                    BaseFont baseFont;
+                    if (style == Font.BOLD) {
+                        baseFont = BaseFont.createFont("ttf/CalibriB.ttf", encoding, BaseFont.EMBEDDED);
+                    } else {
+                        baseFont = BaseFont.createFont("ttf/Calibri.ttf", encoding, BaseFont.EMBEDDED);
+                    }
+                    return new Font(baseFont, size, style, color);
+                }
+            } catch (final Exception e) {
+//                LOGGER.error(e.getMessage(), e);
+                throw new RuntimeException(e);
+            }
+
+            return FontFactory.getFont(familyName, encoding, size, style, color);
+        };
+    }
+
 }

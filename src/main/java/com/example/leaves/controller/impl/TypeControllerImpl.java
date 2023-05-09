@@ -7,8 +7,8 @@ import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,13 +34,13 @@ public class TypeControllerImpl implements TypeController {
     }
 
     @Override
-    public Page<TypeEmployeeDto> getPageFiltered(HttpHeaders headers, TypeEmployeeFilter filter) {
+    public Page<TypeEmployeeDto> getPageFiltered(TypeEmployeeFilter filter) {
 //        Employee employee = AuthenticationHelper.tryGetUser(headers);
         return typeService.getAllFilterPage(filter);
     }
 
     @Override
-    public TypeEmployeeDto create(TypeEmployeeDto typeEmployee, HttpHeaders headers) {
+    public TypeEmployeeDto create(TypeEmployeeDto typeEmployee) {
         return typeService.create(typeEmployee);
     }
 
@@ -79,6 +79,13 @@ public class TypeControllerImpl implements TypeController {
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
+    }
+
+    @Override
+    public ResponseEntity<List<String>> getAllPositionNames() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(typeService.getAllNames());
     }
 
 

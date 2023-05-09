@@ -9,6 +9,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "types", schema = "public")
+@NamedEntityGraph(
+        name = "type",
+        attributeNodes = {
+                @NamedAttributeNode("employeeWithType")
+        }
+)
 @AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
 public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
@@ -18,7 +24,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
     @Column(name = "type_days")
     private int daysLeave;
 
-    @OneToMany(mappedBy = "employeeType", fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeType")
     private List<EmployeeInfo> employeeWithType;
 
     public List<EmployeeInfo> getEmployeesWithType() {
@@ -61,10 +67,11 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         super.toDto(typeEmployeeDto);
         typeEmployeeDto.setTypeName(this.typeName);
         typeEmployeeDto.setDaysLeave(this.daysLeave);
+        typeEmployeeDto.setDeleted(isDeleted());
         List<EmployeeInfoDto> list = new ArrayList<>();
 
         if (this.employeeWithType != null && !getEmployeesWithType().isEmpty()) {
-            getEmployeesWithType().forEach(e -> list.add(e.toDto()));
+            this.getEmployeesWithType().forEach(e -> list.add(e.toDto()));
             typeEmployeeDto.setEmployeeWithType(list);
         } else {
             typeEmployeeDto.setEmployeeWithType(list);

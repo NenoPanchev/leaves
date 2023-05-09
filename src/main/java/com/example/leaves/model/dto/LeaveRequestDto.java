@@ -1,15 +1,19 @@
 package com.example.leaves.model.dto;
 
+import com.example.leaves.util.DatesUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 public class LeaveRequestDto extends BaseDto {
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate approvedStartDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate approvedEndDate;
 
     private Boolean approved;
 
@@ -17,32 +21,51 @@ public class LeaveRequestDto extends BaseDto {
     public LeaveRequestDto() {
     }
 
+    public LocalDate getApprovedStartDate() {
+        return approvedStartDate;
+    }
+
+    public void setApprovedStartDate(LocalDate approvedStartDate) {
+        this.approvedStartDate = approvedStartDate;
+    }
+
+    public LocalDate getApprovedEndDate() {
+        return approvedEndDate;
+    }
+
+    public void setApprovedEndDate(LocalDate approvedEndDate) {
+        this.approvedEndDate = approvedEndDate;
+    }
+
     public Boolean getApproved() {
         return approved;
     }
 
+    public void setApproved(Boolean approved) {
+        this.approved = approved;
+    }
 
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     public LocalDate getEndDate() {
         return endDate;
     }
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     public LocalDate getStartDate() {
         return startDate;
     }
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
     public int getDaysRequested() {
-        return (int) ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        return DatesUtil.countBusinessDaysBetween(startDate, endDate).size();
     }
 }
