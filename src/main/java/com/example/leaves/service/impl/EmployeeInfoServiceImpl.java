@@ -129,18 +129,15 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
 //        setPersonalEmployeeInfo(pdfRequestForm, userOfRequest);
 
-
         Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, leaveRequest, userOfRequest);
-
 
         try {
             return PdfUtil.replaceWords(words);
         } catch (IOException | InvalidFormatException e) {
             throw new PdfInvalidException("Invalid Format");
         }
-
-
     }
+
     private Map<String, String> setEmployeePersonalInfoMap(PdfRequestForm pdfRequestForm,
                                                            LeaveRequest leaveRequest,
                                                            UserEntity userOfRequest) {

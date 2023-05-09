@@ -16,29 +16,20 @@ import java.util.List;
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long>,
         JpaSpecificationExecutor<LeaveRequest>,
         SoftDeleteRepository {
-//    @EntityGraph(value = "requestFull")
-    LeaveRequest findById(long id);
 
+    LeaveRequest findById(long id);
 
     List<LeaveRequest> findAllByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
 
     List<LeaveRequest> findAllByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
-    @EntityGraph(value = "requestFull")
+
     LeaveRequest findFirstByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
-    @EntityGraph(value = "requestFull")
+
     boolean existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
-    @EntityGraph(value = "requestFull")
+
     List<LeaveRequest> findAllByEmployeeAndDeletedIsFalse(EmployeeInfo employee);
-//    @EntityGraph(value = "requestFull")
+
     List<LeaveRequest> findAllByDeletedIsFalse();
-
-//    @Query("UPDATE EntityInfo n set" +
-//            " n.isDeleted=true WHERE n.id in " +
-//            "(SELECT e.entityInfo FROM LeaveRequest e where e.approved IS NOT NULL )")
-//    @Modifying
-//    @Transactional
-//    void softDeleteAllProcessedRequests();
-
 
     @Query("SELECT l FROM LeaveRequest l " +
             "JOIN FETCH l.employee AS e " +
