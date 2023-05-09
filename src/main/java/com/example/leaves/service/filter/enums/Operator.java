@@ -6,5 +6,7 @@ public enum Operator {
     EQUAL,
     NOT_EQUAL,
     LESS_OR_EQUAL,
-    LESS
+    LESS,
+    NULL,
+    NOT_NULL
 }

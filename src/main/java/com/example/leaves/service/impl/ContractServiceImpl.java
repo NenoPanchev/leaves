@@ -134,8 +134,22 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public ContractDto createContract(Long userId, ContractDto dto) {
+        if (dto.getEndDate() != null && dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("Contract end date must be after start date");
+        }
         Long employeeInfoId = employeeInfoService.getIdByUserId(userId);
         EmployeeInfo employeeInfo = employeeInfoService.getById(employeeInfoId);
+        ContractEntity lastContract = getTheLastContract(employeeInfo.getContracts());
+        if (anyDateIsBetweenOtherContractDates(dto, employeeInfo.getContracts())) {
+            throw new IllegalArgumentException("Contract date cannot be between other contract dates");
+        }
+        if (lastContract.getTypeName().equals(dto.getTypeName())) {
+            throw new IllegalArgumentException("New position must be different");
+        }
+        if (lastContract.getEndDate() == null) {
+            lastContract.setEndDate(dto.getStartDate().minusDays(1));
+            contractRepository.save(lastContract);
+        }
         employeeInfo.setEmployeeType(typeEmployeeService.getByName((dto.getTypeName())));
         ContractEntity entity = new ContractEntity();
         entity.toEntity(dto);
@@ -158,13 +172,6 @@ public class ContractServiceImpl implements ContractService {
 
     private boolean anyDateIsBetweenOtherContractDates(ContractDto dto, List<ContractEntity> allOtherContractsOfSameEmployeeInfo) {
         boolean illegal = false;
-//        ContractEntity lastContract = allOtherContractsOfSameEmployeeInfo
-//                .stream()
-//                .filter(c -> c.getEndDate() == null)
-//                .findFirst()
-//                .orElseThrow(ObjectNotFoundException::new);
-//        allOtherContractsOfSameEmployeeInfo.remove(lastContract);
-
         for (ContractEntity contract : allOtherContractsOfSameEmployeeInfo) {
             if (isIllegal(dto.getStartDate(), contract) || isIllegal(dto.getEndDate(), contract)) {
                 illegal = true;
@@ -173,11 +180,25 @@ public class ContractServiceImpl implements ContractService {
         return illegal;
     }
 
+    @Override
+    public boolean aDateIsBetweenOtherContractDates(LocalDate date, List<ContractEntity> allOtherContractsOfSameEmployeeInfo) {
+        boolean isIllegal = false;
+        for (ContractEntity contract : allOtherContractsOfSameEmployeeInfo) {
+            if (isIllegal(date, contract)) {
+                isIllegal = true;
+            }
+        }
+        return isIllegal;
+    }
+
     private boolean isIllegal(LocalDate date, ContractEntity entity) {
         if (date == null) {
             return false;
         }
-        return date.isAfter(entity.getStartDate()) && (entity.getEndDate() != null && date.isBefore(entity.getEndDate()));
+        return date.isAfter(entity.getStartDate())
+                && (entity.getEndDate() != null && date.isBefore(entity.getEndDate()))
+                || date.equals(entity.getStartDate())
+                || date.equals(entity.getEndDate());
     }
 
     private Specification<ContractEntity> getSpecification(Long id, ContractFilter filter) {
@@ -200,7 +221,8 @@ public class ContractServiceImpl implements ContractService {
         };
     }
 
-    private ContractEntity getTheLastContract(List<ContractEntity> contracts) {
+    @Override
+    public ContractEntity getTheLastContract(List<ContractEntity> contracts) {
         ContractEntity lastContract = contracts
                 .stream().max(Comparator.comparing(ContractEntity::getStartDate))
                 .orElseThrow(ArrayIndexOutOfBoundsException::new);

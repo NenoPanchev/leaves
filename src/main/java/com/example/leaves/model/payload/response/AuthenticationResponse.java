@@ -5,6 +5,8 @@ import java.util.List;
 public class AuthenticationResponse {
     private final String jwt;
     private Long id;
+
+    private String name;
     private String email;
     private List<String> authorities;
 
@@ -39,5 +41,14 @@ public class AuthenticationResponse {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public AuthenticationResponse setName(String name) {
+        this.name = name;
+        return this;
     }
 }

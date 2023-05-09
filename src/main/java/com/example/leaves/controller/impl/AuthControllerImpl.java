@@ -77,6 +77,7 @@ public class AuthControllerImpl implements AuthController {
     private void mapUserDetailsToAuthenticationResponse(UserDetails userDetails, AuthenticationResponse authenticationResponse) {
         authenticationResponse.setEmail(userDetails.getUsername());
         authenticationResponse.setId(userService.findIdByEmail(userDetails.getUsername()));
+        authenticationResponse.setName(userService.findNameByEmail(userDetails.getUsername()));
         authenticationResponse.setAuthorities(userDetails
                 .getAuthorities()
                 .stream()

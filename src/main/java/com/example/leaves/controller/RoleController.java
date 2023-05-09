@@ -28,7 +28,7 @@ public interface RoleController {
     ResponseEntity<List<RoleDto>> getFilteredRoles(@RequestBody RoleFilter roleFilter);
 
     @PostMapping("/page")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Page<RoleDto>> getRolesPage(@RequestBody RoleFilter roleFilter);
 
     @PostMapping
