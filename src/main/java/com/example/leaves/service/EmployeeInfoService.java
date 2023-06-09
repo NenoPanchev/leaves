@@ -53,4 +53,6 @@ public interface EmployeeInfoService {
     void importHistory(Map<Integer, Integer> daysUsedHistory, long userId);
 
     void save(EmployeeInfo employeeInfo);
+
+    Map<Integer, Integer> getHistoryByUserId(long userId);
 }

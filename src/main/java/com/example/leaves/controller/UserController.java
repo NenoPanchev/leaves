@@ -116,6 +116,10 @@ public interface UserController {
     @PreAuthorize("hasAnyAuthority('READ')")
     ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(@PathVariable("id") Long id, @RequestBody LeavesReportFilter filter);
 
+    @GetMapping("/{userId}/get-history")
+    @PreAuthorize("hasAuthority('WRITE')")
+    ResponseEntity<Map<Integer, Integer>> getHistory(@PathVariable("userId") long userId);
+
     @PostMapping("/{userId}/import-history")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<String> importHistory(@RequestBody Map<Integer, Integer> daysUsedHistory, @PathVariable("userId") long userId);

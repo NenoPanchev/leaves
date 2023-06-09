@@ -334,6 +334,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeInfoRepository.save(employeeInfo);
     }
 
+    @Override
+    public Map<Integer, Integer> getHistoryByUserId(long userId) {
+        EmployeeInfo employeeInfo = employeeInfoRepository
+                .findByUserInfoId(userId)
+                .orElseThrow(javax.persistence.EntityNotFoundException::new);
+        return employeeInfo.getHistory();
+    }
+
     private void validateHistory(List<LeavesAnnualReport> annualLeavesInfo) {
         List<Integer> carryOverDays = annualLeavesInfo
                 .stream()
