@@ -10,6 +10,7 @@ import com.example.leaves.service.filter.LeavesReportFilter;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EmployeeInfoService {
 
@@ -48,4 +49,8 @@ public interface EmployeeInfoService {
     Long getIdByUserId(Long userId);
 
     EmployeeInfo getByContractId(Long id);
+
+    void importHistory(Map<Integer, Integer> daysUsedHistory, long userId);
+
+    void save(EmployeeInfo employeeInfo);
 }

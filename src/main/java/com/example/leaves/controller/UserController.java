@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RequestMapping("/users")
@@ -114,4 +115,8 @@ public interface UserController {
     @PostMapping("/leaves-report/{id}")
     @PreAuthorize("hasAnyAuthority('READ')")
     ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(@PathVariable("id") Long id, @RequestBody LeavesReportFilter filter);
+
+    @PostMapping("/{userId}/import-history")
+    @PreAuthorize("hasAuthority('WRITE')")
+    ResponseEntity<String> importHistory(@RequestBody Map<Integer, Integer> daysUsedHistory, @PathVariable("userId") long userId);
 }

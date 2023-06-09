@@ -28,7 +28,9 @@ import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
+    private final LeaveRequestService leaveRequestService;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
@@ -51,7 +54,10 @@ public class UserServiceImpl implements UserService {
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
-                           @Lazy EmployeeInfoService employeeInfoService, ContractService contractService, ModelMapper modelMapper) {
+                           @Lazy EmployeeInfoService employeeInfoService,
+                           ContractService contractService,
+                           ModelMapper modelMapper,
+                           @Lazy LeaveRequestService leaveRequestService) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -63,6 +69,7 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.leaveRequestService = leaveRequestService;
     }
 
     @Override
@@ -278,8 +285,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        entity.getEmployeeInfo().setCurrentYearDaysLeave(
-                employeeInfoService.calculateCurrentYearPaidLeave(entity.getEmployeeInfo()));
+        employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());
     }
 
     private void editInitialContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
@@ -608,13 +614,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updatePersonalInfo(UserUpdateDto dto) {
         UserEntity entity = getCurrentUser();
-        if (!entity.getEmail().equals(dto.getEmail()))
-        {
+        if (!entity.getEmail().equals(dto.getEmail())) {
             throw new UnauthorizedException("You can't change others personal info!");
         }
         entity.getEmployeeInfo().setSsn(EncryptionUtil.encrypt(String.valueOf(dto.getEmployeeInfo().getSsn())));
         entity.getEmployeeInfo().setAddress(dto.getEmployeeInfo().getAddress());
-        UserDto outDto=new UserDto();
+        UserDto outDto = new UserDto();
         userRepository.save(entity).toDto(outDto);
         return outDto;
     }
@@ -707,8 +712,19 @@ public class UserServiceImpl implements UserService {
         info.setEmployeeType(type);
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
+        info.setHistory(createInitialHistory(startDate));
         int days = employeeInfoService.calculateCurrentYearPaidLeave(info);
         info.setCurrentYearDaysLeave(days);
         entity.setEmployeeInfo(info);
+    }
+
+    private Map<Integer, Integer> createInitialHistory(LocalDate startDate) {
+        Map<Integer, Integer> history = new HashMap<>();
+        int startYear = startDate.getYear();
+        int currentYear = LocalDate.now().getYear();
+        for (int i = startYear; i <= currentYear; i++) {
+            history.put(i, 0);
+        }
+        return history;
     }
 }

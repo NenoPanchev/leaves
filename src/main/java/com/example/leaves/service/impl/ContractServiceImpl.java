@@ -84,12 +84,17 @@ public class ContractServiceImpl implements ContractService {
                 .orElseThrow(ObjectNotFoundException::new);
         employeeInfo.removeContract(entity);
         deleteById(id);
+        updateTypeEmployee(employeeInfo);
+        employeeInfoService.save(employeeInfo);
+        employeeInfoService.recalculateCurrentYearDaysAfterChanges(employeeInfo);
+    }
+
+    private void updateTypeEmployee(EmployeeInfo employeeInfo) {
         if (employeeInfo.getContracts().size() > 0) {
             employeeInfo.setEmployeeType(typeEmployeeService.getByName(
                     getTheLastContract(employeeInfo.getContracts()).getTypeName()
             ));
         }
-        employeeInfoService.recalculateCurrentYearDaysAfterChanges(employeeInfo);
     }
 
     private void deleteById(Long id) {
@@ -126,6 +131,7 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Contract date cannot be between other contract dates");
         }
         entity.toEntity(dto);
+        updateTypeEmployee(entity.getEmployeeInfo());
         contractRepository.save(entity);
         entity.toDto(dto);
         employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());

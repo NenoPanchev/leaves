@@ -36,5 +36,5 @@ public interface LeaveRequestService {
 
 //    LeaveRequest getByDateBetween();
 
-    int getAllApprovedDaysInYear(int year, Long id);
+    int getAllApprovedDaysInYearByEmployeeInfoId(int year, Long id);
 }

@@ -17,6 +17,7 @@ import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
+import com.example.leaves.util.Util;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -235,7 +237,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         int totalContractDays = calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
-        int spentDays = leaveRequestService.getAllApprovedDaysInYear(currentYear, employeeInfo.getId());
+        int spentDays = leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId());
         return totalContractDays - spentDays;
     }
 
@@ -269,7 +271,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Override
     public void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo) {
         int days = calculateCurrentYearPaidLeave(employeeInfo);
-        employeeInfo.setCurrentYearDaysLeave(days);
+        int currentYear = LocalDate.now().getYear();
+        try {
+            employeeInfo.setCurrentYearDaysLeave(days);
+            employeeInfo.subtractFromAnnualPaidLeaveWithoutThrowing(leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
+            employeeInfo.subtractFromAnnualPaidLeaveWithoutThrowing(employeeInfo.getHistory().get(currentYear));
+        } catch (PaidleaveNotEnoughException e) {
+            throw new PaidleaveNotEnoughException("Paid leave not enough");
+        }
         employeeInfoRepository.save(employeeInfo);
     }
 
@@ -289,6 +298,65 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public EmployeeInfo getByContractId(Long id) {
         return employeeInfoRepository.findByContractId(id)
                 .orElseThrow(ObjectNotFoundException::new);
+    }
+
+    @Override
+    @Transactional
+    public void importHistory(Map<Integer, Integer> daysUsedHistory, long userId) {
+        EmployeeInfo employeeInfo = employeeInfoRepository
+                .findByUserInfoId(userId)
+                .orElseThrow(javax.persistence.EntityNotFoundException::new);
+        int currentYear = LocalDate.now().getYear();
+        Integer currentYearUsedDays = daysUsedHistory.get(currentYear);
+        employeeInfo.setHistory(daysUsedHistory);
+        List<LeavesAnnualReport> annualLeavesInfo = getAnnualLeavesInfo(employeeInfo);
+        Integer daysFromPreviousYear = annualLeavesInfo
+                .stream()
+                .filter(lar -> lar.getYear() == currentYear)
+                .map(LeavesAnnualReport::getFromPreviousYear)
+                .findFirst()
+                .orElseThrow(ObjectNotFoundException::new);
+        employeeInfo.setCarryoverDaysLeave(daysFromPreviousYear);
+        employeeInfo.setCurrentYearDaysLeave(calculateCurrentYearPaidLeave(employeeInfo));
+        try {
+            employeeInfo.subtractFromAnnualPaidLeave(currentYearUsedDays);
+            employeeInfo.subtractFromAnnualPaidLeave(leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
+        } catch (PaidleaveNotEnoughException e) {
+            throw new PaidleaveNotEnoughException("Invalid days used history! There are negative numbers in the calculations.\n" +
+                    "Reason: Used more days than available");
+        }
+        validateHistory(annualLeavesInfo);
+        employeeInfoRepository.save(employeeInfo);
+    }
+
+    @Override
+    public void save(EmployeeInfo employeeInfo) {
+        employeeInfoRepository.save(employeeInfo);
+    }
+
+    private void validateHistory(List<LeavesAnnualReport> annualLeavesInfo) {
+        List<Integer> carryOverDays = annualLeavesInfo
+                .stream()
+                .map(LeavesAnnualReport::getCarryoverDays)
+                .collect(Collectors.toList());
+        List<Integer> fromPreviousYear = annualLeavesInfo
+                .stream()
+                .map(LeavesAnnualReport::getFromPreviousYear)
+                .collect(Collectors.toList());
+        List<Double> contractDays = annualLeavesInfo
+                .stream()
+                .map(LeavesAnnualReport::getContractDays)
+                .collect(Collectors.toList());
+        List<Integer> daysUsed = annualLeavesInfo
+                .stream()
+                .map(LeavesAnnualReport::getDaysUsed)
+                .collect(Collectors.toList());
+        if (Util.checkIfListHasNegativeNumber(carryOverDays)
+        ||  Util.checkIfListHasNegativeNumber(fromPreviousYear)
+        ||  Util.checkIfListHasNegativeNumber(daysUsed)
+        ||  Util.checkIfListHasNegativeDouble(contractDays)) {
+            throw new PaidleaveNotEnoughException("Invalid days used history! There are negative numbers in result");
+        }
     }
 
 
@@ -312,7 +380,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
             }
             // Create and add Leave Annual Report
             createAndAddLeaveAnnualReport(contractBreakdownList, year, totalDaysFromContracts,
-                    leavesAnnualReportList, employeeInfo.getCarryoverDaysLeave(), employeeInfo.getId());
+                    leavesAnnualReportList, employeeInfo);
 
         }
         Collections.reverse(leavesAnnualReportList);
@@ -353,7 +421,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     private double calculateDaysPerContractPeriod(ContractEntity contract, int totalDaysInCurrentYear, int currentYear) {
-//        int currentYear = LocalDate.now().getYear();
         int yearOfStart = contract.getStartDate().getYear();
         LocalDate startDate = contract.getStartDate();
         if (yearOfStart < currentYear) {
@@ -404,12 +471,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return contractBreakdown;
     }
 
-    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, int fromLastYear, Long id) {
+    private void createAndAddLeaveAnnualReport(List<ContractBreakdown> contractBreakdownList, Integer year, double totalDaysFromContracts, List<LeavesAnnualReport> leavesAnnualReportList, EmployeeInfo employeeInfo) {
         LeavesAnnualReport report = new LeavesAnnualReport();
         contractBreakdownList.sort((a, b) -> b.getStartDate().compareTo(a.getStartDate()));
         report.setContractBreakdowns(contractBreakdownList);
         report.setYear(year);
-        report.setDaysUsed(leaveRequestService.getAllApprovedDaysInYear(year, id));
+        int allApprovedDaysInYear = leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(year, employeeInfo.getId());
+        int daysUsedFromHistory = employeeInfo.getHistory().get(year) != null ? employeeInfo.getHistory().get(year) : 0;
+        report.setDaysUsed(allApprovedDaysInYear + daysUsedFromHistory);
 
         int fromPreviousYear = 0;
         if (leavesAnnualReportList.size() > 0) {

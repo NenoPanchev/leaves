@@ -294,9 +294,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public int getAllApprovedDaysInYear(int year, Long id) {
+    public int getAllApprovedDaysInYearByEmployeeInfoId(int year, Long id) {
         int daysSpentDuringYear = 0;
-        List<LeaveRequest> allApprovedInYear = leaveRequestRepository.findAllApprovedInYear(year, id);
+        List<LeaveRequest> allApprovedInYear = leaveRequestRepository.findAllApprovedInYearByEmployeeInfoId(year, id);
         for (LeaveRequest leaveRequest : allApprovedInYear) {
             if (leaveRequest.getStartDate().getYear() == year - 1) {
                 List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year - 1, 1, 1), leaveRequest.getEndDate());

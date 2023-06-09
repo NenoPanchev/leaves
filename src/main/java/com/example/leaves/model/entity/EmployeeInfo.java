@@ -11,9 +11,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @EntityListeners(EntityListener.class)
 @NamedEntityGraph(
@@ -56,8 +54,14 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeInfo",cascade = {CascadeType.ALL})
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employeeInfo", cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "employee_info_history", joinColumns = @JoinColumn(name = "employee_info_id"))
+    @MapKeyColumn(name = "year")
+    @Column(name = "days_used")
+    private Map<Integer, Integer> history = new HashMap<>();
 
     public EmployeeInfo() {
         this.setContractStartDate(LocalDate.now());
@@ -68,13 +72,22 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
             throw new PaidleaveNotEnoughException(days, this.getDaysLeave());
         } else {
             if (days >= this.carryoverDaysLeave) {
-                setCurrentYearDaysLeave(this.getDaysLeave() + this.carryoverDaysLeave - days);
+                setCurrentYearDaysLeave(this.getDaysLeave() - days);
                 setCarryoverDaysLeave(0);
             } else {
                 setCarryoverDaysLeave(this.carryoverDaysLeave - days);
             }
         }
 
+    }
+
+    public void subtractFromAnnualPaidLeaveWithoutThrowing(int days) {
+        if (days >= this.carryoverDaysLeave) {
+            setCurrentYearDaysLeave(this.getDaysLeave() - days);
+            setCarryoverDaysLeave(0);
+        } else {
+            setCarryoverDaysLeave(this.carryoverDaysLeave - days);
+        }
     }
 
     public UserEntity getUserInfo() {

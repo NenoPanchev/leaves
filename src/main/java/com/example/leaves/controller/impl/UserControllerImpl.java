@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -207,6 +208,14 @@ public class UserControllerImpl implements UserController {
                 .status(HttpStatus.OK)
                 .body(employeeInfoService.getAnnualLeavesInfoByUserId(id, filter));
 
+    }
+
+    @Override
+    public ResponseEntity<String> importHistory(Map<Integer, Integer> daysUsedHistory, long userId) {
+        employeeInfoService.importHistory(daysUsedHistory, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("History imported");
     }
 }
 
