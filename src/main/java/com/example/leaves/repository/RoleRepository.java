@@ -13,7 +13,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
 
         @EntityGraph(value = "role")
     List<RoleEntity> findAllByNameInAndDeletedIsFalse(String... roles);
-    @EntityGraph(value = "role")
     boolean existsByNameAndDeletedIsFalse(String name);
 
     @Query("SELECT r.name FROM RoleEntity r " +
