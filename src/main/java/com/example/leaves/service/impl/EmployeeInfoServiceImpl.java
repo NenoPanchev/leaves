@@ -46,6 +46,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final EmployeeInfoRepository employeeInfoRepository;
     private final LeaveRequestService leaveRequestService;
     private final RoleService roleService;
+    private final ContractService contractService;
     @Value("${allowed-leave-days-to-carry-over}")
     private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
 
@@ -55,7 +56,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                    LeaveRequestService leaveRequestService,
                                    UserService userService,
                                    RoleService roleService,
-                                   EmailService emailService) {
+                                   EmailService emailService, ContractService contractService) {
         this.employeeRepository = employeeRepository;
         this.employeeInfoRepository = employeeInfoRepository;
         this.typeService = typeService;
@@ -63,6 +64,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         this.userService = userService;
         this.roleService = roleService;
         this.emailService = emailService;
+        this.contractService = contractService;
     }
 
 
@@ -403,10 +405,10 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .forEach(years::add);
         int currentYear = LocalDate.now().getYear();
         Integer firstYear = Collections.min(years);
-        Integer lastYear = Collections.max(years);
-        if (years.size() == 1 && firstYear <= currentYear) {
-            lastYear = currentYear;
-        }
+        int lastYear;
+        ContractEntity lastContract = contractService.getTheLastContract(contracts);
+        lastYear = lastContract.getEndDate() != null ? lastContract.getEndDate().getYear() : currentYear;
+
         for (int i = firstYear; i <= lastYear; i++) {
             years.add(i);
         }
