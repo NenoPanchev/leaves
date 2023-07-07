@@ -50,6 +50,6 @@ sonarqube-check:
     paths:
       - .sonar/cache
   script: 
-    - mvn verify sonar:sonar -Dsonar.projectKey=lightsoftbulgaria_vacation-management-service_AYkvknAJ1wtAHkv815m6
+    - mvn verify sonar:sonar -DDATABASE_NAME=${DATABASE_NAME} -DPOSTGRES_PASSWORD=${POSTGRES_PASSWORD} -DskipTests -Dsonar.projectKey=lightsoftbulgaria_vacation-management-service_AYkvknAJ1wtAHkv815m6
   allow_failure: true
 
