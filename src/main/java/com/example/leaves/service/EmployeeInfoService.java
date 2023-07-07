@@ -17,8 +17,6 @@ public interface EmployeeInfoService {
 
     EmployeeInfoDto changeType(long employeeId, long typeId);
 
-//    List<EmployeeInfoDto> resetAnnualLeaveForAllEmployees();
-
     byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
 
     List<EmployeeInfoDto> getAll();

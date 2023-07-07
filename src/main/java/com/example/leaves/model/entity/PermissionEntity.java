@@ -3,6 +3,7 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.PermissionDto;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @AttributeOverrides(
         {
@@ -12,7 +13,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "permissions", schema = "public")
 public class PermissionEntity extends BaseEntity<PermissionDto> {
-    @Column(name = "name")
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     public PermissionEntity() {
@@ -31,6 +32,7 @@ public class PermissionEntity extends BaseEntity<PermissionDto> {
         this.name = name.toUpperCase();
     }
 
+    @Override
     public void toDto(PermissionDto dto) {
         if (dto == null) {
             return;
@@ -40,6 +42,7 @@ public class PermissionEntity extends BaseEntity<PermissionDto> {
 
     }
 
+    @Override
     public void toEntity(PermissionDto dto) {
         if (dto == null) {
             return;
@@ -48,4 +51,17 @@ public class PermissionEntity extends BaseEntity<PermissionDto> {
         this.setName(dto.getName().toUpperCase());
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PermissionEntity that = (PermissionEntity) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name);
+    }
 }

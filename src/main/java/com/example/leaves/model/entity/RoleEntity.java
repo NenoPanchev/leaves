@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @AttributeOverrides(
         {
@@ -22,7 +23,7 @@ import java.util.List;
 @Entity
 @Table(name = "roles", schema = "public")
 public class RoleEntity extends BaseEntity<RoleDto> {
-    @Column(name = "name")
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
     @JsonIgnore
     @ManyToMany
@@ -55,6 +56,7 @@ public class RoleEntity extends BaseEntity<RoleDto> {
         return this;
     }
 
+    @Override
     public void toDto(RoleDto dto) {
         if (dto == null) {
             return;
@@ -73,11 +75,26 @@ public class RoleEntity extends BaseEntity<RoleDto> {
         dto.setPermissions(permissionDtos);
     }
 
+    @Override
     public void toEntity(RoleDto dto) {
         if (dto == null) {
             return;
         }
         super.toEntity(dto);
         this.setName(dto.getName() == null ? this.getName() : dto.getName());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        RoleEntity that = (RoleEntity) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name);
     }
 }

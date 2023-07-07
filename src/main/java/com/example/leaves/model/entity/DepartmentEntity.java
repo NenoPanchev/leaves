@@ -5,6 +5,7 @@ import com.example.leaves.model.dto.DepartmentDto;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
         }
 )
 @Table(name = "departments", schema = "public")
-public class DepartmentEntity extends BaseEntity {
+public class DepartmentEntity extends BaseEntity<DepartmentDto> {
     @Column(unique = true, nullable = false, name = "name")
     private String name;
 
@@ -61,6 +62,7 @@ public class DepartmentEntity extends BaseEntity {
         this.employees = employees;
     }
 
+    @Override
     public void toDto(DepartmentDto dto) {
         if (dto == null) {
             return;
@@ -74,17 +76,18 @@ public class DepartmentEntity extends BaseEntity {
         if (this.admin != null && !this.admin.isDeleted()) {
             dto.setAdminEmail(admin.getEmail());
         }
-        if (this.employees != null && this.employees.size() != 0) {
+        if (this.employees != null && !this.employees.isEmpty()) {
             dto.setEmployeeEmails(employees.stream()
                     .filter(userEntity -> !userEntity.isDeleted())
                     .map(UserEntity::getEmail)
                     .collect(Collectors.toList()));
-            if (dto.getEmployeeEmails().size() == 0) {
+            if (dto.getEmployeeEmails().isEmpty()) {
                 dto.setEmployeeEmails(null);
             }
         }
     }
 
+    @Override
     public void toEntity(DepartmentDto dto) {
         if (dto == null) {
             return;
@@ -113,5 +116,19 @@ public class DepartmentEntity extends BaseEntity {
 
     public void removeAll(List<UserEntity> entities) {
         this.employees.removeAll(entities);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DepartmentEntity that = (DepartmentEntity) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name);
     }
 }

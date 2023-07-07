@@ -6,6 +6,7 @@ import com.example.leaves.model.dto.UserDto;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @NamedEntityGraph(
         name = "full",
@@ -28,7 +29,7 @@ public class UserEntity extends BaseEntity<UserDto> {
     private String email;
     @Column(nullable = false, name = "password")
     private String password;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
     @ManyToMany
@@ -96,6 +97,7 @@ public class UserEntity extends BaseEntity<UserDto> {
         this.name = name;
     }
 
+    @Override
     public void toDto(UserDto dto) {
         if (dto == null) {
             return;
@@ -121,6 +123,7 @@ public class UserEntity extends BaseEntity<UserDto> {
         dto.setEmployeeInfo(this.employeeInfo.toDto());
     }
 
+    @Override
     public void toEntity(UserDto dto) {
         if (dto == null) {
             return;
@@ -153,5 +156,19 @@ public class UserEntity extends BaseEntity<UserDto> {
 
     public void setEmployeeInfo(EmployeeInfo employeeInfo) {
         this.employeeInfo = employeeInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), email);
     }
 }

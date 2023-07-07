@@ -8,9 +8,6 @@ public class UserLoginDto {
     private String email;
     private String password;
 
-    public UserLoginDto() {
-    }
-
     @NotEmpty(message = "Field cannot be empty")
     @Email(message = "Enter valid email address")
     public String getEmail() {

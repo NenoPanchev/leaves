@@ -19,9 +19,6 @@ public class UserUpdateDto {
     private List<RoleDto> roles;
     private EmployeeInfoDto employeeInfo;
 
-    public UserUpdateDto() {
-    }
-
     @Size(min = 2, max = 20, message = "Username must be between 2 and 20 characters")
     public String getName() {
         return name;

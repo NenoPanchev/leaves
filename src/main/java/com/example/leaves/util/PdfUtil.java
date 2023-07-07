@@ -3,12 +3,15 @@ package com.example.leaves.util;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.pdf.BaseFont;
+
 import fr.opensagres.xdocreport.itext.extension.font.IFontProvider;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xwpf.converter.pdf.PdfConverter;
 import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,9 +20,13 @@ import java.util.Map;
 
 
 public class PdfUtil {
-    private static final String OUTPUTFILE = "C:/Users/Vladimir/Desktop/ReadPdfssssddddddss.pdf";
+    private static final Logger LOGGER = LoggerFactory.getLogger(PdfUtil.class);
 
     private static final String FILE = "src/main/resources/docx/отпуск.docx";
+
+    private PdfUtil() {
+        throw new IllegalStateException("Util class");
+    }
 
     public static byte[] replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
         try {
@@ -28,7 +35,6 @@ public class PdfUtil {
              * if uploaded doc then use HWPF else if uploaded Docx file use
              * XWPFDocument
              */
-            //File tempFile = File.createTempFile("Request", ".pdf");
 
             XWPFDocument doc = new XWPFDocument(
                     OPCPackage.open(FILE));
@@ -52,7 +58,6 @@ public class PdfUtil {
                     }
                 }
             }
-            //final FileOutputStream fileOutputStream = new FileOutputStream("src/main/resources/docx/отпуск4.pdf");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfOptions options = PdfOptions.create();
             options.fontProvider(getFontProvider());
@@ -96,7 +101,7 @@ public class PdfUtil {
                     return new Font(baseFont, size, style, color);
                 }
             } catch (final Exception e) {
-//                LOGGER.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
                 throw new RuntimeException(e);
             }
 

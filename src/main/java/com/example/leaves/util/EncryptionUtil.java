@@ -1,5 +1,8 @@
 package com.example.leaves.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -13,9 +16,14 @@ import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class EncryptionUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EncryptionUtil.class);
     /* Private variable declaration */
     private static final String SECRET_KEY = "1234!56?78a9";
     private static final String SALTVALUE = "a!b&c/?d*ef!g";
+
+    private EncryptionUtil() {
+        throw new IllegalStateException("Util class");
+    }
 
     /* Encryption Method */
     public static String encrypt(String strToEncrypt) {
@@ -38,7 +46,7 @@ public class EncryptionUtil {
             } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException |
                      InvalidKeySpecException | BadPaddingException | IllegalBlockSizeException |
                      NoSuchPaddingException e) {
-                System.out.println("Error occured during encryption: " + e);
+                LOGGER.warn(String.format("Error occured during decryption: %s", e));
             }
         }
         return null;
@@ -64,7 +72,7 @@ public class EncryptionUtil {
             } catch (InvalidAlgorithmParameterException | InvalidKeyException | NoSuchAlgorithmException |
                      InvalidKeySpecException | BadPaddingException | IllegalBlockSizeException |
                      NoSuchPaddingException e) {
-                System.out.println("Error occured during decryption: " + e);
+                LOGGER.warn(String.format("Error occured during decryption: %s", e));
             }
         }
         return null;

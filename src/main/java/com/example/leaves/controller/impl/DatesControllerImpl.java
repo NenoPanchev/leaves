@@ -11,9 +11,7 @@ import java.util.List;
 
 @RestController
 public class DatesControllerImpl implements DatesController {
-
     private final HolidaysUtil holidaysUtil;
-
 
     public DatesControllerImpl(HolidaysUtil holidaysUtil) {
         this.holidaysUtil = holidaysUtil;

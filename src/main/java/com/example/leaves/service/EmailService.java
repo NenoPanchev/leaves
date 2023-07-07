@@ -21,5 +21,5 @@ public interface EmailService {
     void sendChangePasswordToken(
             final String recipientName,
             final String recipientEmail,
-            String Token) throws MessagingException;
+            String token) throws MessagingException;
 }

@@ -90,7 +90,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     private void updateTypeEmployee(EmployeeInfo employeeInfo) {
-        if (employeeInfo.getContracts().size() > 0) {
+        if (!employeeInfo.getContracts().isEmpty()) {
             employeeInfo.setEmployeeType(typeEmployeeService.getByName(
                     getTheLastContract(employeeInfo.getContracts()).getTypeName()
             ));
@@ -212,9 +212,9 @@ public class ContractServiceImpl implements ContractService {
         {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .joinDeepEquals(ContractEntity_.employeeInfo,
-                            EmployeeInfo_.userInfo, id, UserEntity_.ID)
+                            EmployeeInfo_.userInfo, id, BaseEntity_.ID)
                     .compareDates(ContractEntity_.startDate, filter.getStartDateComparisons())
-                    .equals(ContractEntity_.deleted, filter.isDeleted())
+                    .equals(BaseEntity_.deleted, filter.isDeleted())
                     .compareDates(ContractEntity_.endDate, filter.getEndDateComparisons())
                     .like(ContractEntity_.typeName, filter.getTypeName())
                     .build()
@@ -229,9 +229,8 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public ContractEntity getTheLastContract(List<ContractEntity> contracts) {
-        ContractEntity lastContract = contracts
+        return contracts
                 .stream().max(Comparator.comparing(ContractEntity::getStartDate))
                 .orElseThrow(ArrayIndexOutOfBoundsException::new);
-        return lastContract;
     }
 }

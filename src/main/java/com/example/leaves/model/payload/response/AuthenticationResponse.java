@@ -5,11 +5,9 @@ import java.util.List;
 public class AuthenticationResponse {
     private final String jwt;
     private Long id;
-
     private String name;
     private String email;
     private List<String> authorities;
-
 
     public AuthenticationResponse(String jwt) {
         this.jwt = jwt;

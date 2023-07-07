@@ -117,6 +117,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         return dto;
     }
 
+    @Override
     public void toEntity(LeaveRequestDto baseDto) {
         super.toEntity(baseDto);
         this.setApprovedStartDate(baseDto.getApprovedStartDate());

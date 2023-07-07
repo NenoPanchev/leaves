@@ -1,15 +1,15 @@
 package com.example.leaves.service.filter;
 
+import lombok.EqualsAndHashCode;
+
 import java.util.List;
 
+@EqualsAndHashCode
 public class DepartmentFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
     private String adminEmail;
     private List<String> employeeEmails;
-
-    public DepartmentFilter() {
-    }
 
     public List<Long> getIds() {
         return ids;

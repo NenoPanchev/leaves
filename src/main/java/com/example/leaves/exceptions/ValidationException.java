@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ValidationException extends BaseCustomException {
-    private final BindingResult errors;
+    private final transient BindingResult errors;
 
     public ValidationException(BindingResult errors) {
         super(getValidationMessage(errors).toString().replace(",", "\n"));

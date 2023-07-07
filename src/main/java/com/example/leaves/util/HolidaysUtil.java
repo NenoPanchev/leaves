@@ -1,14 +1,15 @@
 package com.example.leaves.util;
 
 import com.example.leaves.model.payload.response.Holiday;
-import com.google.gson.Gson;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -20,32 +21,29 @@ import static com.example.leaves.constants.GlobalConstants.EASTER_HOLIDAYS;
 
 @Component
 public class HolidaysUtil {
-    private final Gson gson;
+    private static final Logger LOGGER = LoggerFactory.getLogger(HolidaysUtil.class);
+
     @Value("${holidays.api.base.url}")
-    private String HOLIDAY_API_BASE_URL;
+    private String holidayApiBaseUrl;
     private List<LocalDate> holidays = new ArrayList<>();
 
-    public HolidaysUtil(Gson gson) {
-        this.gson = gson;
-    }
-
     @Scheduled(cron = "1 0 0 1 6 * ", zone = "EET")
-    public void setHolidayDates() throws IOException {
-        List<LocalDate> holidays = new ArrayList<>();
+    public void setHolidayDates() {
+        List<LocalDate> holidayDates = new ArrayList<>();
         int currentYear = LocalDate.now().getYear();
         int nextYear = currentYear + 1;
-        holidays.addAll(fetchAllHolidayDatesForYear(currentYear));
-        holidays.addAll(fetchAllHolidayDatesForYear(nextYear));
-        setHolidays(holidays);
+        holidayDates.addAll(fetchAllHolidayDatesForYear(currentYear));
+        holidayDates.addAll(fetchAllHolidayDatesForYear(nextYear));
+        setHolidays(holidayDates);
     }
 
-    private List<LocalDate> fetchAllHolidayDatesForYear(int year) throws IOException {
-        String urlString = HOLIDAY_API_BASE_URL + year + "/BG";
+    private List<LocalDate> fetchAllHolidayDatesForYear(int year) {
+        String urlString = holidayApiBaseUrl + year + "/BG";
         List<LocalDate> holidayDates = new ArrayList<>();
 
         WebClient.Builder builder = WebClient.builder();
 
-        List<Holiday> holidays = builder.build()
+        List<Holiday> holidayList = builder.build()
                 .get()
                 .uri(urlString)
                 .retrieve()
@@ -53,15 +51,17 @@ public class HolidaysUtil {
                 })
                 .block();
 
-
+        if (holidayList == null) {
+            LOGGER.error("error fetching holidays from api");
+            return holidayDates;
+        }
         // Checks how many of Christmas Holidays are in the weekend
-        int daysToAddAfterChristmasHolidays = checkHowManyDaysToAddAfterChristmasHolidays(holidays);
+        int daysToAddAfterChristmasHolidays = checkHowManyDaysToAddAfterChristmasHolidays(holidayList);
 
 //                      According to Bulgarian Labour Code, Art. 154, para. 2
 //                      If holiday is not Easter Holiday and is in the weekend,
 //                      next one or two work days should be holidays as well
-        holidays
-                .stream()
+        holidayList
                 .forEach(day -> {
                     if (EASTER_HOLIDAYS.contains(day.getName())
                             || day.getName().contains(CHRISTMAS_HOLIDAYS_PREFIX)) {
@@ -84,7 +84,7 @@ public class HolidaysUtil {
 
         // Adds that many holidays after Christmas
         for (int i = 1; i <= daysToAddAfterChristmasHolidays; i++) {
-            LocalDate addedDate = holidays.get(holidays.size() - 1).getDate().plusDays(i);
+            LocalDate addedDate = holidayList.get(holidayList.size() - 1).getDate().plusDays(i);
             holidayDates.add(addedDate);
         }
 

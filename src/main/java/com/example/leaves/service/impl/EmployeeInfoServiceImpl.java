@@ -19,6 +19,8 @@ import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -38,7 +40,10 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmployeeInfoServiceImpl.class);
     public static final String LEFT_PAID_LEAVE_SUBJECT = "Left paid leave";
+    private static final String LOCATION = "location";
+    private static final String POSITION = "position";
     private final UserRepository employeeRepository;
     private final UserService userService;
     private final EmailService emailService;
@@ -48,7 +53,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final RoleService roleService;
     private final ContractService contractService;
     @Value("${allowed-leave-days-to-carry-over}")
-    private int ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
+    private int allowedDaysPaidLeaveToCarryOver;
 
     @Autowired
     public EmployeeInfoServiceImpl(UserRepository employeeRepository,
@@ -86,7 +91,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public EmployeeInfoDto create(EmployeeInfoDto employeeDto, UserEntity user) {
         EmployeeInfo employeeInfo = new EmployeeInfo();
         employeeInfo.toEntity(employeeDto);
-        //TODO set created by when users ready
         employeeInfo.setEmployeeType(typeService.getById(employeeDto.getTypeId()));
         user.setEmployeeInfo(employeeInfo);
         employeeRepository.save(user);
@@ -124,14 +128,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         }
 
         if (!(employee.getRoles().contains(roleService.getRoleById(1L)) ||
-                employee.getRoles().contains(roleService.getRoleById(2L)))) {
-            if (employee != leaveRequest.getEmployee().getUserInfo()
-            ) {
+                employee.getRoles().contains(roleService.getRoleById(2L))) && (employee != leaveRequest.getEmployee().getUserInfo()
+            )) {
                 throw new UnauthorizedException("You are not authorized for this operation");
-            }
-        }
 
-//        setPersonalEmployeeInfo(pdfRequestForm, userOfRequest);
+        }
 
         Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, leaveRequest, userOfRequest);
 
@@ -162,16 +163,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
             if (userOfRequest.getEmployeeInfo().getAddress() != null &&
                     !userOfRequest.getEmployeeInfo().getAddress().isEmpty()) {
-                words.put("location", userOfRequest.getEmployeeInfo().getAddress());
+                words.put(LOCATION, userOfRequest.getEmployeeInfo().getAddress());
             } else {
-                words.put("location", " ");
+                words.put(LOCATION, " ");
             }
 
             if (userOfRequest.getEmployeeInfo().getPosition() != null &&
                     !userOfRequest.getEmployeeInfo().getPosition().isEmpty()) {
-                words.put("position", userOfRequest.getEmployeeInfo().getPosition());
+                words.put(POSITION, userOfRequest.getEmployeeInfo().getPosition());
             } else {
-                words.put("position", " ");
+                words.put(POSITION, " ");
             }
 
         } else {
@@ -181,10 +182,10 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
 
 
-                words.put("location", " ");
+                words.put(LOCATION, " ");
 
 
-                words.put("position", " ");
+                words.put(POSITION, " ");
 
         }
 
@@ -220,8 +221,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .map(UserEntity::getEmployeeInfo)
                 .forEach(empl -> {
                     int remainingPaidLeave = empl.getDaysLeave();
-                    if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
-                        remainingPaidLeave = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
+                    if (remainingPaidLeave > allowedDaysPaidLeaveToCarryOver) {
+                        remainingPaidLeave = allowedDaysPaidLeaveToCarryOver;
                     }
                     empl.setCarryoverDaysLeave(remainingPaidLeave);
                     empl.setCurrentYearDaysLeave(empl.getEmployeeType().getDaysLeave());
@@ -265,9 +266,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                         Math.min(annualLeavesList.size(), filter.getOffset()),
                         Math.min(annualLeavesList.size(), filter.getOffset() + filter.getLimit()));
         OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        Page<LeavesAnnualReport> page = new PageImpl<>(content, pageable, annualLeavesList.size());
-
-        return page;
+        return new PageImpl<>(content, pageable, annualLeavesList.size());
     }
 
     @Override
@@ -442,17 +441,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         }
         long days = DAYS.between(startDate, endDate) + 1;
         int daysLeavePerContractType = typeService.getByName(contract.getTypeName()).getDaysLeave();
-        double paidLeavePerPeriod = 1.0 * days * daysLeavePerContractType / totalDaysInCurrentYear;
-        return paidLeavePerPeriod;
+        return  1.0 * days * daysLeavePerContractType / totalDaysInCurrentYear;
     }
 
     private List<ContractEntity> getAllContractsInYear(List<ContractEntity> contracts, int year) {
-        List<ContractEntity> contractsDuringCurrentYear =
-                contracts
+        return contracts
                         .stream()
                         .filter(c -> isValidContractInYear(c, year))
                         .collect(Collectors.toList());
-        return contractsDuringCurrentYear;
     }
 
     private boolean isValidContractInYear(ContractEntity c, int year) {
@@ -491,7 +487,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         report.setDaysUsed(allApprovedDaysInYear + daysUsedFromHistory);
 
         int fromPreviousYear = 0;
-        if (leavesAnnualReportList.size() > 0) {
+        if (!leavesAnnualReportList.isEmpty()) {
             fromPreviousYear = leavesAnnualReportList.get(leavesAnnualReportList.size() - 1).getCarryoverDays();
         }
 
@@ -499,8 +495,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         report.setContractDays(totalDaysFromContracts);
         int carryoverDays = report.getFromPreviousYear() + (int) Math.round(report.getContractDays())
                 - report.getDaysUsed();
-        if (carryoverDays > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
-            carryoverDays = ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER;
+        if (carryoverDays > allowedDaysPaidLeaveToCarryOver) {
+            carryoverDays = allowedDaysPaidLeaveToCarryOver;
         }
 
         report.setCarryoverDays(carryoverDays);
@@ -515,7 +511,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .findAllByDeletedIsFalse()
                 .forEach(employee -> {
                     int remainingPaidLeave = employee.getEmployeeInfo().getDaysLeave();
-                    if (remainingPaidLeave > ALLOWED_DAYS_PAID_LEAVE_TO_CARRY_OVER) {
+                    if (remainingPaidLeave > allowedDaysPaidLeaveToCarryOver) {
                         try {
                             emailService.sendMailToNotifyAboutPaidLeave(employee.getName(),
                                     employee.getEmail(),
@@ -523,7 +519,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                     remainingPaidLeave);
 
                         } catch (MessagingException e) {
-                            throw new RuntimeException(e);
+                            LOGGER.warn("cron job error notifying employees of paid leave left");
                         }
                     }
                 });

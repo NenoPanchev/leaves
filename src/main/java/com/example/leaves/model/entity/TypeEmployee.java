@@ -6,6 +6,7 @@ import com.example.leaves.model.dto.TypeEmployeeDto;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "types", schema = "public")
@@ -24,7 +25,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
     @Column(name = "type_days")
     private int daysLeave;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeType")
+    @OneToMany(mappedBy = "employeeType")
     private List<EmployeeInfo> employeeWithType;
 
     public List<EmployeeInfo> getEmployeesWithType() {
@@ -54,10 +55,6 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         this.employeeWithType.add(employeeWithType);
     }
 
-    public List<EmployeeInfo> getEmployeeWithType() {
-        return employeeWithType;
-    }
-
     public void setEmployeeWithType(List<EmployeeInfo> employeeWithType) {
         this.employeeWithType = employeeWithType;
     }
@@ -80,6 +77,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         return typeEmployeeDto;
     }
 
+    @Override
     public void toEntity(TypeEmployeeDto typeEmployeeDto) {
         super.toEntity(typeEmployeeDto);
         this.setTypeName(typeEmployeeDto.getTypeName());
@@ -87,4 +85,17 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TypeEmployee that = (TypeEmployee) o;
+        return daysLeave == that.daysLeave && Objects.equals(typeName, that.typeName) && Objects.equals(employeeWithType, that.employeeWithType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), typeName, daysLeave, employeeWithType);
+    }
 }

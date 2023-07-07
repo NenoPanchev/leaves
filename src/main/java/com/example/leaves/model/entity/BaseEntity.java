@@ -25,7 +25,7 @@ public abstract class BaseEntity<T extends BaseDto> {
     private boolean deleted;
 
 
-    public BaseEntity() {
+    protected BaseEntity() {
     }
 
     public Long getId() {

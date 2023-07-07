@@ -1,7 +1,6 @@
 package com.example.leaves.handlers;
 
 import com.example.leaves.exceptions.BaseCustomException;
-import com.example.leaves.exceptions.ValidationException;
 import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;

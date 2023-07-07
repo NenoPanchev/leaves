@@ -35,7 +35,6 @@ public class TypeControllerImpl implements TypeController {
 
     @Override
     public Page<TypeEmployeeDto> getPageFiltered(TypeEmployeeFilter filter) {
-//        Employee employee = AuthenticationHelper.tryGetUser(headers);
         return typeService.getAllFilterPage(filter);
     }
 

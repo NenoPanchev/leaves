@@ -69,10 +69,10 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendChangePasswordToken(String recipientName,
                                         String recipientEmail,
-                                        String Token) throws MessagingException {
+                                        String token) throws MessagingException {
         final Context ctx = prepareContext(recipientName,
                 String.format(CHANGE_PASSWORD_TOKEN_MSG,
-                        Token));
+                        token));
 
         // Prepare message using a Spring helper
         final MimeMessage mimeMessage = prepareMimeMsg(recipientEmail, CHANGE_PASSWORD_TOKEN_SUBJECT, ctx);
@@ -81,10 +81,10 @@ public class EmailServiceImpl implements EmailService {
         this.emailSender.send(mimeMessage);
     }
 
-    private Context prepareContext(String recipientName, String Content) {
+    private Context prepareContext(String recipientName, String content) {
         final Context ctx = new Context();
         ctx.setVariable("name", String.format("Hello %s,", recipientName));
-        ctx.setVariable("content", Content);
+        ctx.setVariable("content", content);
         ctx.setVariable("linkToAction", LEAVE_MANAGER_URL);
         return ctx;
     }

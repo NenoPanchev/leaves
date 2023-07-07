@@ -18,9 +18,6 @@ public class LeaveRequestDto extends BaseDto {
     private Boolean approved;
 
 
-    public LeaveRequestDto() {
-    }
-
     public LocalDate getApprovedStartDate() {
         return approvedStartDate;
     }

@@ -30,10 +30,6 @@ public abstract class BaseFilter {
 
     private String sort = "id";
 
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
     public boolean isDeleted() {
         return deleted;
     }

@@ -20,8 +20,6 @@ public interface LeaveRequestService {
 
     LeaveRequest getById(long id);
 
-//    void clearAllProcessed();
-
     void delete(long id);
 
     Page<LeaveRequestDto> getLeaveRequestDtoFilteredPage(LeaveRequestFilter filter);
@@ -33,8 +31,6 @@ public interface LeaveRequestService {
     List<LeaveRequestDto> getAllByCurrentUser();
 
     List<LeaveRequestDto> getAllByUserId(long id);
-
-//    LeaveRequest getByDateBetween();
 
     int getAllApprovedDaysInYearByEmployeeInfoId(int year, Long id);
 }

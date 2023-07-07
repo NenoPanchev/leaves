@@ -11,7 +11,6 @@ import com.example.leaves.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -38,12 +37,12 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> createAuthenticationToken(UserLoginDto authenticationRequest, BindingResult bindingResult) {
+    public ResponseEntity<AuthenticationResponse> createAuthenticationToken(UserLoginDto authenticationRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authenticationRequest.getEmail(), authenticationRequest.getPassword()));
 
         final UserDetails userDetails = userDetailService
@@ -55,23 +54,13 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> refreshUserOnClientRefresh(RefreshRequest jwt) {
-//        final String authorizationHeader = request.getHeader("Authorization");
-//
-//        String username = null;
-//        String jwt = null;
-//
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-//            jwt = authorizationHeader.substring(7);
-//            username = jwtUtil.extractUsername(jwt);
-//        }
+    public ResponseEntity<AuthenticationResponse> refreshUserOnClientRefresh(RefreshRequest jwt) {
         final UserDetails userDetails = userDetailService
                 .loadUserByUsername(jwtUtil.extractUsername(jwt.getJwt()));
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt.getJwt());
         mapUserDetailsToAuthenticationResponse(userDetails, authenticationResponse);
         return ResponseEntity.ok(authenticationResponse);
-
     }
 
     private void mapUserDetailsToAuthenticationResponse(UserDetails userDetails, AuthenticationResponse authenticationResponse) {

@@ -104,10 +104,4 @@ public class RequestControllerImpl implements RequestController {
     public Page<LeaveRequestDto> getPageFiltered(LeaveRequestFilter filter) {
         return leaveRequestService.getLeaveRequestDtoFilteredPage(filter);
     }
-//    @Override
-//    public void clearAllProcessedRequests(HttpHeaders headers) {
-//        Employee employee = AuthenticationHelper.tryGetUser(headers);
-//        leaveRequestService.clearAllProcessed();
-//    }
-
 }

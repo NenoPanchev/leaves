@@ -7,10 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "contracts")
-public class ContractEntity extends BaseEntity {
+public class ContractEntity extends BaseEntity<ContractDto> {
     @ManyToOne()
     private EmployeeInfo employeeInfo;
     @Column(nullable = false)
@@ -77,6 +78,7 @@ public class ContractEntity extends BaseEntity {
         this.typeName = typeName;
     }
 
+    @Override
     public void toDto(ContractDto dto) {
         if (dto == null) {
             return;
@@ -88,6 +90,7 @@ public class ContractEntity extends BaseEntity {
         dto.setTypeName(this.typeName);
     }
 
+    @Override
     public void toEntity(ContractDto dto) {
         if (dto == null) {
             return;
@@ -96,5 +99,19 @@ public class ContractEntity extends BaseEntity {
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();
         this.typeName = dto.getTypeName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ContractEntity that = (ContractEntity) o;
+        return Objects.equals(employeeInfo, that.employeeInfo) && Objects.equals(startDate, that.startDate) && Objects.equals(endDate, that.endDate) && Objects.equals(typeName, that.typeName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), employeeInfo, startDate, endDate, typeName);
     }
 }

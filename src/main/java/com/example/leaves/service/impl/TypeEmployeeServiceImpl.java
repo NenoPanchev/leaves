@@ -4,10 +4,10 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.model.dto.TypeEmployeeDto;
+import com.example.leaves.model.entity.BaseEntity_;
 import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.TypeEmployee_;
 import com.example.leaves.repository.TypeEmployeeRepository;
-import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.filter.TypeEmployeeFilter;
 import com.example.leaves.util.ListHelper;
@@ -26,12 +26,10 @@ import java.util.List;
 @Service
 public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     private final TypeEmployeeRepository typeRepository;
-    private final UserRepository userRepository;
 
     @Autowired
-    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository, UserRepository userRepository) {
+    public TypeEmployeeServiceImpl(TypeEmployeeRepository typeRepository) {
         this.typeRepository = typeRepository;
-        this.userRepository = userRepository;
     }
 
     private static void setTypeChanges(TypeEmployeeDto typeDto, TypeEmployee typeToBeUpdated) {
@@ -166,14 +164,14 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .in(TypeEmployee_.id, filter.getId())
+                    .in(BaseEntity_.id, filter.getId())
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .graterThan(TypeEmployee_.daysLeave, filter.getDaysLeave().get(0))
                     .lessThan(TypeEmployee_.daysLeave, filter.getDaysLeave().get(1))
-                    .in(TypeEmployee_.createdAt, filter.getDateCreated())
-                    .in(TypeEmployee_.lastModifiedAt, filter.getLastUpdated())
-                    .in(TypeEmployee_.createdBy, filter.getCreatedBy())
-                    .equal(TypeEmployee_.deleted, filter.getDeleted())
+                    .in(BaseEntity_.createdAt, filter.getDateCreated())
+                    .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
+                    .in(BaseEntity_.createdBy, filter.getCreatedBy())
+                    .equal(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -185,13 +183,13 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .in(TypeEmployee_.id, filter.getId())
+                    .in(BaseEntity_.id, filter.getId())
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .in(TypeEmployee_.daysLeave, filter.getDaysLeave())
-                    .in(TypeEmployee_.createdAt, filter.getDateCreated())
-                    .in(TypeEmployee_.lastModifiedAt, filter.getLastUpdated())
-                    .in(TypeEmployee_.createdBy, filter.getCreatedBy())
-                    .equal(TypeEmployee_.deleted, filter.getDeleted())
+                    .in(BaseEntity_.createdAt, filter.getDateCreated())
+                    .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
+                    .in(BaseEntity_.createdBy, filter.getCreatedBy())
+                    .equal(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -203,13 +201,13 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .lessThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .lessThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .lessThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))
-                    .lessThan(TypeEmployee_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
-                    .lessThan(TypeEmployee_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
-                    .in(TypeEmployee_.createdBy, filter.getCreatedBy())
-                    .equal(TypeEmployee_.deleted, filter.getDeleted())
+                    .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
+                    .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
+                    .in(BaseEntity_.createdBy, filter.getCreatedBy())
+                    .equal(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -221,13 +219,13 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(TypeEmployee_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .graterThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
                     .in(TypeEmployee_.typeName, filter.getTypeName())
                     .graterThan(TypeEmployee_.daysLeave, ListHelper.getGreatestNum(filter.getDaysLeave()))
-                    .greaterThan(TypeEmployee_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
-                    .graterThan(TypeEmployee_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
-                    .in(TypeEmployee_.createdBy, filter.getCreatedBy())
-                    .equal(TypeEmployee_.deleted, filter.getDeleted())
+                    .greaterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
+                    .graterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
+                    .in(BaseEntity_.createdBy, filter.getCreatedBy())
+                    .equal(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 

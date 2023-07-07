@@ -8,9 +8,7 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 public class EmployeeInfoDto extends UserDto {
-
     private long typeId;
-
     private int daysLeave;
     private int carryoverDaysLeave;
     private int currentYearDaysLeave;

@@ -1,9 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.ContractDto;
-import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.filter.ContractFilter;
-import com.example.leaves.service.filter.DepartmentFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,7 +9,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @CrossOrigin
 @RequestMapping("/contracts")

@@ -3,18 +3,19 @@ package com.example.leaves.service.filter;
 import com.example.leaves.service.filter.comparison.DateComparison;
 import com.example.leaves.service.filter.comparison.IntegerComparison;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@EqualsAndHashCode
 public class UserFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
     private String email;
     private String department;
     private List<String> roles;
-
     private String position;
     private List<DateComparison> startDateComparisons = new ArrayList<>();
     private List<IntegerComparison> daysLeaveComparisons = new ArrayList<>();
@@ -22,9 +23,6 @@ public class UserFilter extends BaseFilter {
     private LocalDate lessThanOrEqualToDate;
     private Integer greaterThanOrEqualToPaidLeave;
     private Integer lessThanOrEqualToPaidLeave;
-
-    public UserFilter() {
-    }
 
     public String getName() {
         return name;

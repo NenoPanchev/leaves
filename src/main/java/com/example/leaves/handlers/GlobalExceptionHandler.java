@@ -25,15 +25,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-//    @ResponseStatus(HttpStatus.NOT_FOUND)
-//    @ExceptionHandler(value = ValidationException.class)
-//    protected ResponseEntity<Object> handleBadRequests(
-//            RuntimeException ex, WebRequest request) {
-//        String bodyOfResponse = ex.getMessage();
-//        return handleExceptionInternal(ex, bodyOfResponse,
-//                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-//    }
-
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(value = ResourceAlreadyExistsException.class)
     protected ResponseEntity<Object> handleExistingResources(
@@ -54,18 +45,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(value
-            = {IllegalArgumentException.class, IllegalStateException.class})
+            = {IllegalArgumentException.class, IllegalStateException.class, IllegalContractStartDateException.class})
     protected ResponseEntity<Object> handleConflict(
-            RuntimeException ex, WebRequest request) {
-        String bodyOfResponse = ex.getMessage();
-        return handleExceptionInternal(ex, bodyOfResponse,
-                new HttpHeaders(), HttpStatus.CONFLICT, request);
-    }
-
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(value
-            = {IllegalContractStartDateException.class})
-    protected ResponseEntity<Object> handleInvalidContractStartDate(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
         return handleExceptionInternal(ex, bodyOfResponse,

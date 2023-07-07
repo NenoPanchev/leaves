@@ -12,7 +12,11 @@ import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.OffsetLimitPageRequest;
+import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.TokenUtil;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -35,6 +39,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final String ADMIN = "ADMIN";
+    private static final String USER_NOT_FOUND_TEMPLATE = "User with id %d does not exist";
+    private static final String USER_NOT_FOUND_MESSAGE = "User not found";
+    private static final String INCORRECT_OLD_PASSWORD_MESSAGE = "Incorrect old password!";
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
@@ -45,7 +53,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
-    private final LeaveRequestService leaveRequestService;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
@@ -56,8 +63,7 @@ public class UserServiceImpl implements UserService {
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
                            @Lazy EmployeeInfoService employeeInfoService,
                            ContractService contractService,
-                           ModelMapper modelMapper,
-                           @Lazy LeaveRequestService leaveRequestService) {
+                           ModelMapper modelMapper) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -69,7 +75,6 @@ public class UserServiceImpl implements UserService {
         this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
-        this.leaveRequestService = leaveRequestService;
     }
 
     @Override
@@ -88,7 +93,7 @@ public class UserServiceImpl implements UserService {
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
-        superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
+        superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", ADMIN, "USER"));
         superAdmin.setDepartment(administration);
 
         // Employee Info
@@ -102,7 +107,7 @@ public class UserServiceImpl implements UserService {
         admin.setName("Admin Admin");
         admin.setEmail("admin@admin.com");
         admin.setPassword(passwordEncoder.encode("1234"));
-        admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
+        admin.setRoles(roleService.findAllByRoleIn(ADMIN, "USER"));
         admin.setDepartment(administration);
 
         // Employee Info
@@ -164,7 +169,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto getUserDtoById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         UserDto dto = new UserDto();
         userRepository.findByIdAndDeletedIsFalse(id).toDto(dto);
@@ -176,7 +181,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity getUserById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         return userRepository.findByIdAndDeletedIsFalse(id);
     }
@@ -202,10 +207,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
         }
         if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id)));
         departmentService.detachAdminFromDepartment(id);
         departmentService.detachEmployeeFromDepartment(userEntity);
         userRepository.deleteById(id);
@@ -218,10 +223,9 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
         }
         if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         userRepository.markAsDeleted(id);
-//        userRepository.softDeleteById(id);
     }
 
     @Override
@@ -232,7 +236,7 @@ public class UserServiceImpl implements UserService {
         }
         UserDto dto = modelMapper.map(updateDto, UserDto.class);
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id)));
         String initialEntityDepartmentName = entity.getDepartment() == null ? "" : entity.getDepartment().getName();
         boolean sameDepartment = true;
         entity.toEntity(dto);
@@ -350,7 +354,7 @@ public class UserServiceImpl implements UserService {
                     .stream()
                     .map(roleDto -> {
                         String name = roleDto.getName().toUpperCase();
-                        if (name.equals("ADMIN")) {
+                        if (ADMIN.equals(name)) {
                             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             boolean isSuperAdmin = authentication
                                     .getAuthorities()
@@ -389,7 +393,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Type not found"));
         UserEntity user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
         user.getEmployeeInfo().setEmployeeType(typeEmployee);
         UserDto dto = new UserDto();
         userRepository.save(user).toDto(dto);
@@ -428,10 +432,10 @@ public class UserServiceImpl implements UserService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
-                    .in(UserEntity_.id, filter.getIds())
+                    .in(BaseEntity_.id, filter.getIds())
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())
-                    .equals(UserEntity_.deleted, filter.isDeleted())
+                    .equals(BaseEntity_.deleted, filter.isDeleted())
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
                     .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
@@ -451,7 +455,7 @@ public class UserServiceImpl implements UserService {
 
             return query.where(predicates)
                     .distinct(true)
-                    .orderBy(criteriaBuilder.asc(root.get(UserEntity_.ID)))
+                    .orderBy(criteriaBuilder.asc(root.get(BaseEntity_.ID)))
                     .getGroupRestriction();
         };
     }
@@ -494,13 +498,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findUserById(long id) {
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("user not found"));
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
     public UserDto findUserByEmail(String email) {
         UserDto dto = new UserDto();
-        userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("user not found")).toDto(dto);
+        userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE)).toDto(dto);
         return dto;
     }
 
@@ -512,7 +516,7 @@ public class UserServiceImpl implements UserService {
                                 .getContext()
                                 .getAuthentication()
                                 .getName())
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -524,7 +528,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long findIdByEmail(String email) {
         return userRepository.findIdByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -544,7 +548,7 @@ public class UserServiceImpl implements UserService {
             throw new PasswordsNotMatchingException("New passwords and confirmation must match!");
         }
         if (!passwordEncoder.matches(dto.getOldPassword(), entity.getPassword())) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
         if (dto.getOldPassword().equals(dto.getNewPassword())) {
             throw new SameNewPasswordException("New password can not match the previous one!");
@@ -589,10 +593,10 @@ public class UserServiceImpl implements UserService {
     public void validatePassword(Long id, String password) {
         UserEntity entity = getUserEntity(id);
         if (password == null || password.isEmpty()) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
         if (!passwordEncoder.matches(password, entity.getPassword())) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
     }
 
@@ -631,9 +635,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserEntity getUserEntity(Long id) {
-        UserEntity entity = userRepository
-                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
-        return entity;
+        return userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     private void createPasswordResetTokenForUser(UserEntity entity, String token) {
@@ -647,8 +650,7 @@ public class UserServiceImpl implements UserService {
     public Page<UserDto> getUsersPage(UserFilter filter) {
         Page<UserDto> page = null;
         if (filter.getLimit() != null && filter.getLimit() > 0) {
-            int offset = filter.getOffset() == null ? 0 : filter.getOffset();
-            int limit = filter.getLimit();
+
             OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
             page = userRepository
                     .findAll(getSpecification(filter), pageable)

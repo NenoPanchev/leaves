@@ -64,23 +64,22 @@ public interface UserController {
     ResponseEntity<UserDto> updatePersonalInfo(@Valid @RequestBody UserUpdateDto dto);
     @PutMapping("/change-password/{id}")
     @PreAuthorize("hasAuthority('READ')")
-    //TODO ASK BINDING RESULT VALIDATION BETTER OR FRONTEND
-    ResponseEntity changePassword(@RequestBody PasswordChangeDto dto,
+    ResponseEntity<Void> changePassword(@RequestBody PasswordChangeDto dto,
                                   @PathVariable("id") Long id,
                                   BindingResult bindingResult);
 
     @PutMapping("/{id}/validate-password")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity validatePassword(@RequestBody String password,
+    ResponseEntity<Void> validatePassword(@RequestBody String password,
                                   @PathVariable("id") Long id);
 
     @PutMapping("/{id}/validate-password-token")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity validateChangePasswordToken(@RequestBody String token,
+    ResponseEntity<Void> validateChangePasswordToken(@RequestBody String token,
                                     @PathVariable("id") Long id);
     @PutMapping("{id}/change-password-token")
     @PreAuthorize("hasAuthority('READ')")
-    ResponseEntity<?> sendChangePasswordToken(@PathVariable("id") Long id);
+    ResponseEntity<Void> sendChangePasswordToken(@PathVariable("id") Long id);
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('DELETE')")
@@ -90,10 +89,7 @@ public interface UserController {
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<UserDto> addType(@RequestBody long typeId, @PathVariable("userId") long userId);
 
-    //    @PostMapping("/{requestId}/pdf")
-//    @PreAuthorize("hasAuthority('READ')")
-//    ResponseEntity<byte[]> getPdfOfRequest(@PathVariable("requestId") long requestId,
-//                                           @RequestBody PdfRequestForm pdfRequestForm);
+
     @PostMapping("/{requestId}/pdf")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<ByteArrayResource> getPdfOfRequest(@PathVariable("requestId") long requestId,

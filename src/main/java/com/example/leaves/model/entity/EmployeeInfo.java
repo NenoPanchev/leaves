@@ -27,7 +27,7 @@ import java.util.*;
 @Table(name = "employee_info", schema = "public")
 public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "type_id")
     @JsonBackReference
     private TypeEmployee employeeType;
@@ -41,7 +41,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     @Column(name = "ssn")
     private String ssn;
-    //TODO CHANGE SSN TO CHAR ARR
 
     @Column(name = "address")
     private String address;
@@ -139,7 +138,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     }
 
     public void setEmployeeType(TypeEmployee employeeType) {
-        //TODO reset annual leave when change or not ?
         this.employeeType = employeeType;
         if (this.getId() == null) {
             setCurrentYearDaysLeave(employeeType.getDaysLeave());
@@ -184,5 +182,21 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     public void removeContract(int index) {
         this.contracts.remove(index);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        EmployeeInfo that = (EmployeeInfo) o;
+        return carryoverDaysLeave == that.carryoverDaysLeave && currentYearDaysLeave == that.currentYearDaysLeave && Objects.equals(employeeType, that.employeeType)
+                && Objects.equals(contractStartDate, that.contractStartDate) && Objects.equals(leaveRequests, that.leaveRequests) && Objects.equals(userInfo, that.userInfo)
+                && Objects.equals(contracts, that.contracts) && Objects.equals(history, that.history);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), employeeType, carryoverDaysLeave, currentYearDaysLeave, contractStartDate, leaveRequests, userInfo, contracts, history);
     }
 }
