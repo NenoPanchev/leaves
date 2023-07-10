@@ -34,7 +34,7 @@ stages:          # List of stages for jobs, and their order of execution
 #     paths:
 #       - .sonar/cache
 #   script: 
-#     - mvn verify sonar:sonar -DDATABASE_NAME=${DATABASE_NAME} -DPOSTGRES_PASSWORD=${POSTGRES_PASSWORD} -DskipTests -Dsonar.projectKey=lightsoftbulgaria_vacation-management-service_AYk--zmEheLMcg5uOE2l
+#     - mvn verify sonar:sonar -DDATABASE_NAME=${DATABASE_NAME} -DPOSTGRES_PASSWORD=${POSTGRES_PASSWORD} -DskipTests -Dsonar.projectKey=lightsoftbulgaria_vacation-management-service_AYlAGSMIQBvc8w5qbn3w
 
 #   allow_failure: true
 
@@ -45,6 +45,7 @@ build-image-and-push:
     REGISTRY_IP: 192.168.20.94
   before_script:
   - apk add --no-cache git
+  - docker cp 
   script:
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
@@ -52,9 +53,9 @@ build-image-and-push:
       else
         TAG="$CI_COMMIT_REF_NAME"
       fi
-      mkdir -p /etc/docker
-      touch /etc/docker/daemon.json
-      echo '{ "insecure-registries": ["192.168.20.94:443"] }' | cat /etc/docker/daemon.json
+      # mkdir -p /etc/docker
+      # touch /etc/docker/daemon.json
+      echo "192.168.20.94 zunregistry.com" >> /etc/hosts
       docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
       docker push ${REGISTRY_IP}/vacation_management_service:$TAG
