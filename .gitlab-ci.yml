@@ -4,6 +4,7 @@ stages:          # List of stages for jobs, and their order of execution
   - test
   - build
   - sonar
+  - push
 
 unit-test-job:   # This job runs in the test stage.
   stage: test    # It only starts when the job in the build stage completes successfully.
@@ -37,3 +38,18 @@ sonarqube-check:
 
   allow_failure: true
 
+variables:
+  REGISTRY_IP: 192.168.20.94
+  
+push:
+    stage: push
+    script:
+      - if [[ "$CI_COMMIT_BRANCH" == "master" ]]; then
+          TAG="latest";
+        else
+          TAG="$CI_COMMIT_REF_NAME";
+        fi
+      - docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
+      - docker push ${REGISTRY_IP}/vacation_management_service:$TAG
+    rules:
+      - exists
