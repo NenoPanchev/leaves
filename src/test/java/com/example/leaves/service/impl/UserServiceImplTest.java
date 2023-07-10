@@ -1,11 +1,16 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.LeavesApplication;
+import com.example.leaves.config.H2TestProfileJPAConfig;
 import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.PermissionEntity;
+import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.model.entity.enums.PermissionEnum;
+import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.PermissionService;
@@ -23,19 +28,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.transaction.Transactional;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
+@SpringBootTest(classes = {
+        LeavesApplication.class,
+        H2TestProfileJPAConfig.class
+})
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 class UserServiceImplTest {
     private UserEntity user, admin, testUser;
     private RoleEntity userRole, adminRole;
@@ -149,6 +158,7 @@ class UserServiceImplTest {
         UserEntity actual = userService.findByEmail(user.getEmail());
         assertEquals(user.getName(), actual.getName());
     }
+
     @Test
     public void findByEmailThrowsIfNonExistentUser() {
         assertThrows(ObjectNotFoundException.class, () -> userService.findByEmail("safhaosogaas"));
@@ -156,14 +166,14 @@ class UserServiceImplTest {
 
     @Test
     public void getUserById() {
-        UserDto actual = userService.getUserById(2L);
+        UserDto actual = userService.getUserDtoById(2L);
         assertEquals(admin.getName(), actual.getName());
         assertEquals(admin.getEmail(), actual.getEmail());
     }
 
     @Test
     public void getUserByIdThrowsIfNonExistentUser() {
-        assertThrows(ObjectNotFoundException.class, () -> userService.getUserById(3123213L));
+        assertThrows(ObjectNotFoundException.class, () -> userService.getUserDtoById(3123213L));
     }
 
     @Test
@@ -178,8 +188,8 @@ class UserServiceImplTest {
 
     @Test
     public void existsByEmail() {
-        assertTrue(userService.existsByEmail(admin.getEmail()));
-        assertFalse(userService.existsByEmail("asfigaosasdfas"));
+        assertTrue(userService.existsByEmailAndDeletedIsFalse(admin.getEmail()));
+        assertFalse(userService.existsByEmailAndDeletedIsFalse("asfigaosasdfas"));
     }
 
     @Test
@@ -194,6 +204,7 @@ class UserServiceImplTest {
         assertEquals(1, actual.size());
         assertEquals(admin.getEmail(), actual.get(0).getEmail());
     }
+
     @Test
     public void getFilteredUsers() {
         UserFilter filter = new UserFilter();
@@ -223,9 +234,8 @@ class UserServiceImplTest {
 
     @Test
     public void updateUser() {
-        UserDto dto = new UserDto();
+        UserUpdateDto dto = new UserUpdateDto();
         dto.setName("New User");
-        dto.setPassword("1234");
         UserDto actual = userService.updateUser(3L, dto);
         assertEquals(dto.getName(), actual.getName());
 
@@ -242,14 +252,13 @@ class UserServiceImplTest {
 
     @Test
     public void updateUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserDto()));
+        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserUpdateDto()));
     }
 
     @Test
     public void updateUserThrowsIfNonExistent() {
-        UserDto userDto = new UserDto();
+        UserUpdateDto userDto = new UserUpdateDto();
         userDto.setName("aaaaaaa");
-        userDto.setPassword("aaaaaaa");
         assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, userDto));
     }
 
@@ -266,7 +275,7 @@ class UserServiceImplTest {
 
     @Test
     public void softDeleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test
@@ -289,7 +298,7 @@ class UserServiceImplTest {
 
     @Test
     public void deleteUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, ()-> userService.softDeleteUser(1L));
+        assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test

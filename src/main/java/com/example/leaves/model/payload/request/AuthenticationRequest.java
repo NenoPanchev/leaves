@@ -8,9 +8,6 @@ public class AuthenticationRequest {
     private String email;
     private String password;
 
-    public AuthenticationRequest() {
-    }
-
     @NotEmpty(message = "Field cannot be empty")
     @Email(message = "Enter valid email address")
     public String getEmail() {

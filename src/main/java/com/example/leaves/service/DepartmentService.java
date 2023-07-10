@@ -4,12 +4,14 @@ import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.model.entity.DepartmentEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.filter.DepartmentFilter;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
 public interface DepartmentService {
     void seedDepartments();
+
     DepartmentEntity findByDepartment(String department);
 
     List<DepartmentDto> getAllDepartmentDtos();
@@ -41,4 +43,6 @@ public interface DepartmentService {
     void detachEmployeeFromDepartment(UserEntity userEntity);
 
     List<String> getAllNames();
+
+    Page<DepartmentDto> getDepartmentsPage(DepartmentFilter departmentFilter);
 }

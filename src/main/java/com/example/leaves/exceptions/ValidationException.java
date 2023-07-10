@@ -7,23 +7,13 @@ import org.springframework.validation.ObjectError;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ValidationException extends RuntimeException{
-    private final BindingResult errors;
+public class ValidationException extends BaseCustomException {
+    private final transient BindingResult errors;
 
     public ValidationException(BindingResult errors) {
+        super(getValidationMessage(errors).toString().replace(",", "\n"));
         this.errors = errors;
     }
-
-    public List<String> getMessages() {
-        return getValidationMessage(this.errors);
-    }
-
-
-    @Override
-    public String getMessage() {
-        return this.getMessages().toString().replace(",", "\n");
-    }
-
 
     //demonstrate how to extract a message from the binging result
     private static List<String> getValidationMessage(BindingResult bindingResult) {
@@ -33,7 +23,7 @@ public class ValidationException extends RuntimeException{
                 .collect(Collectors.toList());
     }
 
-    private static String getValidationMessage(ObjectError error) {
+    public static String getValidationMessage(ObjectError error) {
         if (error instanceof FieldError) {
             FieldError fieldError = (FieldError) error;
             String className = fieldError.getObjectName();
@@ -43,6 +33,14 @@ public class ValidationException extends RuntimeException{
             return String.format("%s.%s %s but it was %s", className, property, message, invalidValue);
         }
         return String.format("%s: %s", error.getObjectName(), error.getDefaultMessage());
+    }
+    public List<String> getMessages() {
+        return getValidationMessage(this.errors);
+    }
+
+    @Override
+    public String getMessage() {
+        return this.getMessages().toString().replace(",", "\n");
     }
 
 }

@@ -13,14 +13,12 @@ import com.example.leaves.service.filter.RoleFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -34,6 +32,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 class RoleServiceImplTest {
     private RoleEntity user, admin, superAdmin;
     private RoleService serviceToTest;
@@ -96,7 +95,7 @@ class RoleServiceImplTest {
 
     @Test
     void findAllByRoleIn() {
-        String[] roleNames = new String[] {"USER", "ADMIN", "SUPER_ADMIN"};
+        String[] roleNames = new String[]{"USER", "ADMIN", "SUPER_ADMIN"};
         List<RoleEntity> expected = Arrays.asList(user, superAdmin);
         when(mockRoleRepository.findAllByNameInAndDeletedIsFalse(roleNames))
                 .thenReturn(expected);
@@ -145,6 +144,7 @@ class RoleServiceImplTest {
                 .thenReturn(entities);
 
         List<RoleDto> actual = serviceToTest.getAllRoleDtos();
+
 
         assertEquals(expected.size(), actual.size());
         assertEquals(expected.get(0).getName(), actual.get(0).getName());

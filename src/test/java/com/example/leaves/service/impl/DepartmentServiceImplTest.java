@@ -2,23 +2,21 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.DepartmentDto;
-import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.entity.DepartmentEntity;
-import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.DepartmentEnum;
 import com.example.leaves.repository.DepartmentRepository;
 import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
-import com.example.leaves.service.filter.RoleFilter;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
@@ -30,6 +28,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 class DepartmentServiceImplTest {
     private DepartmentEntity administration, it, accounting;
     private UserEntity superAdmin;
@@ -144,6 +143,7 @@ class DepartmentServiceImplTest {
         verify(mockDepartmentRepository, times(1)).deleteById(it.getId());
 
     }
+
     @Test
     void deleteDepartmentThrowsWhenNonExistentDepartment() {
         assertThrows(ObjectNotFoundException.class, () -> serviceToTest.deleteDepartment(99L));

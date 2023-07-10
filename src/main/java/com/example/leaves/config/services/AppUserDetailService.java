@@ -33,7 +33,6 @@ public class AppUserDetailService implements UserDetailsService {
         UserEntity userEntity = userRepository
                 .findByEmailAndDeletedIsFalse(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " was not found."));
-
         return mapToUserDetails(userEntity);
     }
 

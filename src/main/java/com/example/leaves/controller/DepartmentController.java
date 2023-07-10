@@ -2,7 +2,7 @@ package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.DepartmentDto;
 import com.example.leaves.service.filter.DepartmentFilter;
-import com.example.leaves.service.specification.SearchCriteria;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -25,6 +25,11 @@ public interface DepartmentController {
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<DepartmentDto>> getFilteredDepartments(@RequestBody DepartmentFilter filter);
+
+    @PostMapping("/page")
+    @PreAuthorize("hasRole('ADMIN')")
+    ResponseEntity<Page<DepartmentDto>> getDepartmentsPage(@RequestBody DepartmentFilter departmentFilter);
+
     @PostMapping
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<DepartmentDto> create(@Valid @RequestBody DepartmentDto dto,

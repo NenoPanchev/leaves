@@ -1,17 +1,15 @@
 package com.example.leaves.service.filter;
 
-import com.example.leaves.model.entity.UserEntity;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode
 public class DepartmentFilter extends BaseFilter {
     private List<Long> ids;
     private String name;
-    private String admin;
-    private List<String> employees;
-
-    public DepartmentFilter() {
-    }
+    private String adminEmail;
+    private List<String> employeeEmails;
 
     public List<Long> getIds() {
         return ids;
@@ -29,19 +27,19 @@ public class DepartmentFilter extends BaseFilter {
         this.name = name;
     }
 
-    public String getAdmin() {
-        return admin;
+    public String getAdminEmail() {
+        return adminEmail;
     }
 
-    public void setAdmin(String admin) {
-        this.admin = admin;
+    public void setAdminEmail(String adminEmail) {
+        this.adminEmail = adminEmail;
     }
 
-    public List<String> getEmployees() {
-        return employees;
+    public List<String> getEmployeeEmails() {
+        return employeeEmails;
     }
 
-    public void setEmployees(List<String> employees) {
-        this.employees = employees;
+    public void setEmployeeEmails(List<String> employeeEmails) {
+        this.employeeEmails = employeeEmails;
     }
 }

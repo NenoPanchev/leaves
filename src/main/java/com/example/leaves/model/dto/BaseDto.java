@@ -1,5 +1,7 @@
 package com.example.leaves.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 public abstract class BaseDto {
@@ -9,7 +11,9 @@ public abstract class BaseDto {
     private String lastModifiedBy;
     private LocalDateTime lastModifiedAt;
 
-    public BaseDto() {
+    private boolean isDeleted;
+
+    protected BaseDto() {
     }
 
     public Long getId() {
@@ -28,6 +32,7 @@ public abstract class BaseDto {
         this.createdBy = createdBy;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -44,6 +49,7 @@ public abstract class BaseDto {
         this.lastModifiedBy = lastModifiedBy;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", shape = JsonFormat.Shape.STRING)
     public LocalDateTime getLastModifiedAt() {
         return lastModifiedAt;
     }
@@ -52,4 +58,11 @@ public abstract class BaseDto {
         this.lastModifiedAt = lastModifiedAt;
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 }

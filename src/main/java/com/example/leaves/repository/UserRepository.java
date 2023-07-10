@@ -1,6 +1,6 @@
 package com.example.leaves.repository;
 
-import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.UserEntity;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -13,14 +13,31 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpecificationExecutor<UserEntity>, SoftDeleteRepository {
     @EntityGraph(value = "full")
     Optional<UserEntity> findByEmailAndDeletedIsFalse(String email);
+
     @EntityGraph(value = "full")
     Optional<UserEntity> findByIdAndDeletedIsFalse(Long id);
+
     boolean existsByEmailAndDeletedIsFalse(String email);
+
+    boolean existsByEmail(String email);
+
+    Optional<UserEntity> findByEmail(String email);
 
     @Query("SELECT u.email FROM UserEntity u " +
             "WHERE u.id = :id " +
             "AND u.deleted = false ")
     String findEmailById(Long id);
+
+    @Query("SELECT u.employeeInfo FROM UserEntity u " +
+            "WHERE u.id = :id " +
+            "AND u.deleted = false ")
+    EmployeeInfo findEmployeeInfoById(Long id);
+
+    @Query("SELECT u.employeeInfo FROM UserEntity u " +
+            "WHERE u.deleted = false ")
+    List<EmployeeInfo> findAllEmployeeInfo();
+
+    UserEntity findById(int id);
 
     @Query("SELECT u FROM UserEntity u " +
             "JOIN u.roles AS r " +
@@ -40,12 +57,25 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     List<UserEntity> findAllByDeletedIsFalseOrderById();
 
+    List<UserEntity> findAllByDeletedIsFalse();
+
     @Query("SELECT u.email FROM UserEntity u " +
             "WHERE u.deleted = false ")
     List<String> findAllEmailsByDeletedIsFalse();
+
+    UserEntity findByIdAndDeletedIsFalse(long id);
+
 
     @Query("SELECT u.email FROM UserEntity u " +
             "WHERE u.deleted = false " +
             "AND u.department = null ")
     List<String> findAllEmailsByDeletedIsFalseAndDepartmentIsNull();
+
+    @Query("SELECT u.id FROM UserEntity u " +
+            "WHERE u.email = :email")
+    Optional<Long> findIdByEmail(@Param("email") String email);
+
+    @Query("SELECT u.name FROM UserEntity u " +
+            "WHERE u.email = :email ")
+    Optional<String> findNameByEmail(@Param("email") String email);
 }

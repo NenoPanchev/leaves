@@ -2,30 +2,47 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @NamedEntityGraph(
         name = "full",
         attributeNodes = {
                 @NamedAttributeNode("roles"),
-                @NamedAttributeNode("department")
+                @NamedAttributeNode("department"),
         }
 )
-
+@AttributeOverrides(
+        {
+                @AttributeOverride(name = "id", column = @Column(name = "id"))
+        }
+)
 @Entity
-@Table(name = "users")
-public class UserEntity extends BaseEntity{
+@Table(name = "users", schema = "public")
+public class UserEntity extends BaseEntity<UserDto> {
+    @Column(name = "name")
     private String name;
+    @Column(name = "email")
     private String email;
+    @Column(nullable = false, name = "password")
     private String password;
+    @ManyToOne(cascade = {CascadeType.PERSIST})
+    @JoinColumn(name = "department_id")
     private DepartmentEntity department;
+    @ManyToMany
     private List<RoleEntity> roles;
+
+
+    @OneToOne(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
+    @JoinColumn(name = "employee_info_id")
+    private EmployeeInfo employeeInfo;
+
+
+    @OneToOne(fetch = FetchType.EAGER,mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PasswordResetToken token;
 
     public UserEntity() {
         this.roles = new ArrayList<>();
@@ -41,7 +58,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @Column(nullable = false)
+
     public String getPassword() {
         return password;
     }
@@ -51,7 +68,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @ManyToMany
+
     public List<RoleEntity> getRoles() {
         return roles;
     }
@@ -62,7 +79,6 @@ public class UserEntity extends BaseEntity{
     }
 
 
-    @ManyToOne
     public DepartmentEntity getDepartment() {
         return department;
     }
@@ -72,7 +88,7 @@ public class UserEntity extends BaseEntity{
         return this;
     }
 
-    @Column
+
     public String getName() {
         return name;
     }
@@ -81,6 +97,7 @@ public class UserEntity extends BaseEntity{
         this.name = name;
     }
 
+    @Override
     public void toDto(UserDto dto) {
         if (dto == null) {
             return;
@@ -102,8 +119,11 @@ public class UserEntity extends BaseEntity{
             roleDtoList.add(roleDto);
         }
         dto.setRoles(roleDtoList);
+
+        dto.setEmployeeInfo(this.employeeInfo.toDto());
     }
 
+    @Override
     public void toEntity(UserDto dto) {
         if (dto == null) {
             return;
@@ -116,5 +136,39 @@ public class UserEntity extends BaseEntity{
 
     public void removeRole(RoleEntity role) {
         this.roles.remove(role);
+    }
+
+    public PasswordResetToken getToken() {
+        return token;
+    }
+
+    public void setToken(PasswordResetToken token) {
+        if (this.token != null) {
+            this.getToken().dismissUser();
+        }
+        this.token = token;
+    }
+
+
+    public EmployeeInfo getEmployeeInfo() {
+        return employeeInfo;
+    }
+
+    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
+        this.employeeInfo = employeeInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), email);
     }
 }

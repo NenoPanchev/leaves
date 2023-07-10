@@ -9,16 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("test")
 class PermissionServiceImplTest {
     private PermissionEntity read, write, delete;
     private PermissionService serviceToTest;
@@ -74,7 +80,7 @@ class PermissionServiceImplTest {
         when(mockPermissionRepository.findAllByNameInAndDeletedIsFalse(names))
                 .thenReturn(expected);
 
-        List<PermissionEntity> actual =  serviceToTest
+        List<PermissionEntity> actual = serviceToTest
                 .findAllByPermissionNameIn(new ArrayList<>(names));
 
         assertEquals(expected.size(), actual.size());

@@ -3,9 +3,11 @@ package com.example.leaves.model.payload.response;
 import java.util.List;
 
 public class AuthenticationResponse {
+    private final String jwt;
+    private Long id;
+    private String name;
     private String email;
     private List<String> authorities;
-    private final String jwt;
 
     public AuthenticationResponse(String jwt) {
         this.jwt = jwt;
@@ -29,5 +31,22 @@ public class AuthenticationResponse {
 
     public void setAuthorities(List<String> authorities) {
         this.authorities = authorities;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public AuthenticationResponse setName(String name) {
+        this.name = name;
+        return this;
     }
 }
