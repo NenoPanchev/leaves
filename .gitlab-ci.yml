@@ -53,7 +53,7 @@ build-image-and-push:
         TAG="$CI_COMMIT_REF_NAME"
       fi
       docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
-      docker login --password-stdin --username "" --password "" ${REGISTRY_IP}:5000
+      echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
       docker push ${REGISTRY_IP}/vacation_management_service:$TAG
   rules:
     - exists:
