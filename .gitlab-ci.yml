@@ -52,8 +52,8 @@ build-image-and-push:
       else
         TAG="$CI_COMMIT_REF_NAME"
       fi
-      docker build -t ${REGISTRY_IP}:5000/vacation_management_service:$TAG .
+      docker build -t http://${REGISTRY_IP}:5000/vacation_management_service:$TAG .
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
-      docker push ${REGISTRY_IP}:5000/vacation_management_service:$TAG
+      docker push http://${REGISTRY_IP}:5000/vacation_management_service:$TAG
   rules:
     - exists:
