@@ -54,9 +54,9 @@ build-image-and-push:
       fi
       mkdir -p /etc/docker
       touch /etc/docker/daemon.json
-      echo '{ "insecure-registries": ["192.168.20.94:5000"] }' | cat /etc/docker/daemon.json
-      docker build -t ${REGISTRY_IP}:5000/vacation_management_service:$TAG .
+      echo '{ "insecure-registries": ["192.168.20.94:443"] }' | cat /etc/docker/daemon.json
+      docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
-      docker push ${REGISTRY_IP}:5000/vacation_management_service:$TAG
+      docker push ${REGISTRY_IP}/vacation_management_service:$TAG
   rules:
     - exists:
