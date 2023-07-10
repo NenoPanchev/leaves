@@ -55,7 +55,7 @@ build-image-and-push:
       mkdir -p /etc/docker
       touch /etc/docker/daemon.json
       echo '{ "insecure-registries": ["192.168.20.94:5000"] }' | cat /etc/docker/daemon.json
-      systemd restart docker
+      restart docker
       docker build -t http://${REGISTRY_IP}:5000/vacation_management_service:$TAG .
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
       docker push http://${REGISTRY_IP}:5000/vacation_management_service:$TAG
