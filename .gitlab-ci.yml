@@ -40,6 +40,8 @@ sonarqube-check:
 
 build-image-and-push:
   stage: push
+  services:
+    - docker:dind
   variables:
     REGISTRY_IP: 192.168.20.94
   script:
