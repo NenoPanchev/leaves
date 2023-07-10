@@ -43,12 +43,13 @@ build-image-and-push:
   variables:
     REGISTRY_IP: 192.168.20.94
   script:
-    - if [[ "$CI_COMMIT_BRANCH" == "master" ]]; then
-        TAG="latest";
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" == "master" ]]; then
+        TAG="latest"
       else
-        TAG="$CI_COMMIT_REF_NAME";
+        TAG="$CI_COMMIT_REF_NAME"
       fi
-    - docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
-    - docker push ${REGISTRY_IP}/vacation_management_service:$TAG
+      docker build -t ${REGISTRY_IP}/vacation_management_service:$TAG .
+      docker push ${REGISTRY_IP}/vacation_management_service:$TAG
   rules:
-    - exists
+    - exists:
