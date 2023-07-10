@@ -55,6 +55,7 @@ build-image-and-push:
       # mkdir -p /etc/docker
       # touch /etc/docker/daemon.json
       echo "192.168.20.94 zunregistry.com" >> /etc/hosts
+      ping -c 4 zunregistry.com
       docker build -t vacation_management_service:$TAG .
       docker tag vacation_management_service:$TAG zunregistry.com/vacation_management_service:$TAG
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
