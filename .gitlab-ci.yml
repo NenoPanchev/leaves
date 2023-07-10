@@ -52,6 +52,8 @@ build-image-and-push:
       else
         TAG="$CI_COMMIT_REF_NAME"
       fi
+      echo '{ "insecure-registries": ["192.168.20.94:5000"] }' | sudo tee /etc/docker/daemon.json
+      sudo systemctl restart docker
       docker build -t http://${REGISTRY_IP}:5000/vacation_management_service:$TAG .
       # echo "" | docker login --username _ --password-stdin --password "" ${REGISTRY_IP}:5000
       docker push http://${REGISTRY_IP}:5000/vacation_management_service:$TAG
