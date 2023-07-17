@@ -9,6 +9,9 @@ build-job:       # This job runs in the build stage, which runs first.
   stage: build
   script:
     - mvn compile
+  artifacts:
+    paths:
+      - target/
 
 sonarqube-check:
   stage: sonar
@@ -23,6 +26,8 @@ sonarqube-check:
     - mvn verify sonar:sonar -DDATABASE_NAME=${DATABASE_NAME} -DPOSTGRES_PASSWORD=${POSTGRES_PASSWORD} -DHOST_ADDRESS=${HOST_ADDRESS} -DskipTests -Dsonar.projectKey=lightsoftbulgaria_vacation-management-service_AYlJxQZfX5c1-Q-2oyTA
 
   allow_failure: true
+  dependencies:
+    - build-job
 
 build-image-and-push:
   stage: push
