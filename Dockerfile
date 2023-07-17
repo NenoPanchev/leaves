@@ -5,14 +5,15 @@ FROM amazoncorretto:8
 WORKDIR /app
 
 # Copy the application JAR file to the container
-#COPY leaves-0.0.1-SNAPSHOT.jar .
+COPY target/leaves-*.jar /app.jar
 
 # Expose the port used by the Java application (if applicable)
-EXPOSE 8080
+EXPOSE 80
 
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://db_host:5432/leaves_db
 ENV SPRING_DATASOURCE_USERNAME=postgres
 ENV SPRING_DATASOURCE_PASSWORD=1234
+ENV SERVER_PORT=80
 
 # Run the Java application
-CMD ["java", "-jar", "leaves-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "app.jar"]
