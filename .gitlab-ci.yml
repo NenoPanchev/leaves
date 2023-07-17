@@ -11,7 +11,7 @@ build-job:       # This job runs in the build stage, which runs first.
     - mvn clean install -DskipTests
   artifacts:
     paths:
-      - target/
+      - target/leaves-*.jar
 
 sonarqube-check:
   stage: sonar
