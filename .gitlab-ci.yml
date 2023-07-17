@@ -49,3 +49,5 @@ build-image-and-push:
       docker push docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
   rules:
     - exists:
+  dependencies:
+    - "build-job"
