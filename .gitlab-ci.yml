@@ -44,11 +44,9 @@ build-image-and-push:
       docker tag vacation_management_service:$TAG docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
       docker push docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
   rules:
-    - script:
-        - '[ -n "$CI_COMMIT_TAG" ] || [ "$CI_COMMIT_REF_NAME" == "master" ]'
+    - if: '$CI_COMMIT_REF_NAME == "master" || $CI_COMMIT_TAG'
       when: always
-    - exists:
-        - $CI_COMMIT_REF_NAME
+    - if: '$CI_COMMIT_REF_NAME != "master"'
       when: manual
   dependencies:
     - build
