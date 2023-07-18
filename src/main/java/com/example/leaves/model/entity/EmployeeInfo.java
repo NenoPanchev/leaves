@@ -18,7 +18,7 @@ import java.util.*;
         name = "fullInfo",
         attributeNodes = {
                 @NamedAttributeNode("employeeType"),
-                @NamedAttributeNode("leaveRequests")
+                @NamedAttributeNode("requests")
         }
 )
 @Entity
@@ -48,7 +48,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @Column(name = "position")
     private String position;
     @OneToMany(mappedBy = "employee")
-    private Set<LeaveRequest> leaveRequests;
+    private Set<RequestEntity> requests;
 
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
@@ -117,11 +117,11 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         this.currentYearDaysLeave = currentYearDaysLeave;
     }
 
-    public void removeRequest(LeaveRequest leaveRequest) {
-        if (leaveRequests.contains(leaveRequest)) {
-            leaveRequests.remove(leaveRequest);
+    public void removeRequest(RequestEntity request) {
+        if (requests.contains(request)) {
+            requests.remove(request);
         } else {
-            throw new EntityNotFoundException("request", leaveRequest.getId());
+            throw new EntityNotFoundException("request", request.getId());
         }
     }
 
@@ -129,8 +129,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return this.getDaysLeave() - days >= 0 && days > 0;
     }
 
-    public Set<LeaveRequest> getRequests() {
-        return leaveRequests;
+    public Set<RequestEntity> getRequests() {
+        return requests;
     }
 
     public TypeEmployee getEmployeeType() {
@@ -191,12 +191,24 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         if (!super.equals(o)) return false;
         EmployeeInfo that = (EmployeeInfo) o;
         return carryoverDaysLeave == that.carryoverDaysLeave && currentYearDaysLeave == that.currentYearDaysLeave && Objects.equals(employeeType, that.employeeType)
-                && Objects.equals(contractStartDate, that.contractStartDate) && Objects.equals(leaveRequests, that.leaveRequests) && Objects.equals(userInfo, that.userInfo)
+                && Objects.equals(contractStartDate, that.contractStartDate) && Objects.equals(requests, that.requests) && Objects.equals(userInfo, that.userInfo)
                 && Objects.equals(contracts, that.contracts) && Objects.equals(history, that.history);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), employeeType, carryoverDaysLeave, currentYearDaysLeave, contractStartDate, leaveRequests, userInfo, contracts, history);
+        return Objects.hash(super.hashCode(), employeeType, carryoverDaysLeave, currentYearDaysLeave, contractStartDate, requests, userInfo, contracts, history);
+    }
+
+    @Override
+    public String toString() {
+        return "EmployeeInfo{" +
+                "employeeType=" + employeeType +
+                ", carryoverDaysLeave=" + carryoverDaysLeave +
+                ", currentYearDaysLeave=" + currentYearDaysLeave +
+                ", contractStartDate=" + contractStartDate +
+                ", contracts=" + contracts +
+                ", history=" + history +
+                '}';
     }
 }

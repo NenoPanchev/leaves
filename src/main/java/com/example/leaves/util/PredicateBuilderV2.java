@@ -1,5 +1,7 @@
 package com.example.leaves.util;
 
+import com.example.leaves.model.entity.enums.RequestTypeEnum;
+
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -55,6 +57,16 @@ public class PredicateBuilderV2<ENTITY> {
     public <T> PredicateBuilderV2<?> equal(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
             this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilderV2<?> likeRequestTypeEnum(final SingularAttribute<?, T> attribute, final String value) {
+        if (value != null) {
+            Expression<RequestTypeEnum> requestTypeEnumExpression = this.root.get((SingularAttribute<? super ENTITY, T>) attribute).as(RequestTypeEnum.class);
+//            String requestTypeName = requestTypeEnumExpression.getJavaType().getName();
+            Expression<String> requestTypeName = requestTypeEnumExpression.as(String.class);
+            this.predicates.add(builder.like(requestTypeName, "%" + value.toUpperCase().trim() + "%"));
         }
         return this;
     }

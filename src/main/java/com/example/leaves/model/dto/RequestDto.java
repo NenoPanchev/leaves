@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
 
-public class LeaveRequestDto extends BaseDto {
+public class RequestDto extends BaseDto {
+    private String requestType;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate startDate;
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -64,5 +65,13 @@ public class LeaveRequestDto extends BaseDto {
 
     public int getDaysRequested() {
         return DatesUtil.countBusinessDaysBetween(startDate, endDate).size();
+    }
+
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
     }
 }

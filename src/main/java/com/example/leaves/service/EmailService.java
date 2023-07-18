@@ -1,6 +1,6 @@
 package com.example.leaves.service;
 
-import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.RequestEntity;
 
 import javax.mail.MessagingException;
 
@@ -16,7 +16,7 @@ public interface EmailService {
     void sendMailToNotifyAboutNewRequest(String recipientName,
                                          String recipientEmail,
                                          String subject,
-                                         LeaveRequest request) throws MessagingException;
+                                         RequestEntity request) throws MessagingException;
 
     void sendChangePasswordToken(
             final String recipientName,

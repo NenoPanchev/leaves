@@ -5,14 +5,15 @@ import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
-import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.model.entity.*;
-import com.example.leaves.repository.LeaveRequestRepository;
+import com.example.leaves.model.entity.enums.RequestTypeEnum;
+import com.example.leaves.repository.RequestRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.EmailService;
-import com.example.leaves.service.LeaveRequestService;
+import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
-import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.service.filter.RequestFilter;
 import com.example.leaves.util.DatesUtil;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
@@ -35,32 +36,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class LeaveRequestServiceImpl implements LeaveRequestService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LeaveRequestServiceImpl.class);
+public class RequestServiceImpl implements RequestService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestServiceImpl.class);
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
-    public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
+    public static final String APPROVE_REQUESTEntity_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     private final EmailService emailService;
     private final UserRepository employeeRepository;
-    private final LeaveRequestRepository leaveRequestRepository;
+    private final RequestRepository requestRepository;
     private final UserService userService;
 
 
     @Autowired
-    public LeaveRequestServiceImpl(UserRepository employeeRepository,
-                                   LeaveRequestRepository leaveRequestRepository,
-                                   @Lazy UserService userService,
-                                   EmailService emailService) {
+    public RequestServiceImpl(UserRepository employeeRepository,
+                              RequestRepository requestRepository,
+                              @Lazy UserService userService,
+                              EmailService emailService) {
 
         this.employeeRepository = employeeRepository;
-        this.leaveRequestRepository = leaveRequestRepository;
+        this.requestRepository = requestRepository;
         this.userService = userService;
         this.emailService = emailService;
     }
 
 
-    private LeaveRequest addRequestIn(EmployeeInfo employee, LeaveRequestDto leaveRequestDto) {
-        LeaveRequest request = new LeaveRequest();
-        request.toEntity(leaveRequestDto);
+    private RequestEntity addRequestIn(EmployeeInfo employee, RequestDto requestDto) {
+        RequestEntity request = new RequestEntity();
+        request.toEntity(requestDto);
         request.setEmployee(employee);
         //TODO UNCOMMENT WHEN EMAIL ACCOUNT READY
 
@@ -69,10 +70,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 //        executor.execute(() -> sendNotificationEmailToAdmins(request));
 
 //        sendNotificationEmailToAdmins(request);
-        return leaveRequestRepository.save(request);
+        return requestRepository.save(request);
     }
 
-    private void sendNotificationEmailToAdmins(LeaveRequest request) {
+    private void sendNotificationEmailToAdmins(RequestEntity request) {
         userService.getAllAdmins().forEach(
                 (admin -> {
 
@@ -90,32 +91,35 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public LeaveRequest addRequest(LeaveRequestDto leaveRequestDto) {
+    @Transactional
+    public RequestEntity addRequest(RequestDto requestDto) {
         UserEntity employee = getCurrentUser();
-        addRequestValidation(leaveRequestDto, employee);
-        return addRequestIn(employee.getEmployeeInfo(), leaveRequestDto);
+        addRequestValidation(requestDto, employee);
+        return addRequestIn(employee.getEmployeeInfo(), requestDto);
 
     }
 
-    private void addRequestValidation(LeaveRequestDto leaveRequestDto, UserEntity employee) {
-        LeaveRequest request = new LeaveRequest();
-        request.toEntity(leaveRequestDto);
-        checkIfDateBeforeToday(leaveRequestDto);
-        checkIfEmployeeHasEnoughDaysPaidLeave(employee, request);
-        sameDates(leaveRequestDto, employee);
-        requestWithDatesBetweenArgDates(leaveRequestDto, employee);
-        requestDatesBetweenActualDates(leaveRequestDto, employee);
-        dateArgBetween(leaveRequestDto, employee);
+    private void addRequestValidation(RequestDto requestDto, UserEntity employee) {
+        RequestEntity request = new RequestEntity();
+        request.toEntity(requestDto);
+        checkIfDateBeforeToday(requestDto);
+        if (isLeaveRequest(requestDto.getRequestType())) {
+            checkIfEmployeeHasEnoughDaysPaidLeave(employee, request);
+        }
+        sameDates(requestDto, employee);
+        requestWithDatesBetweenArgDates(requestDto, employee);
+        requestDatesBetweenActualDates(requestDto, employee);
+        dateArgBetween(requestDto, employee);
     }
 
-    private void checkIfDateBeforeToday(LeaveRequestDto request) {
+    private void checkIfDateBeforeToday(RequestDto request) {
         if (request.getStartDate().isBefore(LocalDate.now())) {
             throw new PaidleaveNotEnoughException(
                     String.format("%s@%s", request.getStartDate(), LocalDate.now()), "Add");
         }
     }
 
-    private void checkIfEmployeeHasEnoughDaysPaidLeave(UserEntity employee, LeaveRequest request) {
+    private void checkIfEmployeeHasEnoughDaysPaidLeave(UserEntity employee, RequestEntity request) {
         if (!(employee.getEmployeeInfo().checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
             throw new PaidleaveNotEnoughException(
                     String.format("%s@%s", request.getDaysRequested(), employee.getEmployeeInfo().getDaysLeave())
@@ -123,56 +127,56 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
     }
 
-    private void sameDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
-        boolean exists = leaveRequestRepository.existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(
-                leaveRequestDto.getStartDate(),
+    private void sameDates(RequestDto requestDto, UserEntity employee) {
+        boolean exists = requestRepository.existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(
+                requestDto.getStartDate(),
                 employee.getEmployeeInfo(),
-                leaveRequestDto.getEndDate());
+                requestDto.getEndDate());
         if (exists) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
-                    , leaveRequestDto.getStartDate()
-                    , leaveRequestDto.getEndDate()), "Add");
+                    , requestDto.getStartDate()
+                    , requestDto.getEndDate()), "Add");
         }
     }
 
-    private void requestWithDatesBetweenArgDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
-        boolean between = leaveRequestRepository.exists(
-                getRequestWithDatesBetweenArgDates(leaveRequestDto.getStartDate(),
-                        leaveRequestDto.getEndDate(),
+    private void requestWithDatesBetweenArgDates(RequestDto requestDto, UserEntity employee) {
+        boolean between = requestRepository.exists(
+                getRequestWithDatesBetweenArgDates(requestDto.getStartDate(),
+                        requestDto.getEndDate(),
                         employee.getEmployeeInfo()));
         if (between) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
-                    , leaveRequestDto.getStartDate()
-                    , leaveRequestDto.getEndDate()), "Add");
+                    , requestDto.getStartDate()
+                    , requestDto.getEndDate()), "Add");
         }
     }
 
-    private void requestDatesBetweenActualDates(LeaveRequestDto leaveRequestDto, UserEntity employee) {
-        boolean outside = leaveRequestRepository.exists(
-                getRequestWithArgDatesBetweenActualDates(leaveRequestDto.getStartDate(),
-                        leaveRequestDto.getEndDate(),
+    private void requestDatesBetweenActualDates(RequestDto requestDto, UserEntity employee) {
+        boolean outside = requestRepository.exists(
+                getRequestWithArgDatesBetweenActualDates(requestDto.getStartDate(),
+                        requestDto.getEndDate(),
                         employee.getEmployeeInfo()));
         if (outside) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
-                    , leaveRequestDto.getStartDate()
-                    , leaveRequestDto.getEndDate()), "Add");
+                    , requestDto.getStartDate()
+                    , requestDto.getEndDate()), "Add");
         }
     }
 
-    private void dateArgBetween(LeaveRequestDto leaveRequestDto, UserEntity employee) {
-        boolean dateArgBetween = leaveRequestRepository.exists(
-                getRequestWithDatesWrappingArgDate(leaveRequestDto.getStartDate(), employee.getEmployeeInfo()))
-                || leaveRequestRepository.exists(
-                getRequestWithDatesWrappingArgDate(leaveRequestDto.getEndDate(), employee.getEmployeeInfo()));
+    private void dateArgBetween(RequestDto requestDto, UserEntity employee) {
+        boolean dateArgBetween = requestRepository.exists(
+                getRequestWithDatesWrappingArgDate(requestDto.getStartDate(), employee.getEmployeeInfo()))
+                || requestRepository.exists(
+                getRequestWithDatesWrappingArgDate(requestDto.getEndDate(), employee.getEmployeeInfo()));
         if (dateArgBetween) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
-                    , leaveRequestDto.getStartDate()
-                    , leaveRequestDto.getEndDate()), "Add");
+                    , requestDto.getStartDate()
+                    , requestDto.getEndDate()), "Add");
         }
-        if (leaveRequestDto.getEndDate().isBefore(leaveRequestDto.getStartDate())) {
+        if (requestDto.getEndDate().isBefore(requestDto.getStartDate())) {
             throw new DuplicateEntityException(String.format(SEND_DATES_AND_SPLIT_IN_REACT
-                    , leaveRequestDto.getStartDate()
-                    , leaveRequestDto.getEndDate()), "Add");
+                    , requestDto.getStartDate()
+                    , requestDto.getEndDate()), "Add");
         }
     }
 
@@ -182,29 +186,31 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     @Transactional
-    public LeaveRequest approveRequest(long id, LeaveRequestDto leaveRequestDto) {
+    public RequestEntity approveRequest(long id, RequestDto requestDto) {
 
-        LeaveRequest leaveRequest = getById(id);
-        if (leaveRequest.getApproved() == null) {
-            UserEntity userEntity = leaveRequest.getEmployee().getUserInfo();
+        RequestEntity request = getById(id);
+        if (request.getApproved() == null) {
+            UserEntity userEntity = request.getEmployee().getUserInfo();
 
             if (userEntity == null) {
                 throw new EntityNotFoundException("User  not found ", 1);
             }
 
-            if (leaveRequestDto.getApprovedStartDate().isBefore(leaveRequest.getStartDate())
-                    || leaveRequestDto.getApprovedStartDate().isAfter(leaveRequest.getEndDate())) {
-                throw new IllegalArgumentException(APPROVE_REQUEST_EXCEPTION_MSG);
+            if (requestDto.getApprovedStartDate().isBefore(request.getStartDate())
+                    || requestDto.getApprovedStartDate().isAfter(request.getEndDate())) {
+                throw new IllegalArgumentException(APPROVE_REQUESTEntity_EXCEPTION_MSG);
             }
 
-            leaveRequest.setApprovedEndDate(leaveRequestDto.getApprovedEndDate());
-            leaveRequest.setApprovedStartDate(leaveRequestDto.getApprovedStartDate());
+            request.setApprovedEndDate(requestDto.getApprovedEndDate());
+            request.setApprovedStartDate(requestDto.getApprovedStartDate());
 
-            EmployeeInfo e = userEntity.getEmployeeInfo();
-            e.subtractFromAnnualPaidLeave(leaveRequest.getDaysRequested());
-            leaveRequest.setApproved(Boolean.TRUE);
+            if (isLeaveRequest(requestDto.getRequestType())) {
+                EmployeeInfo e = userEntity.getEmployeeInfo();
+                e.subtractFromAnnualPaidLeave(request.getDaysRequested());
+            }
+            request.setApproved(Boolean.TRUE);
             employeeRepository.save(userEntity);
-            return leaveRequest;
+            return request;
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
         }
@@ -214,18 +220,18 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     @Override
     @Transactional
-    public LeaveRequest disapproveRequest(long id) {
-        LeaveRequest leaveRequest = getById(id);
-        if (leaveRequest.getApproved() == null) {
-            leaveRequest.setApproved(Boolean.FALSE);
-            return leaveRequestRepository.save(leaveRequest);
+    public RequestEntity disapproveRequest(long id) {
+        RequestEntity request = getById(id);
+        if (request.getApproved() == null) {
+            request.setApproved(Boolean.FALSE);
+            return requestRepository.save(request);
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
         }
     }
 
     @Override
-    public List<LeaveRequestDto> getAllFilter(LeaveRequestFilter filter) {
+    public List<RequestDto> getAllFilter(RequestFilter filter) {
         switch (filter.getOperation()) {
             case GREATER_THAN:
                 return getLeaveRequestDtoFilteredGraterThan(filter).getContent();
@@ -238,73 +244,73 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public List<LeaveRequestDto> getAll() {
-        List<LeaveRequestDto> list = new ArrayList<>();
-        leaveRequestRepository.findAllByDeletedIsFalse().forEach(e -> list.add(e.toDto()));
+    public List<RequestDto> getAll() {
+        List<RequestDto> list = new ArrayList<>();
+        requestRepository.findAllByDeletedIsFalse().forEach(e -> list.add(e.toDto()));
         return list;
     }
 
     @Override
-    public LeaveRequest getById(long id) {
-        return leaveRequestRepository.findById(id);
+    public RequestEntity getById(long id) {
+        return requestRepository.findById(id);
     }
 
     @Override
     @Transactional
     public void delete(long id) {
-        leaveRequestRepository.markAsDeleted(id);
+        requestRepository.markAsDeleted(id);
     }
 
     @Override
     @Transactional
     public void unMarkAsDelete(long id) {
-        leaveRequestRepository.unMarkAsRemoved(id);
+        requestRepository.unMarkAsRemoved(id);
     }
 
     @Override
     @Transactional
-    public LeaveRequestDto updateEndDate(LeaveRequestDto leaveRequestDto) {
+    public RequestDto updateEndDate(RequestDto requestDto) {
         UserEntity employee = getCurrentUser();
-        LeaveRequest sameStartDate = leaveRequestRepository.findFirstByStartDateAndEmployeeAndDeletedIsFalse
-                (leaveRequestDto.getStartDate(), employee.getEmployeeInfo());
+        RequestEntity sameStartDate = requestRepository.findFirstByStartDateAndEmployeeAndDeletedIsFalse
+                (requestDto.getStartDate(), employee.getEmployeeInfo());
 
-        sameStartDate.setEndDate(leaveRequestDto.getEndDate());
+        sameStartDate.setEndDate(requestDto.getEndDate());
 
-        return leaveRequestRepository.save(sameStartDate).toDto();
+        return requestRepository.save(sameStartDate).toDto();
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByCurrentUser() {
-        List<LeaveRequestDto> list = new ArrayList<>();
+    public List<RequestDto> getAllByCurrentUser() {
+        List<RequestDto> list = new ArrayList<>();
         UserEntity user = getCurrentUser();
 
-        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        requestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByUserId(long id) {
-        List<LeaveRequestDto> list = new ArrayList<>();
+    public List<RequestDto> getAllByUserId(long id) {
+        List<RequestDto> list = new ArrayList<>();
         UserEntity user = userService.getUserById(id);
 
-        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        requestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
     @Override
-    public int getAllApprovedDaysInYearByEmployeeInfoId(int year, Long id) {
+    public int getAllApprovedLeaveDaysInYearByEmployeeInfoId(int year, Long id) {
         int daysSpentDuringYear = 0;
-        List<LeaveRequest> allApprovedInYear = leaveRequestRepository.findAllApprovedInYearByEmployeeInfoId(year, id);
-        for (LeaveRequest leaveRequest : allApprovedInYear) {
-            if (leaveRequest.getStartDate().getYear() == year - 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year - 1, 1, 1), leaveRequest.getEndDate());
+        List<RequestEntity> allApprovedInYear = requestRepository.findAllApprovedLeaveInYearByEmployeeInfoId(year, id);
+        for (RequestEntity request : allApprovedInYear) {
+            if (request.getStartDate().getYear() == year - 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year - 1, 1, 1), request.getEndDate());
                 daysSpentDuringYear += countOfBusinessDays.size();
             }
-            if (leaveRequest.getEndDate().getYear() == year + 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(leaveRequest.getStartDate(), LocalDate.of(year + 1, 12, 31));
+            if (request.getEndDate().getYear() == year + 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(request.getStartDate(), LocalDate.of(year + 1, 12, 31));
                 daysSpentDuringYear += countOfBusinessDays.size();
             }
-            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(leaveRequest.getStartDate(), leaveRequest.getEndDate());
+            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(request.getStartDate(), request.getEndDate());
             daysSpentDuringYear += localDates.size();
 
         }
@@ -312,7 +318,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     @Override
-    public Page<LeaveRequestDto> getLeaveRequestDtoFilteredPage(LeaveRequestFilter filter) {
+    public Page<RequestDto> getLeaveRequestDtoFilteredPage(RequestFilter filter) {
         switch (filter.getOperation()) {
             case GREATER_THAN:
                 return getLeaveRequestDtoFilteredGraterThan(filter);
@@ -325,66 +331,63 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
     }
 
-    public List<LeaveRequestDto> getAllByEmployeeId(long employeeId) {
-        List<LeaveRequestDto> list = new ArrayList<>();
+    public List<RequestDto> getAllByEmployeeId(long employeeId) {
+        List<RequestDto> list = new ArrayList<>();
         UserEntity user = employeeRepository
                 .findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("user not found"));
 
 
-        leaveRequestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
+        requestRepository.findAllByEmployeeAndDeletedIsFalse(user.getEmployeeInfo()).forEach(e -> list.add(e.toDto()));
         return list;
     }
 
-    private Page<LeaveRequestDto> getLeaveRequestDtoFilteredGraterThan(LeaveRequestFilter filter) {
+    private Page<RequestDto> getLeaveRequestDtoFilteredGraterThan(RequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        return leaveRequestRepository.findAll(getSpecificationGraterThanDates(filter)
-                .or(ifApprovedHasNullGraterThanDates(filter)), pageRequest).map(LeaveRequest::toDto);
+        return requestRepository.findAll(getSpecificationGraterThanDates(filter)
+                .or(ifApprovedHasNullGraterThanDates(filter)), pageRequest).map(RequestEntity::toDto);
     }
 
-    private Page<LeaveRequestDto> getLeaveRequestDtoFilteredLessThan(LeaveRequestFilter filter) {
+    private Page<RequestDto> getLeaveRequestDtoFilteredLessThan(RequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        return leaveRequestRepository.findAll(getSpecificationLessThanDates(filter)
+        return requestRepository.findAll(getSpecificationLessThanDates(filter)
                         .or(ifApprovedHasNullLessThanDates(filter)), pageRequest)
-                .map(LeaveRequest::toDto);
+                .map(RequestEntity::toDto);
 
     }
 
-    private Page<LeaveRequestDto> getLeaveRequestDtoFilteredRange(LeaveRequestFilter filter) {
+    private Page<RequestDto> getLeaveRequestDtoFilteredRange(RequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         if (filter.getEndDate().isEmpty())
         {
             //START DATE - START DATE RANGE
 
-            return leaveRequestRepository.findAll(getSpecificationStartDateRange(filter)
+            return requestRepository.findAll(getSpecificationStartDateRange(filter)
                             .or(ifApprovedHasNullStartDateRange(filter)), pageRequest)
-                    .map(LeaveRequest::toDto);
+                    .map(RequestEntity::toDto);
 
         } else if (filter.getStartDate().isEmpty()) {
 
             //END DATE - END DATE RANGE
-            return leaveRequestRepository.findAll(getSpecificationEndDateRange(filter)
+            return requestRepository.findAll(getSpecificationEndDateRange(filter)
                             .or(ifApprovedHasNullEndDateRange(filter)), pageRequest)
-                    .map(LeaveRequest::toDto);
+                    .map(RequestEntity::toDto);
         }
         else
         {
             //START DATE - END DATE RANGE
-            return leaveRequestRepository.findAll(getSpecificationRange(filter)
+            return requestRepository.findAll(getSpecificationRange(filter)
                             .or(ifApprovedHasNullRange(filter)), pageRequest)
-                    .map(LeaveRequest::toDto);
+                    .map(RequestEntity::toDto);
         }
-
-
-
     }
-    private Specification<LeaveRequest> getSpecificationStartDateRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> getSpecificationStartDateRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.startDate, filter.getStartDate().get(0))
-                    .lessThan(LeaveRequest_.startDate, filter.getStartDate().get(1))
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, filter.getStartDate().get(0))
+                    .lessThan(RequestEntity_.startDate, filter.getStartDate().get(1))
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -395,14 +398,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             return criteriaBuilder.and(predicates);
         };
     }
-    private Specification<LeaveRequest> ifApprovedHasNullStartDateRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNullStartDateRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.startDate, filter.getStartDate().get(0))
-                    .lessThan(LeaveRequest_.startDate, filter.getStartDate().get(1))
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, filter.getStartDate().get(0))
+                    .lessThan(RequestEntity_.startDate, filter.getStartDate().get(1))
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -414,13 +417,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         };
 
     }
-    private Specification<LeaveRequest> getSpecificationEndDateRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> getSpecificationEndDateRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.endDate, filter.getEndDate().get(0))
-                    .lessThan(LeaveRequest_.endDate, filter.getEndDate().get(1))
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.endDate, filter.getEndDate().get(0))
+                    .lessThan(RequestEntity_.endDate, filter.getEndDate().get(1))
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -431,14 +434,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             return criteriaBuilder.and(predicates);
         };
     }
-    private Specification<LeaveRequest> ifApprovedHasNullEndDateRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNullEndDateRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.endDate, filter.getEndDate().get(0))
-                    .lessThan(LeaveRequest_.endDate, filter.getEndDate().get(1))
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.endDate, filter.getEndDate().get(0))
+                    .lessThan(RequestEntity_.endDate, filter.getEndDate().get(1))
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -450,13 +453,13 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         };
 
     }
-    private Specification<LeaveRequest> getSpecificationRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> getSpecificationRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -467,14 +470,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             return criteriaBuilder.and(predicates);
         };
     }
-    private Specification<LeaveRequest> ifApprovedHasNullRange(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNullRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -487,14 +490,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    private Specification<LeaveRequest> getSpecificationLessThanDates(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> getSpecificationLessThanDates(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
-                    .lessThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .lessThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -506,16 +509,16 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         };
     }
 
-    private Specification<LeaveRequest> getRequestWithDatesBetweenArgDates(LocalDate startDate,
-                                                                           LocalDate endDate,
-                                                                           EmployeeInfo employee) {
+    private Specification<RequestEntity> getRequestWithDatesBetweenArgDates(LocalDate startDate,
+                                                                            LocalDate endDate,
+                                                                            EmployeeInfo employee) {
         if (startDate != null && endDate != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
                 Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
-                        .graterThan(LeaveRequest_.startDate, startDate)
-                        .lessThan(LeaveRequest_.endDate, endDate)
-                        .equalsField(LeaveRequest_.employee, employee)
+                        .graterThan(RequestEntity_.startDate, startDate)
+                        .lessThan(RequestEntity_.endDate, endDate)
+                        .equalsField(RequestEntity_.employee, employee)
                         .equalsField(BaseEntity_.deleted, false)
                         .build()
                         .toArray(new Predicate[0]);
@@ -528,8 +531,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    private Specification<LeaveRequest> getRequestWithDatesWrappingArgDate(LocalDate date,
-                                                                           EmployeeInfo employee) {
+    private Specification<RequestEntity> getRequestWithDatesWrappingArgDate(LocalDate date,
+                                                                            EmployeeInfo employee) {
         if (date != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
@@ -543,9 +546,9 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    private Specification<LeaveRequest> getRequestWithArgDatesBetweenActualDates(LocalDate startDate,
-                                                                                 LocalDate endDate,
-                                                                                 EmployeeInfo employee) {
+    private Specification<RequestEntity> getRequestWithArgDatesBetweenActualDates(LocalDate startDate,
+                                                                                  LocalDate endDate,
+                                                                                  EmployeeInfo employee) {
         if (startDate != null && endDate != null && employee != null) {
             return (root, query, criteriaBuilder) ->
             {
@@ -562,25 +565,25 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     private Predicate[] getPredicatesRequestWithArgDatesBetweenActualDates(LocalDate startDate,
                                                                            LocalDate endDate,
                                                                            EmployeeInfo employee,
-                                                                           Root<LeaveRequest> root,
+                                                                           Root<RequestEntity> root,
                                                                            CriteriaBuilder criteriaBuilder) {
         return new PredicateBuilderV2<>(root, criteriaBuilder)
-                .lessThan(LeaveRequest_.startDate, startDate)
-                .graterThan(LeaveRequest_.endDate, endDate)
-                .equalsField(LeaveRequest_.employee, employee)
+                .lessThan(RequestEntity_.startDate, startDate)
+                .graterThan(RequestEntity_.endDate, endDate)
+                .equalsField(RequestEntity_.employee, employee)
                 .equalsField(BaseEntity_.deleted, false)
                 .build()
                 .toArray(new Predicate[0]);
     }
 
-    public Specification<LeaveRequest> getSpecificationGraterThanDates(LeaveRequestFilter filter) {
+    public Specification<RequestEntity> getSpecificationGraterThanDates(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
-                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .graterThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .graterThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .graterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .greaterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -592,15 +595,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         };
     }
 
-    private Specification<LeaveRequest> ifApprovedHasNullGraterThanDates(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNullGraterThanDates(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
-                    .graterThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .graterThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .graterThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .graterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .graterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -613,15 +616,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    private Specification<LeaveRequest> ifApprovedHasNullLessThanDates(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNullLessThanDates(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
-                    .lessThan(LeaveRequest_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
-                    .lessThan(LeaveRequest_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .lessThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
+                    .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -634,20 +637,20 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    private Page<LeaveRequestDto> getLeaveRequestDtoFilteredEqual(LeaveRequestFilter filter) {
+    private Page<RequestDto> getLeaveRequestDtoFilteredEqual(RequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        return leaveRequestRepository.findAll(getSpecification(filter).or(ifApprovedHasNull(filter)), pageRequest).map(LeaveRequest::toDto);
+        return requestRepository.findAll(getSpecification(filter).or(ifApprovedHasNull(filter)), pageRequest).map(RequestEntity::toDto);
     }
 
-    private Specification<LeaveRequest> ifApprovedHasNull(LeaveRequestFilter filter) {
+    private Specification<RequestEntity> ifApprovedHasNull(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(BaseEntity_.id, filter.getId())
-                    .in(LeaveRequest_.startDate, filter.getStartDate())
-                    .in(LeaveRequest_.endDate, filter.getEndDate())
-                    .inWithNull(LeaveRequest_.approved, filter.getApproved())
+                    .in(RequestEntity_.startDate, filter.getStartDate())
+                    .in(RequestEntity_.endDate, filter.getEndDate())
+                    .inWithNull(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -660,14 +663,15 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     }
 
-    public Specification<LeaveRequest> getSpecification(LeaveRequestFilter filter) {
+    public Specification<RequestEntity> getSpecification(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(BaseEntity_.id, filter.getId())
-                    .in(LeaveRequest_.startDate, filter.getStartDate())
-                    .in(LeaveRequest_.endDate, filter.getEndDate())
-                    .in(LeaveRequest_.approved, filter.getApproved())
+                    .likeRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
+                    .in(RequestEntity_.startDate, filter.getStartDate())
+                    .in(RequestEntity_.endDate, filter.getEndDate())
+                    .in(RequestEntity_.approved, filter.getApproved())
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
@@ -679,4 +683,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         };
     }
 
+    private boolean isLeaveRequest(String requestType) {
+        return RequestTypeEnum.LEAVE.name().equals(requestType);
+    }
 }

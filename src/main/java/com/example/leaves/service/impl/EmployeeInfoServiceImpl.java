@@ -6,7 +6,7 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.payload.response.ContractBreakdown;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
@@ -49,7 +49,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final EmailService emailService;
     private final TypeEmployeeService typeService;
     private final EmployeeInfoRepository employeeInfoRepository;
-    private final LeaveRequestService leaveRequestService;
+    private final RequestService requestService;
     private final RoleService roleService;
     private final ContractService contractService;
     @Value("${allowed-leave-days-to-carry-over}")
@@ -58,14 +58,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Autowired
     public EmployeeInfoServiceImpl(UserRepository employeeRepository,
                                    EmployeeInfoRepository employeeInfoRepository, TypeEmployeeService typeService,
-                                   LeaveRequestService leaveRequestService,
+                                   RequestService requestService,
                                    UserService userService,
                                    RoleService roleService,
                                    EmailService emailService, ContractService contractService) {
         this.employeeRepository = employeeRepository;
         this.employeeInfoRepository = employeeInfoRepository;
         this.typeService = typeService;
-        this.leaveRequestService = leaveRequestService;
+        this.requestService = requestService;
         this.userService = userService;
         this.roleService = roleService;
         this.emailService = emailService;
@@ -120,21 +120,21 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         //Current user may not be the one that made the leave request
         UserEntity employee = userService.getCurrentUser();
 
-        LeaveRequest leaveRequest = leaveRequestService.getById(requestId);
-        UserEntity userOfRequest = leaveRequest.getEmployee().getUserInfo();
+        RequestEntity request = requestService.getById(requestId);
+        UserEntity userOfRequest = request.getEmployee().getUserInfo();
 
-        if (leaveRequest.getApproved() == null || !leaveRequest.getApproved()) {
-            throw new RequestNotApproved(leaveRequest.getId());
+        if (request.getApproved() == null || !request.getApproved()) {
+            throw new RequestNotApproved(request.getId());
         }
 
         if (!(employee.getRoles().contains(roleService.getRoleById(1L)) ||
-                employee.getRoles().contains(roleService.getRoleById(2L))) && (employee != leaveRequest.getEmployee().getUserInfo()
+                employee.getRoles().contains(roleService.getRoleById(2L))) && (employee != request.getEmployee().getUserInfo()
             )) {
                 throw new UnauthorizedException("You are not authorized for this operation");
 
         }
 
-        Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, leaveRequest, userOfRequest);
+        Map<String, String> words = setEmployeePersonalInfoMap(pdfRequestForm, request, userOfRequest);
 
         try {
             return PdfUtil.replaceWords(words);
@@ -144,7 +144,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     private Map<String, String> setEmployeePersonalInfoMap(PdfRequestForm pdfRequestForm,
-                                                           LeaveRequest leaveRequest,
+                                                           RequestEntity request,
                                                            UserEntity userOfRequest) {
         Map<String, String> words = new HashMap<>();
 
@@ -194,14 +194,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
         words.put("year", pdfRequestForm.getYear());
 
-        words.put("startDate", leaveRequest.getApprovedStartDate()
+        words.put("startDate", request.getApprovedStartDate()
                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
-        words.put("endDate", leaveRequest.getApprovedEndDate()
+        words.put("endDate", request.getApprovedEndDate()
                 .plusDays(1)
                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
-        words.put("daysNumber", String.valueOf(leaveRequest.getDaysRequested()));
+        words.put("daysNumber", String.valueOf(request.getDaysRequested()));
 
         return words;
     }
@@ -240,7 +240,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         int totalContractDays = calculateTotalContractDaysPerYear(employeeInfo.getContracts(), currentYear);
-        int spentDays = leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId());
+        int spentDays = requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId());
         return totalContractDays - spentDays;
     }
 
@@ -275,7 +275,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         int currentYear = LocalDate.now().getYear();
         try {
             employeeInfo.setCurrentYearDaysLeave(days);
-            employeeInfo.subtractFromAnnualPaidLeaveWithoutThrowing(leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
+            employeeInfo.subtractFromAnnualPaidLeaveWithoutThrowing(requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
             employeeInfo.subtractFromAnnualPaidLeaveWithoutThrowing(employeeInfo.getHistory().get(currentYear));
         } catch (PaidleaveNotEnoughException e) {
             throw new PaidleaveNotEnoughException("Paid leave not enough");
@@ -321,7 +321,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeInfo.setCurrentYearDaysLeave(calculateCurrentYearPaidLeave(employeeInfo));
         try {
             employeeInfo.subtractFromAnnualPaidLeave(currentYearUsedDays);
-            employeeInfo.subtractFromAnnualPaidLeave(leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
+            employeeInfo.subtractFromAnnualPaidLeave(requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(currentYear, employeeInfo.getId()));
         } catch (PaidleaveNotEnoughException e) {
             throw new PaidleaveNotEnoughException("Invalid days used history! There are negative numbers in the calculations.\n" +
                     "Reason: Used more days than available");
@@ -482,7 +482,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         contractBreakdownList.sort((a, b) -> b.getStartDate().compareTo(a.getStartDate()));
         report.setContractBreakdowns(contractBreakdownList);
         report.setYear(year);
-        int allApprovedDaysInYear = leaveRequestService.getAllApprovedDaysInYearByEmployeeInfoId(year, employeeInfo.getId());
+        int allApprovedDaysInYear = requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(year, employeeInfo.getId());
         int daysUsedFromHistory = employeeInfo.getHistory().get(year) != null ? employeeInfo.getHistory().get(year) : 0;
         report.setDaysUsed(allApprovedDaysInYear + daysUsedFromHistory);
 

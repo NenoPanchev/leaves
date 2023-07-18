@@ -1,6 +1,6 @@
 package com.example.leaves.service.impl;
 
-import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -52,7 +52,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendMailToNotifyAboutNewRequest(String recipientName,
                                                 String recipientEmail,
                                                 String subject,
-                                                LeaveRequest request) throws MessagingException {
+                                                RequestEntity request) throws MessagingException {
         String employeeName = request.getEmployee().getUserInfo().getName();
         String employeeEmail = request.getEmployee().getUserInfo().getEmail();
 

@@ -6,8 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-@EqualsAndHashCode
-public class LeaveRequestFilter extends BaseFilter {
+@EqualsAndHashCode(callSuper = false)
+public class RequestFilter extends BaseFilter {
+    private String requestType;
 
     private List<LocalDate> startDate;
 
@@ -37,5 +38,12 @@ public class LeaveRequestFilter extends BaseFilter {
 
     public void setApproved(List<Boolean> approved) {
         this.approved = approved;
+    }
+
+    public String getRequestType() {
+        return this.requestType;
+    }
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
     }
 }
