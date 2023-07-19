@@ -385,6 +385,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, filter.getStartDate().get(0))
                     .lessThan(RequestEntity_.startDate, filter.getStartDate().get(1))
                     .in(RequestEntity_.approved, filter.getApproved())
@@ -403,6 +404,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, filter.getStartDate().get(0))
                     .lessThan(RequestEntity_.startDate, filter.getStartDate().get(1))
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -421,6 +423,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.endDate, filter.getEndDate().get(0))
                     .lessThan(RequestEntity_.endDate, filter.getEndDate().get(1))
                     .in(RequestEntity_.approved, filter.getApproved())
@@ -439,6 +442,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.endDate, filter.getEndDate().get(0))
                     .lessThan(RequestEntity_.endDate, filter.getEndDate().get(1))
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -457,6 +461,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .in(RequestEntity_.approved, filter.getApproved())
@@ -475,6 +480,7 @@ public class RequestServiceImpl implements RequestService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -495,6 +501,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .lessThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .in(RequestEntity_.approved, filter.getApproved())
@@ -581,6 +588,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .graterThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .in(RequestEntity_.approved, filter.getApproved())
@@ -601,6 +609,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .graterThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .graterThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -622,6 +631,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .lessThan(BaseEntity_.id, ListHelper.getGreatestNum(filter.getId()))
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .lessThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -648,6 +658,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(BaseEntity_.id, filter.getId())
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .in(RequestEntity_.startDate, filter.getStartDate())
                     .in(RequestEntity_.endDate, filter.getEndDate())
                     .inWithNull(RequestEntity_.approved, filter.getApproved())
@@ -668,7 +679,7 @@ public class RequestServiceImpl implements RequestService {
         {
             Predicate[] predicates = new PredicateBuilderV2<>(root, criteriaBuilder)
                     .in(BaseEntity_.id, filter.getId())
-                    .likeRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
+                    .equalsRequestTypeEnum(RequestEntity_.requestType, filter.getRequestType())
                     .in(RequestEntity_.startDate, filter.getStartDate())
                     .in(RequestEntity_.endDate, filter.getEndDate())
                     .in(RequestEntity_.approved, filter.getApproved())
