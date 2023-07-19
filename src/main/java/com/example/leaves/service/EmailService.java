@@ -3,6 +3,7 @@ package com.example.leaves.service;
 import com.example.leaves.model.entity.RequestEntity;
 
 import javax.mail.MessagingException;
+import java.util.Collection;
 
 public interface EmailService {
 
@@ -22,4 +23,6 @@ public interface EmailService {
             final String recipientName,
             final String recipientEmail,
             String token) throws MessagingException;
+
+    void send(Collection<String> recipients, String subject, String text);
 }

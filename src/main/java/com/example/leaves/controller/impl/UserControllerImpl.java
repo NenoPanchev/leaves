@@ -195,7 +195,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public void notifyUsersOfTheirPaidLeave() {
-        employeeInfoService.notifyEmployeesOfTheirLeftPaidLeave();
+        employeeInfoService.notifyEmployeesOfTheirPaidLeaveLeft();
     }
 
     @Override

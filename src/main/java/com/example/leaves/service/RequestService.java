@@ -33,4 +33,6 @@ public interface RequestService {
     List<RequestDto> getAllByUserId(long id);
 
     int getAllApprovedLeaveDaysInYearByEmployeeInfoId(int year, Long id);
+
+    void notifyAccountingOfPaidLeaveUsed();
 }

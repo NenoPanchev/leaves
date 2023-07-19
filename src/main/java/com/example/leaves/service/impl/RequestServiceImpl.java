@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -32,14 +33,22 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
+import java.util.*;
+
+import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
 
 @Service
 public class RequestServiceImpl implements RequestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestServiceImpl.class);
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
     public static final String APPROVE_REQUESTEntity_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
+    public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван отпуск за месец %s както следва:\n";
+    public static final String MAIL_TO_ACCOUNTING_POSTFIX = "Поздрави,\nЕкипът на Лайт Софт България\n";
+    public static final String ACCOUNTING_EMAIL = "";
+    public static final String MONTHLY_PAID_LEAVE_REPORT_SUBJECT = "Месечен доклад за отпуски";
     private final EmailService emailService;
     private final UserRepository employeeRepository;
     private final RequestRepository requestRepository;
@@ -315,6 +324,30 @@ public class RequestServiceImpl implements RequestService {
 
         }
         return daysSpentDuringYear;
+    }
+
+    @Override
+    @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 8 1 * *}", zone = EUROPE_SOFIA)
+    public void notifyAccountingOfPaidLeaveUsed() {
+        LocalDate date = LocalDate.now().minusMonths(1);
+        int year = date.getYear();
+        int month = date.getMonthValue();
+        Map<String, Set<Integer>> employeesDaysUsed = new TreeMap<>();
+        List<RequestEntity> requests = requestRepository
+                .findAllApprovedLeaveRequestsInPreviousMonth(month, year);
+        requests
+                .forEach(request -> {
+                    String name = request.getEmployee().getUserInfo().getName();
+                    employeesDaysUsed.putIfAbsent(name, new TreeSet<>());
+                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request));
+                });
+        String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG"));
+        if (employeesDaysUsed.isEmpty()) {
+            LOGGER.info("Notifying cancelled. No paid leave days have been used in {}", monthName);
+            return;
+        }
+        String message = generateMessageForAccountingNote(employeesDaysUsed, monthName);
+        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
     }
 
     @Override
@@ -696,5 +729,32 @@ public class RequestServiceImpl implements RequestService {
 
     private boolean isLeaveRequest(String requestType) {
         return RequestTypeEnum.LEAVE.name().equals(requestType);
+    }
+
+    private Set<Integer> getDaysOfMonthUsed(RequestEntity request) {
+        Set<Integer> daysSet = new TreeSet<>();
+        LocalDate startDate = request.getApprovedStartDate();
+        Calendar calendarStartDay = Calendar.getInstance();
+        calendarStartDay.setTime(Date.from(startDate.atStartOfDay(ZoneId.of(EUROPE_SOFIA)).toInstant()));
+        int startDay = startDate.getDayOfMonth();
+        int maxDay = calendarStartDay.getActualMaximum(Calendar.DAY_OF_MONTH);
+        for (int day = startDay; day <= maxDay; day++) {
+            daysSet.add(day);
+        }
+        return daysSet;
+    }
+
+
+    private String generateMessageForAccountingNote(Map<String, Set<Integer>> employeesDaysUsed, String monthName) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(MAIL_TO_ACCOUNTING_GREETING_PREFIX, monthName));
+        sb.append(System.lineSeparator());
+        for (Map.Entry<String, Set<Integer>> entry : employeesDaysUsed.entrySet()) {
+            String stringJoin = String.join(",", entry.getValue().toString());
+            sb.append(String.format("%s: Общо (%d дни) - %s%n%n", entry.getKey(), entry.getValue().size(), stringJoin));
+        }
+        sb.append(System.lineSeparator());
+        sb.append(MAIL_TO_ACCOUNTING_POSTFIX);
+        return sb.toString();
     }
 }

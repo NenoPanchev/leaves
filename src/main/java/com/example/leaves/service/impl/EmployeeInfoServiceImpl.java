@@ -1,6 +1,7 @@
 package com.example.leaves.service.impl;
 
 
+import com.example.leaves.constants.GlobalConstants;
 import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
@@ -18,6 +19,7 @@ import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.leaves.constants.GlobalConstants.*;
 import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
@@ -213,7 +216,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 1 1 1 *")
+    @Scheduled(cron = "${cron-jobs.update.paid-leave:0 0 1 1 1 *}", zone = EUROPE_SOFIA)
     public void updatePaidLeaveAnnually() {
         employeeRepository
                 .findAllByDeletedIsFalse()
@@ -504,8 +507,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 16 18 10,11 ?")
-    public void notifyEmployeesOfTheirLeftPaidLeave() {
+    @Scheduled(cron = "${cron-jobs.notify.paid-leave.left:0 0 9 1 10,11 *}", zone = EUROPE_SOFIA)
+    public void notifyEmployeesOfTheirPaidLeaveLeft() {
 
         employeeRepository
                 .findAllByDeletedIsFalse()
@@ -524,7 +527,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     }
                 });
     }
-
 
     @Override
     public EmployeeInfoDto changeType(long employeeId, long typeId) {

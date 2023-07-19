@@ -1,5 +1,6 @@
 package com.example.leaves.util;
 
+import com.example.leaves.constants.GlobalConstants;
 import com.example.leaves.model.payload.response.Holiday;
 
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class HolidaysUtil {
     private String holidayApiBaseUrl;
     private List<LocalDate> holidays = new ArrayList<>();
 
-    @Scheduled(cron = "1 0 0 1 6 * ", zone = "EET")
+    @Scheduled(cron = "${cron-jobs.update.holidays:0 0 0 1 6 *}", zone = GlobalConstants.EUROPE_SOFIA)
     public void setHolidayDates() {
         List<LocalDate> holidayDates = new ArrayList<>();
         int currentYear = LocalDate.now().getYear();
