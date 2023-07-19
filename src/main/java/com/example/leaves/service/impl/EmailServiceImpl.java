@@ -1,28 +1,19 @@
 package com.example.leaves.service.impl;
 
-import com.example.leaves.constants.GlobalConstants;
 import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -38,7 +29,7 @@ public class EmailServiceImpl implements EmailService {
             "End date: %s\n";
     public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is:%s";
     public static final String CHANGE_PASSWORD_TOKEN_SUBJECT = "Password Change";
-    public static final String DEFAULT_FROM = "Лайт Софт България";
+    public static final String DEFAULT_FROM = "";
     private final JavaMailSender emailSender;
     private final TemplateEngine templateEngine;
 

@@ -44,7 +44,7 @@ import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
 public class RequestServiceImpl implements RequestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestServiceImpl.class);
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
-    public static final String APPROVE_REQUESTEntity_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
+    public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван отпуск за месец %s както следва:\n";
     public static final String MAIL_TO_ACCOUNTING_POSTFIX = "Поздрави,\nЕкипът на Лайт Софт България\n";
     public static final String ACCOUNTING_EMAIL = "";
@@ -207,7 +207,7 @@ public class RequestServiceImpl implements RequestService {
 
             if (requestDto.getApprovedStartDate().isBefore(request.getStartDate())
                     || requestDto.getApprovedStartDate().isAfter(request.getEndDate())) {
-                throw new IllegalArgumentException(APPROVE_REQUESTEntity_EXCEPTION_MSG);
+                throw new IllegalArgumentException(APPROVE_REQUEST_EXCEPTION_MSG);
             }
 
             request.setApprovedEndDate(requestDto.getApprovedEndDate());
@@ -341,13 +341,15 @@ public class RequestServiceImpl implements RequestService {
                     employeesDaysUsed.putIfAbsent(name, new TreeSet<>());
                     employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request));
                 });
-        String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG"));
+        String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG")).toLowerCase();
         if (employeesDaysUsed.isEmpty()) {
             LOGGER.info("Notifying cancelled. No paid leave days have been used in {}", monthName);
             return;
         }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName);
-        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
+//        TODO uncomment when email sender is configured.
+//        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
+        LOGGER.info("Monthly paid leave used notify to accounting sent.");
     }
 
     @Override
@@ -737,7 +739,10 @@ public class RequestServiceImpl implements RequestService {
         Calendar calendarStartDay = Calendar.getInstance();
         calendarStartDay.setTime(Date.from(startDate.atStartOfDay(ZoneId.of(EUROPE_SOFIA)).toInstant()));
         int startDay = startDate.getDayOfMonth();
-        int maxDay = calendarStartDay.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int maxDay = request.getApprovedEndDate().getDayOfMonth();
+        if (startDate.getMonthValue() != request.getApprovedEndDate().getMonthValue()) {
+            maxDay = calendarStartDay.getActualMaximum(Calendar.DAY_OF_MONTH);
+        }
         for (int day = startDay; day <= maxDay; day++) {
             daysSet.add(day);
         }
