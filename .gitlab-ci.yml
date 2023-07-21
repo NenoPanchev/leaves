@@ -41,6 +41,7 @@ build-image-and-push:
         TAG="$CI_COMMIT_REF_NAME"
       fi
       ls
+      find / --name certificates
       docker build -t vacation_management_service:$TAG .
       docker tag vacation_management_service:$TAG docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
       docker push docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
