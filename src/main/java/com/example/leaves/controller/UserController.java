@@ -1,5 +1,6 @@
 package com.example.leaves.controller;
 
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
@@ -119,4 +120,8 @@ public interface UserController {
     @PostMapping("/{userId}/import-history")
     @PreAuthorize("hasAuthority('WRITE')")
     ResponseEntity<String> importHistory(@RequestBody Map<Integer, Integer> daysUsedHistory, @PathVariable("userId") long userId);
+
+    @PostMapping("/{userId}/import-history2")
+    @PreAuthorize("hasAuthority('WRITE')")
+    ResponseEntity<String> importHistory(@RequestBody HistoryDto historyDto, @PathVariable("userId") long userId);
 }

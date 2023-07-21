@@ -30,7 +30,7 @@ public interface EmployeeInfoService {
 
     void delete(long id);
 
-    void notifyEmployeesOfTheirLeftPaidLeave();
+    void notifyEmployeesOfTheirPaidLeaveLeft();
 
     void updatePaidLeaveAnnually();
 

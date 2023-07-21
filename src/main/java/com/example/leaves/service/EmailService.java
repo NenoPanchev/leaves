@@ -1,8 +1,9 @@
 package com.example.leaves.service;
 
-import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.RequestEntity;
 
 import javax.mail.MessagingException;
+import java.util.Collection;
 
 public interface EmailService {
 
@@ -16,10 +17,12 @@ public interface EmailService {
     void sendMailToNotifyAboutNewRequest(String recipientName,
                                          String recipientEmail,
                                          String subject,
-                                         LeaveRequest request) throws MessagingException;
+                                         RequestEntity request) throws MessagingException;
 
     void sendChangePasswordToken(
             final String recipientName,
             final String recipientEmail,
             String token) throws MessagingException;
+
+    void send(Collection<String> recipients, String subject, String text);
 }

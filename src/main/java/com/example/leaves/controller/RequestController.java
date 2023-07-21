@@ -1,7 +1,7 @@
 package com.example.leaves.controller;
 
-import com.example.leaves.model.dto.LeaveRequestDto;
-import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.model.dto.RequestDto;
+import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,35 +13,35 @@ import java.util.List;
 public interface RequestController {
     @GetMapping
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAll();
+    List<RequestDto> getAll();
 
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByCurrentUser();
+    List<RequestDto> getAllByCurrentUser();
 
     @GetMapping("/employee/{id}")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByUserId(@PathVariable long id);
+    List<RequestDto> getAllByUserId(@PathVariable long id);
 
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllFilter(@RequestBody LeaveRequestFilter searchCriteria);
+    List<RequestDto> getAllFilter(@RequestBody RequestFilter searchCriteria);
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto getById(@PathVariable long id);
+    RequestDto getById(@PathVariable long id);
 
     @PutMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto update(@RequestBody LeaveRequestDto leaveRequestDto);
+    RequestDto update(@RequestBody RequestDto requestDto);
 
     @PostMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto addRequest(@RequestBody LeaveRequestDto leaveRequestDto);
+    RequestDto addRequest(@RequestBody RequestDto requestDto);
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest(@PathVariable long id, @RequestBody LeaveRequestDto leaveRequestDto);
+    void approveRequest(@PathVariable long id, @RequestBody RequestDto requestDto);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")
@@ -57,6 +57,6 @@ public interface RequestController {
 
     @PostMapping("/Page")
     @PreAuthorize("hasRole('ADMIN')")
-    Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
+    Page<RequestDto> getPageFiltered(@RequestBody RequestFilter filter);
 
 }

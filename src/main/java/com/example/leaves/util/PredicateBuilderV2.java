@@ -1,5 +1,7 @@
 package com.example.leaves.util;
 
+import com.example.leaves.model.entity.enums.RequestTypeEnum;
+
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
@@ -58,6 +60,27 @@ public class PredicateBuilderV2<ENTITY> {
         }
         return this;
     }
+
+    public <T> PredicateBuilderV2<?> equalsRequestTypeEnum(final SingularAttribute<?, T> attribute, final String value) {
+        if (!Util.isBlank(value)) {
+            Expression<RequestTypeEnum> requestTypeEnumExpression = root.get((SingularAttribute<? super ENTITY, T>) attribute).as(RequestTypeEnum.class);
+            RequestTypeEnum enumValue = RequestTypeEnum.valueOf(value.toUpperCase());
+            this.predicates.add(builder.equal(requestTypeEnumExpression, enumValue));
+        }
+        return this;
+    }
+
+//    public <T> PredicateBuilderV2<?> equalsRequestTypeEnum(final SingularAttribute<?, T> attribute, final String value) {
+//        if (value != null) {
+//            Expression<String> valueExpression = builder.literal(value.toUpperCase());
+//            Expression<RequestTypeEnum> requestTypeEnumExpression = root.get(attribute.getName()).as(RequestTypeEnum.class);
+//            Expression<RequestTypeEnum> castExpression = (Expression<RequestTypeEnum>) builder.literal(RequestTypeEnum.class).as(requestTypeEnumExpression.getJavaType());
+//            Predicate equalPredicate = builder.equal(castExpression, builder.literal(RequestTypeEnum.valueOf(value.toUpperCase())));
+//            predicates.add(equalPredicate);
+//        }
+//        return this;
+//    }
+
 
     public <T> PredicateBuilderV2<?> equalsField(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
