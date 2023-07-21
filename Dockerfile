@@ -6,7 +6,7 @@ WORKDIR /home/app
 
 RUN mkdir -p /home/app/certificates
 
-COPY certificates/vacantion/service/service.vacation.lightsoftbulgaria.jks /home/app/certificates/service.vacation.lightsoftbulgaria.jks
+COPY /certificates/vacation/service/service.vacation.lightsoftbulgaria.jks /home/app/certificates/service.vacation.lightsoftbulgaria.jks
 
 # Copy the application JAR file to the container
 COPY target/leaves-*.jar /home/app/app.jar
