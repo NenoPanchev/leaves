@@ -11,7 +11,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: false
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
@@ -23,10 +23,10 @@ server:
 
 notification:
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: <username>
-    password: <password>
+    host: mail.lightsoftbulgaria.com
+    port: 465
+    username: vacation@lightsoftbulgaria.com
+    password: ${EMAIL_SENDER_PASSWORD}
     protocol: smtp
     java-mail-properties:
       mail:
@@ -38,9 +38,14 @@ notification:
             enable: true
             required: true
           ssl:
-            trust: smtp.gmail.com
+            trust: mail.lightsoftbulgaria.com
 
-
+logging:
+  file:
+    name: logs/leaves.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
 
 allowed-leave-days-to-carry-over: 5
 holidays:
@@ -57,4 +62,7 @@ cron-jobs:
       left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.
       used: "0 0 8 1 * *"       # At 08:00 on day-of-month 1.
 
+ui:
+  address: "vacation.lightsoftbulgaria.com"
 
+should-send-emails: false

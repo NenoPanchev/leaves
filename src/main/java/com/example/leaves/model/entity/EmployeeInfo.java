@@ -3,6 +3,7 @@ package com.example.leaves.model.entity;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.EntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -55,6 +56,9 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employeeInfo", cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "employeeInfo")
+    private List<HistoryEntity> historyList = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "employee_info_history", joinColumns = @JoinColumn(name = "employee_info_id"))

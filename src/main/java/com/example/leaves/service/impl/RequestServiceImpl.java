@@ -45,7 +45,7 @@ public class RequestServiceImpl implements RequestService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestServiceImpl.class);
     public static final String SEND_DATES_AND_SPLIT_IN_REACT = "%s|%s";
     public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
-    public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван отпуск за месец %s както следва:\n";
+    public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван платен годишен отпуск за месец %s %d г. както следва:\n";
     public static final String MAIL_TO_ACCOUNTING_POSTFIX = "Поздрави,\nЕкипът на Лайт Софт България\n";
     public static final String ACCOUNTING_EMAIL = "";
     public static final String MONTHLY_PAID_LEAVE_REPORT_SUBJECT = "Месечен доклад за отпуски";
@@ -346,7 +346,7 @@ public class RequestServiceImpl implements RequestService {
             LOGGER.info("Notifying cancelled. No paid leave days have been used in {}", monthName);
             return;
         }
-        String message = generateMessageForAccountingNote(employeesDaysUsed, monthName);
+        String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
 //        TODO uncomment when email sender is configured.
 //        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify to accounting sent.");
@@ -750,9 +750,9 @@ public class RequestServiceImpl implements RequestService {
     }
 
 
-    private String generateMessageForAccountingNote(Map<String, Set<Integer>> employeesDaysUsed, String monthName) {
+    private String generateMessageForAccountingNote(Map<String, Set<Integer>> employeesDaysUsed, String monthName, int year) {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format(MAIL_TO_ACCOUNTING_GREETING_PREFIX, monthName));
+        sb.append(String.format(MAIL_TO_ACCOUNTING_GREETING_PREFIX, monthName, year));
         sb.append(System.lineSeparator());
         for (Map.Entry<String, Set<Integer>> entry : employeesDaysUsed.entrySet()) {
             String stringJoin = String.join(",", entry.getValue().toString());

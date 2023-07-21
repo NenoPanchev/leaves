@@ -3,12 +3,14 @@ package com.example.leaves.controller.impl;
 import com.example.leaves.controller.UserController;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.HistoryService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.LeavesReportFilter;
 import com.example.leaves.service.filter.UserFilter;
@@ -29,10 +31,12 @@ import java.util.Map;
 public class UserControllerImpl implements UserController {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
+    private final HistoryService historyService;
 
-    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService) {
+    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService, HistoryService historyService) {
         this.userService = userService;
         this.employeeInfoService = employeeInfoService;
+        this.historyService = historyService;
     }
 
     @Override
@@ -216,6 +220,14 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<String> importHistory(Map<Integer, Integer> daysUsedHistory, long userId) {
         employeeInfoService.importHistory(daysUsedHistory, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("History imported");
+    }
+
+    @Override
+    public ResponseEntity<String> importHistory(HistoryDto historyDto, long userId) {
+        historyService.importHistory(historyDto, userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("History imported");

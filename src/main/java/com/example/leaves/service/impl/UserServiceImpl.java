@@ -12,11 +12,7 @@ import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.EncryptionUtil;
-import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetLimitPageRequest;
-import com.example.leaves.util.PredicateBuilder;
-import com.example.leaves.util.TokenUtil;
+import com.example.leaves.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -36,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.example.leaves.util.Util.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -147,7 +145,7 @@ public class UserServiceImpl implements UserService {
         setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
 
         entity = userRepository.save(entity);
-        if (!isEmpty(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
 
         }
@@ -244,7 +242,7 @@ public class UserServiceImpl implements UserService {
         entity.setRoles(roles);
         DepartmentEntity departmentEntity = null;
 
-        if (!isEmpty(dto.getDepartment()) && !initialEntityDepartmentName.equals(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment()) && !initialEntityDepartmentName.equals(dto.getDepartment())) {
             sameDepartment = false;
             departmentEntity = departmentService
                     .findByDepartment(dto.getDepartment());
@@ -266,7 +264,7 @@ public class UserServiceImpl implements UserService {
 
 
     private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo, String contractChange) {
-        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
+        if (employeeInfo == null || isBlank(employeeInfo.getTypeName())) {
             return;
         }
         if (contractChange.equals("Initial")) {
@@ -665,13 +663,13 @@ public class UserServiceImpl implements UserService {
 
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,
                                                 String dtoDepartmentName, boolean sameDepartment) {
-        if (!isEmpty(dtoDepartmentName) && !sameDepartment) {
+        if (!isBlank(dtoDepartmentName) && !sameDepartment) {
             if (!initialEntityDepartmentName.equals("")) {
                 departmentService.detachEmployeeFromDepartment(entity);
             }
             departmentService.addEmployeeToDepartment(entity, departmentEntity);
         }
-        if ((isEmpty(dtoDepartmentName)) && !initialEntityDepartmentName.equals("")) {
+        if ((isBlank(dtoDepartmentName)) && !initialEntityDepartmentName.equals("")) {
             departmentService.detachEmployeeFromDepartment(entity);
             entity.setDepartment(null);
         }
@@ -680,7 +678,7 @@ public class UserServiceImpl implements UserService {
 
 
     private DepartmentEntity getDepartmentFromDto(UserDto dto, DepartmentEntity department) {
-        if (!isEmpty(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment())) {
             department = departmentService
                     .findByDepartment(dto.getDepartment());
         }
@@ -697,16 +695,12 @@ public class UserServiceImpl implements UserService {
         }
 
         TypeEmployee type;
-        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
+        if (employeeInfo == null || isBlank(employeeInfo.getTypeName())) {
             type = typeEmployeeRepository.findByTypeName("Trainee");
         } else {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
         createEmployeeInfoFor(entity, startDate, type);
-    }
-
-    private boolean isEmpty(String name) {
-        return name == null || name.equals("");
     }
 
     private void createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type) {
