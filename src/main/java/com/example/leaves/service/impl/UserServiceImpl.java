@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -578,13 +579,12 @@ public class UserServiceImpl implements UserService {
 
         createPasswordResetTokenForUser(entity, token);
 
-//        try {
-//            //TODO UNCOMMENT WHEN EMAIL READY
-//            emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
-//        } catch (MessagingException e) {
-//            //TODO CHANGE EXCEPTION
-//            throw new RuntimeException(e);
-//        }
+        try {
+            emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
+        } catch (MessagingException e) {
+            //TODO CHANGE EXCEPTION
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

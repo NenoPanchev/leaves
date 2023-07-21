@@ -47,7 +47,7 @@ public class RequestServiceImpl implements RequestService {
     public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван платен годишен отпуск за месец %s %d г. както следва:\n";
     public static final String MAIL_TO_ACCOUNTING_POSTFIX = "Поздрави,\nЕкипът на Лайт Софт България\n";
-    public static final String ACCOUNTING_EMAIL = "";
+    public static final String ACCOUNTING_EMAIL = "neno.panchev@gmail.com";
     public static final String MONTHLY_PAID_LEAVE_REPORT_SUBJECT = "Месечен доклад за отпуски";
     private final EmailService emailService;
     private final UserRepository employeeRepository;
@@ -72,13 +72,11 @@ public class RequestServiceImpl implements RequestService {
         RequestEntity request = new RequestEntity();
         request.toEntity(requestDto);
         request.setEmployee(employee);
-        //TODO UNCOMMENT WHEN EMAIL ACCOUNT READY
-
         //TODO ASK CAN I USE IT LIKE THIS ?
 //        ExecutorService executor = Executors.newCachedThreadPool();
 //        executor.execute(() -> sendNotificationEmailToAdmins(request));
 
-//        sendNotificationEmailToAdmins(request);
+        sendNotificationEmailToAdmins(request);
         return requestRepository.save(request);
     }
 
@@ -348,7 +346,7 @@ public class RequestServiceImpl implements RequestService {
         }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
 //        TODO uncomment when email sender is configured.
-//        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
+        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify to accounting sent.");
     }
 

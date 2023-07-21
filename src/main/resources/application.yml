@@ -63,6 +63,6 @@ cron-jobs:
       used: "0 0 8 1 * *"       # At 08:00 on day-of-month 1.
 
 ui:
-  address: "vacation.lightsoftbulgaria.com"
+  address: "https://vacation.lightsoftbulgaria.com"
 
 should-send-emails: false
