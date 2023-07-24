@@ -16,6 +16,9 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
         JpaSpecificationExecutor<RequestEntity>,
         SoftDeleteRepository {
 
+//    @Query("SELECT r FROM RequestEntity r " +
+//            "JOIN FETCH r.employee " +
+//            "WHERE r.id = :id")
     RequestEntity findById(long id);
 
     List<RequestEntity> findAllByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);

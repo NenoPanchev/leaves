@@ -72,9 +72,6 @@ public class RequestServiceImpl implements RequestService {
         RequestEntity request = new RequestEntity();
         request.toEntity(requestDto);
         request.setEmployee(employee);
-        //TODO ASK CAN I USE IT LIKE THIS ?
-//        ExecutorService executor = Executors.newCachedThreadPool();
-//        executor.execute(() -> sendNotificationEmailToAdmins(request));
 
         sendNotificationEmailToAdmins(request);
         return requestRepository.save(request);
@@ -212,11 +209,11 @@ public class RequestServiceImpl implements RequestService {
             request.setApprovedStartDate(requestDto.getApprovedStartDate());
 
             if (isLeaveRequest(requestDto.getRequestType())) {
-                EmployeeInfo e = userEntity.getEmployeeInfo();
+                EmployeeInfo e = request.getEmployee();
                 e.subtractFromAnnualPaidLeave(request.getDaysRequested());
             }
             request.setApproved(Boolean.TRUE);
-            employeeRepository.save(userEntity);
+            requestRepository.save(request);
             return request;
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
@@ -345,7 +342,6 @@ public class RequestServiceImpl implements RequestService {
             return;
         }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
-//        TODO uncomment when email sender is configured.
         emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify to accounting sent.");
     }

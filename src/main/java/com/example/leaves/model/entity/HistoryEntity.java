@@ -9,21 +9,21 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Objects;
 
-@Entity
-@Table(name = "history", schema = "public")
+//@Entity
+//@Table(name = "history", schema = "public")
 public class HistoryEntity extends BaseEntity<HistoryDto> {
-    @Column(name = "calendar_year", nullable = false)
+//    @Column(name = "calendar_year", nullable = false)
     private int calendarYear;
-    @Column(name = "days_from_previous_year", nullable = false)
+//    @Column(name = "days_from_previous_year", nullable = false)
     private int daysFromPreviousYear;
-    @Column(name = "contract_days", nullable = false)
+//    @Column(name = "contract_days", nullable = false)
     private double contractDays;
-    @Column(name = "days_used", nullable = false)
+//    @Column(name = "days_used", nullable = false)
     private int daysUsed;
-    @Column(name = "days_to_carry_over")
+//    @Column(name = "days_to_carry_over")
     private int daysToCarryOver;
-    @ManyToOne
-    private EmployeeInfo employeeInfo;
+//    @ManyToOne
+//    private EmployeeInfo employeeInfo;
 
     public int getCalendarYear() {
         return calendarYear;
@@ -65,13 +65,13 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysToCarryOver = daysToCarryOver;
     }
 
-    public EmployeeInfo getEmployeeInfo() {
-        return employeeInfo;
-    }
-
-    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
-        this.employeeInfo = employeeInfo;
-    }
+//    public EmployeeInfo getEmployeeInfo() {
+//        return employeeInfo;
+//    }
+//
+//    public void setEmployeeInfo(EmployeeInfo employeeInfo) {
+//        this.employeeInfo = employeeInfo;
+//    }
 
     @Override
     public void toDto(HistoryDto baseDto) {
@@ -85,7 +85,7 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         baseDto.setDaysToCarryOver(this.daysToCarryOver);
         baseDto.setContractDays(this.contractDays);
         EmployeeInfoDto employeeInfoDto = new EmployeeInfoDto();
-        this.employeeInfo.toDto(employeeInfoDto);
+//        this.employeeInfo.toDto(employeeInfoDto);
         baseDto.setEmployeeInfo(employeeInfoDto);
     }
 
@@ -102,25 +102,25 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysToCarryOver = baseDto.getDaysToCarryOver();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        HistoryEntity that = (HistoryEntity) o;
-        return calendarYear == that.calendarYear && Objects.equals(employeeInfo.getId(), that.employeeInfo.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), calendarYear, employeeInfo.getId());
-    }
-
-    @Override
-    public String toString() {
-        return "HistoryEntity{" +
-                "calendarYear=" + calendarYear +
-                ", employeeInfo=" + employeeInfo.getId() +
-                '}';
-    }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        if (!super.equals(o)) return false;
+//        HistoryEntity that = (HistoryEntity) o;
+//        return calendarYear == that.calendarYear && Objects.equals(employeeInfo.getId(), that.employeeInfo.getId());
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(super.hashCode(), calendarYear, employeeInfo.getId());
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "HistoryEntity{" +
+//                "calendarYear=" + calendarYear +
+//                ", employeeInfo=" + employeeInfo.getId() +
+//                '}';
+//    }
 }

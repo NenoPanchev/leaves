@@ -23,6 +23,7 @@ server:
 
 notification:
   mail:
+    enable: true
     host: mail.lightsoftbulgaria.com
     port: 465
     username: vacation@lightsoftbulgaria.com
@@ -34,11 +35,12 @@ notification:
           protocol: smtp
         smtp:
           auth: true
-          starttls:
-            enable: true
-            required: true
           ssl:
-            trust: mail.lightsoftbulgaria.com
+            enable: true
+        starttls:
+          enable: true
+        ssl:
+          trust: mail.lightsoftbulgaria.com
 
 logging:
   file:

@@ -31,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
             "End date: %s\n";
     public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is:%s";
     public static final String CHANGE_PASSWORD_TOKEN_SUBJECT = "Password Change";
-    public static final String DEFAULT_FROM = "vacation.lightsoftbulgaria.com";
+    public static final String DEFAULT_FROM = "vacation@lightsoftbulgaria.com";
     @Value("${should-send-emails:false}")
     public boolean shouldSendEmails;
     private final JavaMailSender emailSender;
@@ -127,6 +127,7 @@ public class EmailServiceImpl implements EmailService {
                 new MimeMessageHelper(mimeMessage, true, "UTF-8"); // true = multipart
         message.setSubject(subject);
         message.setTo(recipientEmail);
+        message.setFrom(DEFAULT_FROM);
 
         // Create the HTML body using Thymeleaf
         final String htmlContent = this.templateEngine.process("DaysLeaveTemplate.html",

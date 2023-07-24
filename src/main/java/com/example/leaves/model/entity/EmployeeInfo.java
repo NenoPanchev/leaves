@@ -56,8 +56,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employeeInfo", cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "employeeInfo")
-    private List<HistoryEntity> historyList = new ArrayList<>();
+//    @OneToMany(mappedBy = "employeeInfo")
+//    private List<HistoryEntity> historyList = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "employee_info_history", joinColumns = @JoinColumn(name = "employee_info_id"))
@@ -210,8 +210,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
                 ", carryoverDaysLeave=" + carryoverDaysLeave +
                 ", currentYearDaysLeave=" + currentYearDaysLeave +
                 ", contractStartDate=" + contractStartDate +
-                ", contracts=" + contracts +
-                ", history=" + history +
                 '}';
     }
 }

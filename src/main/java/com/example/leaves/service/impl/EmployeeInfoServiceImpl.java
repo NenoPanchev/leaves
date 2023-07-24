@@ -526,6 +526,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                     employee.getEmail(),
                                     LEFT_PAID_LEAVE_SUBJECT,
                                     remainingPaidLeave);
+                            LOGGER.info("Sent notifying email about paid leave left to {}.", employee.getName());
 
                         } catch (MessagingException e) {
                             LOGGER.warn("cron job error notifying employees of paid leave left");
