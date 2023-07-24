@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -22,22 +23,24 @@ import java.util.Map;
 public class PdfUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(PdfUtil.class);
 
-    private static final String FILE = "src/main/resources/docx/отпуск.docx";
+    private static final String FILE = "docx/отпуск.docx";
 
     private PdfUtil() {
         throw new IllegalStateException("Util class");
     }
 
     public static byte[] replaceWords(Map<String, String> words) throws IOException, InvalidFormatException {
-        try {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             InputStream inputStream = PdfUtil.class.getClassLoader().getResourceAsStream(FILE)) {
 
             /**
              * if uploaded doc then use HWPF else if uploaded Docx file use
              * XWPFDocument
              */
 
+            assert inputStream != null;
             XWPFDocument doc = new XWPFDocument(
-                    OPCPackage.open(FILE));
+                    OPCPackage.open(inputStream));
             for (XWPFParagraph p : doc.getParagraphs()) {
                 List<XWPFRun> runs = p.getRuns();
                 if (runs != null) {
@@ -58,14 +61,11 @@ public class PdfUtil {
                     }
                 }
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfOptions options = PdfOptions.create();
             options.fontProvider(getFontProvider());
 
             PdfConverter.getInstance().convert(doc, baos, options);
             return baos.toByteArray();
-        } finally {
-
         }
     }
 

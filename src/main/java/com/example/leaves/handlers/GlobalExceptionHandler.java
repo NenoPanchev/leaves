@@ -22,14 +22,14 @@ import java.io.IOException;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
+    public static final String WARNING_LOG_TEMPLATE = "{} thrown from method: {} of a {} class. Message: {}";
 
     @ExceptionHandler(value = ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ResponseEntity<Object> handleObjectNotFound(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleExistingResources(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
@@ -57,6 +57,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String page = request != null ? request.getDescription(false) : "Unknown Page";
 
         LOGGER.warn("Access denied for user: {}, requested page: {}, Reason: {}", user, page, bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.FORBIDDEN, request);
     }
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
@@ -75,7 +76,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BaseCustomException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionRestResponse handleCustomException(BaseCustomException exception) {
-        LOGGER.warn(exception.getMessage());
+        logException(exception);
         if (exception.getType() == null) {
             return new ExceptionRestResponse(400, "default", exception.getMessage());
         } else {
@@ -89,7 +90,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleJwtExpired(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.UNAUTHORIZED, request);
     }
@@ -99,7 +100,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handlePasswordsNotMatching(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
@@ -109,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleSameNewPassword(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = ex.getMessage();
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
@@ -120,7 +121,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             IOException ex, WebRequest request) {
         String requestedPath = request.getDescription(false); // Get the requested path from the WebRequest
         String bodyOfResponse = "Resource not found at path: " + requestedPath;
-        LOGGER.warn(bodyOfResponse);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
@@ -130,7 +131,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleRuntimeException(
             RuntimeException ex, WebRequest request) {
         String bodyOfResponse = "An unexpected error occurred.";
-        LOGGER.error("Unhandled RuntimeException:", ex);
+        logException(ex);
         return handleExceptionInternal(ex, bodyOfResponse,
                 new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
@@ -146,6 +147,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             this.type = type;
             this.message = message;
         }
+    }
+
+    private void logException(Exception ex) {
+        LOGGER.warn(WARNING_LOG_TEMPLATE, ex.getClass().getSimpleName(), getMethodName(ex), ex.getStackTrace()[0].getClassName(), ex.getMessage());
+    }
+
+    private String getMethodName(Exception ex) {
+        StackTraceElement[] stackTrace = ex.getStackTrace();
+        if (stackTrace.length > 0) {
+            return stackTrace[0].getMethodName();
+        }
+        return "Unknown Method";
     }
 
 }

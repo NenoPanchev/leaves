@@ -51,6 +51,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     public static final String LEFT_PAID_LEAVE_SUBJECT = "Left paid leave";
     private static final String LOCATION = "location";
     private static final String POSITION = "position";
+    private static final String POSITION_NAME = "Техник компютърно програмиране";
     private final UserRepository employeeRepository;
     private final UserService userService;
     private final EmailService emailService;
@@ -179,7 +180,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     !userOfRequest.getEmployeeInfo().getPosition().isEmpty()) {
                 words.put(POSITION, userOfRequest.getEmployeeInfo().getPosition());
             } else {
-                words.put(POSITION, " ");
+                words.put(POSITION, POSITION_NAME);
             }
 
         } else {
@@ -192,7 +193,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 words.put(LOCATION, " ");
 
 
-                words.put(POSITION, " ");
+                words.put(POSITION, POSITION_NAME);
 
         }
 
@@ -209,6 +210,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
 
         words.put("daysNumber", String.valueOf(request.getDaysRequested()));
+        words.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
         return words;
     }
