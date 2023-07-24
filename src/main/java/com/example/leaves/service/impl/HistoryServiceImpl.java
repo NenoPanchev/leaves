@@ -1,5 +1,7 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -55,5 +58,37 @@ public class HistoryServiceImpl implements HistoryService {
             history.add(new HistoryEntity(year, days));
         }
         return history;
+    }
+
+    @Override
+    public int getDaysUsedForYear(List<HistoryEntity> historyEntities, int year) {
+        return historyEntities
+                .stream()
+                .filter(historyEntity -> historyEntity.getCalendarYear() == year)
+                .findAny()
+                .map(HistoryEntity::getDaysUsed)
+                .orElseThrow(() -> new IllegalArgumentException("There is no history for year: " + year));
+    }
+
+    @Override
+    public int getDaysUsedForYearDto(List<HistoryDto> historyDtos, int year) {
+        return historyDtos
+                .stream()
+                .filter(historyDto -> historyDto.getCalendarYear() == year)
+                .findAny()
+                .map(HistoryDto::getDaysUsed)
+                .orElseThrow(() -> new IllegalArgumentException("There is no history for year: " + year));
+    }
+
+    @Override
+    public List<HistoryEntity> toEntityList(List<HistoryDto> historyDtos) {
+        return historyDtos
+                .stream()
+                .map(dto -> {
+                    HistoryEntity entity = new HistoryEntity();
+                    entity.toEntity(dto);
+                    return entity;
+                        })
+                .collect(Collectors.toList());
     }
 }

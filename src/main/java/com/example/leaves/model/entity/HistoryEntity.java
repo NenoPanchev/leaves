@@ -91,6 +91,10 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.employeeInfo = employeeInfo;
     }
 
+    public int getTotalDaysLeave() {
+        return this.daysFromPreviousYear + this.contractDays;
+    }
+
     @Override
     public void toDto(HistoryDto baseDto) {
         if (baseDto == null) {

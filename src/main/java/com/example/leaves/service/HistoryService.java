@@ -12,4 +12,8 @@ public interface HistoryService {
     void importHistory(HistoryDto historyDto, long userId);
     Map<Integer, Integer> createInitialHistory(LocalDate startDate);
     List<HistoryEntity> createInitialHistory(LocalDate startDate, List<ContractEntity> contracts);
+    int getDaysUsedForYear(List<HistoryEntity> historyEntities, int year);
+    int getDaysUsedForYearDto(List<HistoryDto> historyDtos, int year);
+
+    List<HistoryEntity> toEntityList(List<HistoryDto> historyDtos);
 }

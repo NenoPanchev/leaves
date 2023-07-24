@@ -1,11 +1,9 @@
 package com.example.leaves.service;
 
 import com.example.leaves.model.dto.EmployeeInfoDto;
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.ContractEntity;
-import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.TypeEmployee;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.filter.LeavesReportFilter;
 import org.springframework.data.domain.Page;
@@ -55,6 +53,7 @@ public interface EmployeeInfoService {
     EmployeeInfo getByContractId(Long id);
 
     void importHistory(Map<Integer, Integer> daysUsedHistory, long userId);
+    void importHistory(List<HistoryDto> historyDtos, long userId);
 
     void save(EmployeeInfo employeeInfo);
 

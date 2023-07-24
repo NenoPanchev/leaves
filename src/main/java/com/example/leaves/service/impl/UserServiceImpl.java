@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
         superAdmin.setDepartment(administration);
 
         // Employee Info
-        createEmployeeInfoFor(superAdmin, LocalDate.of(2017, 1, 1), developer);
+        employeeInfoService.createEmployeeInfoFor(superAdmin, LocalDate.of(2017, 1, 1), developer);
 
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
@@ -670,28 +670,7 @@ public class UserServiceImpl implements UserService {
         } else {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
-        createEmployeeInfoFor(entity, startDate, type);
+        employeeInfoService.createEmployeeInfoFor(entity, startDate, type);
     }
 
-    private void createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type) {
-        EmployeeInfo info = new EmployeeInfo();
-        info.setEmployeeType(type);
-        info.setContractStartDate(startDate);
-        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        info.setHistory(createInitialHistory(startDate));
-//        info.setHistoryList();
-        int days = employeeInfoService.calculateCurrentYearPaidLeave(info);
-        info.setCurrentYearDaysLeave(days);
-        entity.setEmployeeInfo(info);
-    }
-
-    private Map<Integer, Integer> createInitialHistory(LocalDate startDate) {
-        Map<Integer, Integer> history = new HashMap<>();
-        int startYear = startDate.getYear();
-        int currentYear = LocalDate.now().getYear();
-        for (int i = startYear; i <= currentYear; i++) {
-            history.put(i, 0);
-        }
-        return history;
-    }
 }
