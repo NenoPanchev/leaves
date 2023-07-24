@@ -6,6 +6,7 @@ import com.example.leaves.service.HistoryService;
 import org.springframework.stereotype.Service;
 
 
+@Service
 public class HistoryServiceImpl implements HistoryService {
     private HistoryRepository historyRepository;
 

@@ -203,6 +203,10 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void assignDepartmentAdmins() {
+        if (departmentRepository.count() > 0) {
+            return;
+        }
+
         departmentRepository
                 .findAllByDeletedIsFalseOrderById()
                 .forEach(entity -> {
