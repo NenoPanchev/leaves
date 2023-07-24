@@ -4,11 +4,13 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.filter.LeavesReportFilter;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -36,12 +38,16 @@ public interface EmployeeInfoService {
 
     int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo);
 
+    int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year);
+
     int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
 
     void removeContracts(List<ContractEntity> dummyContracts);
+
     Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
 
     void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo);
+
     EmployeeInfo getById(Long id);
 
     Long getIdByUserId(Long userId);
@@ -53,4 +59,6 @@ public interface EmployeeInfoService {
     void save(EmployeeInfo employeeInfo);
 
     Map<Integer, Integer> getHistoryByUserId(long userId);
+
+    EmployeeInfo createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type);
 }

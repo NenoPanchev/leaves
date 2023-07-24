@@ -12,8 +12,8 @@ import lombok.Setter;
 public class HistoryDto extends BaseDto {
     private int calendarYear;
     private int daysFromPreviousYear;
-    private double contractDays;
+    private int contractDays;
     private int daysUsed;
-    private int daysToCarryOver;
+    private int daysLeft;
     private EmployeeInfoDto employeeInfo;
 }

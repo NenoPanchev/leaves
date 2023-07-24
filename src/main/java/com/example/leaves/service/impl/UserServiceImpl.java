@@ -679,6 +679,7 @@ public class UserServiceImpl implements UserService {
         info.setContractStartDate(startDate);
         info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
         info.setHistory(createInitialHistory(startDate));
+//        info.setHistoryList();
         int days = employeeInfoService.calculateCurrentYearPaidLeave(info);
         info.setCurrentYearDaysLeave(days);
         entity.setEmployeeInfo(info);

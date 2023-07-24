@@ -31,10 +31,12 @@ import java.util.Map;
 public class UserControllerImpl implements UserController {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
+    private final HistoryService historyService;
 
-    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService) {
+    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService, HistoryService historyService) {
         this.userService = userService;
         this.employeeInfoService = employeeInfoService;
+        this.historyService = historyService;
     }
 
     @Override
@@ -223,13 +225,13 @@ public class UserControllerImpl implements UserController {
                 .body("History imported");
     }
 
-//    @Override
-//    public ResponseEntity<String> importHistory(HistoryDto historyDto, long userId) {
-//        historyService.importHistory(historyDto, userId);
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body("History imported");
-//    }
+    @Override
+    public ResponseEntity<String> importHistory(HistoryDto historyDto, long userId) {
+        historyService.importHistory(historyDto, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("History imported");
+    }
 }
 
 

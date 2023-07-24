@@ -4,10 +4,7 @@ package com.example.leaves.service.impl;
 import com.example.leaves.exceptions.*;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.ContractEntity;
-import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.RequestEntity;
-import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.*;
 import com.example.leaves.model.payload.response.ContractBreakdown;
 import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.repository.EmployeeInfoRepository;
@@ -60,6 +57,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private final RequestService requestService;
     private final RoleService roleService;
     private final ContractService contractService;
+    private final HistoryService historyService;
     @Value("${allowed-leave-days-to-carry-over}")
     private int allowedDaysPaidLeaveToCarryOver;
 
@@ -69,7 +67,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                    RequestService requestService,
                                    UserService userService,
                                    RoleService roleService,
-                                   EmailService emailService, ContractService contractService) {
+                                   EmailService emailService, ContractService contractService, HistoryService historyService) {
         this.employeeRepository = employeeRepository;
         this.employeeInfoRepository = employeeInfoRepository;
         this.typeService = typeService;
@@ -78,6 +76,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         this.roleService = roleService;
         this.emailService = emailService;
         this.contractService = contractService;
+        this.historyService = historyService;
     }
 
 
@@ -352,6 +351,20 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return employeeInfo.getHistory();
     }
 
+    @Override
+    public EmployeeInfo createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type) {
+        EmployeeInfo info = new EmployeeInfo();
+        info.setEmployeeType(type);
+        info.setContractStartDate(startDate);
+        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
+        info.setHistory(historyService.createInitialHistory(startDate));
+//        info.setHistoryList();
+        int days = calculateCurrentYearPaidLeave(info);
+        info.setCurrentYearDaysLeave(days);
+        entity.setEmployeeInfo(info);
+        return info;
+    }
+
     private void validateHistory(List<LeavesAnnualReport> annualLeavesInfo) {
         List<Integer> carryOverDays = annualLeavesInfo
                 .stream()
@@ -425,7 +438,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         return yearsList;
     }
 
-    private int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year) {
+    @Override
+    public int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year) {
         double sum = 0;
         int totalDaysInCurrentYear = checkIfLeapYearAndGetTotalDays(year);
 

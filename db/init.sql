@@ -103,6 +103,20 @@ create table if not exists employee_info
 alter table employee_info
     owner to postgres;
 
+create table if not exists employee_history
+(
+    employee_info_id BIGSERIAL,
+    calendar_year             INTEGER default 0 not null,
+    days_from_previous_year   INTEGER default 0 not null,
+    contract_days             INTEGER default 0 not null,
+    days_used                 INTEGER default 0 not null,
+    days_left        INTEGER default 0 not null,
+    PRIMARY KEY (employee_info_id, calendar_year),
+    FOREIGN KEY (employee_info_id) REFERENCES employee_info (id)
+);
+alter table employee_history
+    owner to postgres;
+
 create table if not exists employee_info_history
 (
     employee_info_id BIGSERIAL,
@@ -111,7 +125,7 @@ create table if not exists employee_info_history
     PRIMARY KEY (employee_info_id, year),
     FOREIGN KEY (employee_info_id) REFERENCES employee_info (id)
 );
-alter table employee_info
+alter table employee_info_history
     owner to postgres;
 
 create table if not exists users

@@ -2,6 +2,7 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,20 +11,37 @@ import javax.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "history", schema = "public")
+@Table(name = "employee_history", schema = "public")
+@NoArgsConstructor
 public class HistoryEntity extends BaseEntity<HistoryDto> {
     @Column(name = "calendar_year", nullable = false)
     private int calendarYear;
     @Column(name = "days_from_previous_year", nullable = false)
     private int daysFromPreviousYear;
     @Column(name = "contract_days", nullable = false)
-    private double contractDays;
+    private int contractDays;
     @Column(name = "days_used", nullable = false)
     private int daysUsed;
     @Column(name = "days_to_carry_over")
-    private int daysToCarryOver;
+    private int daysLeft;
     @ManyToOne
     private EmployeeInfo employeeInfo;
+
+    public HistoryEntity(int calendarYear, int contractDays) {
+        this.calendarYear = calendarYear;
+        this.daysFromPreviousYear = 0;
+        this.contractDays = contractDays;
+        this.daysUsed = 0;
+        this.daysLeft = contractDays;
+    }
+
+    public HistoryEntity(int calendarYear, int daysFromPreviousYear, int contractDays, int daysUsed, int daysLeft) {
+        this.calendarYear = calendarYear;
+        this.daysFromPreviousYear = daysFromPreviousYear;
+        this.contractDays = contractDays;
+        this.daysUsed = daysUsed;
+        this.daysLeft = daysFromPreviousYear + contractDays - daysUsed;
+    }
 
     public int getCalendarYear() {
         return calendarYear;
@@ -41,11 +59,11 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysFromPreviousYear = daysFromPreviousYear;
     }
 
-    public double getContractDays() {
+    public int getContractDays() {
         return contractDays;
     }
 
-    public void setContractDays(double contractDays) {
+    public void setContractDays(int contractDays) {
         this.contractDays = contractDays;
     }
 
@@ -57,12 +75,12 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysUsed = daysUsed;
     }
 
-    public int getDaysToCarryOver() {
-        return daysToCarryOver;
+    public int getDaysLeft() {
+        return daysLeft;
     }
 
-    public void setDaysToCarryOver(int daysToCarryOver) {
-        this.daysToCarryOver = daysToCarryOver;
+    public void setDaysLeft(int daysToCarryOver) {
+        this.daysLeft = daysToCarryOver;
     }
 
     public EmployeeInfo getEmployeeInfo() {
@@ -82,7 +100,7 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         baseDto.setCalendarYear(this.calendarYear);
         baseDto.setDaysUsed(this.daysUsed);
         baseDto.setDaysFromPreviousYear(this.daysFromPreviousYear);
-        baseDto.setDaysToCarryOver(this.daysToCarryOver);
+        baseDto.setDaysLeft(this.daysLeft);
         baseDto.setContractDays(this.contractDays);
         EmployeeInfoDto employeeInfoDto = new EmployeeInfoDto();
         this.employeeInfo.toDto(employeeInfoDto);
@@ -99,7 +117,7 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysFromPreviousYear = baseDto.getDaysFromPreviousYear();
         this.contractDays = baseDto.getContractDays();
         this.daysUsed = baseDto.getDaysUsed();
-        this.daysToCarryOver = baseDto.getDaysToCarryOver();
+        this.daysLeft = baseDto.getDaysLeft();
     }
 
     @Override
