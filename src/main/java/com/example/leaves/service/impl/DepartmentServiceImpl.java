@@ -213,12 +213,6 @@ public class DepartmentServiceImpl implements DepartmentService {
                         case "ADMINISTRATION":
                             entity.setAdmin(userService.findByEmail("super@admin.com"));
                             break;
-                        case "IT":
-                            entity.setAdmin(userService.findByEmail("admin@admin.com"));
-                            break;
-                        case "ACCOUNTING":
-                            entity.setAdmin(userService.findByEmail("user@user.com"));
-                            break;
                         default:
                     }
                     departmentRepository.save(entity);
