@@ -36,6 +36,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
@@ -262,6 +263,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public void delete(long id) {
+        refundApprovedDays(id);
         requestRepository.markAsDeleted(id);
     }
 
@@ -755,5 +757,16 @@ public class RequestServiceImpl implements RequestService {
         sb.append(System.lineSeparator());
         sb.append(MAIL_TO_ACCOUNTING_POSTFIX);
         return sb.toString();
+    }
+
+
+    private void refundApprovedDays(long id) {
+        RequestEntity request = getById(id);
+        if (Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
+            return;
+        }
+        int approvedDays = (int) ChronoUnit.DAYS.between(request.getApprovedStartDate(), request.getApprovedEndDate()) + 1;
+        EmployeeInfo employeeInfo = request.getEmployee();
+        employeeInfo.setCurrentYearDaysLeave(employeeInfo.getCurrentYearDaysLeave() + approvedDays);
     }
 }
