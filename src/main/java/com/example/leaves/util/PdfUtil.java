@@ -23,7 +23,7 @@ import java.util.Map;
 public class PdfUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(PdfUtil.class);
 
-    private static final String FILE = "docx/отпуск.docx";
+    private static final String FILE = "static/docx/отпуск.docx";
 
     private PdfUtil() {
         throw new IllegalStateException("Util class");
@@ -86,17 +86,17 @@ public class PdfUtil {
                 if (familyName.equalsIgnoreCase("Times New Roman")) {
                     BaseFont baseFont;
                     if (style == Font.BOLD) {
-                        baseFont = BaseFont.createFont("ttf/Times New RomanB.ttf", encoding, BaseFont.EMBEDDED);
+                        baseFont = BaseFont.createFont("static/ttf/Times New RomanB.ttf", encoding, BaseFont.EMBEDDED);
                     } else {
-                        baseFont = BaseFont.createFont("ttf/Times New Roman.ttf", encoding, BaseFont.EMBEDDED);
+                        baseFont = BaseFont.createFont("static/ttf/Times New Roman.ttf", encoding, BaseFont.EMBEDDED);
                     }
                     return new Font(baseFont, size, style, color);
                 } else if (familyName.equalsIgnoreCase("Calibri") || encoding.equalsIgnoreCase(BaseFont.IDENTITY_H)) {
                     BaseFont baseFont;
                     if (style == Font.BOLD) {
-                        baseFont = BaseFont.createFont("ttf/CalibriB.ttf", encoding, BaseFont.EMBEDDED);
+                        baseFont = BaseFont.createFont("static/ttf/CalibriB.ttf", encoding, BaseFont.EMBEDDED);
                     } else {
-                        baseFont = BaseFont.createFont("ttf/Calibri.ttf", encoding, BaseFont.EMBEDDED);
+                        baseFont = BaseFont.createFont("static/ttf/Calibri.ttf", encoding, BaseFont.EMBEDDED);
                     }
                     return new Font(baseFont, size, style, color);
                 }
