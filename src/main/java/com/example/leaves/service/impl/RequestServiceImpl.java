@@ -11,6 +11,7 @@ import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.repository.RequestRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.EmailService;
+import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RequestFilter;
@@ -54,18 +55,21 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository employeeRepository;
     private final RequestRepository requestRepository;
     private final UserService userService;
+    private final EmployeeInfoService employeeInfoService;
 
 
     @Autowired
     public RequestServiceImpl(UserRepository employeeRepository,
                               RequestRepository requestRepository,
                               @Lazy UserService userService,
-                              EmailService emailService) {
+                              EmailService emailService,
+                              @Lazy EmployeeInfoService employeeInfoService) {
 
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
         this.userService = userService;
         this.emailService = emailService;
+        this.employeeInfoService = employeeInfoService;
     }
 
 
@@ -128,6 +132,13 @@ public class RequestServiceImpl implements RequestService {
         if (!(employee.getEmployeeInfo().checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
             throw new PaidleaveNotEnoughException(
                     String.format("%s@%s", request.getDaysRequested(), employee.getEmployeeInfo().getDaysLeave())
+                    , "Add");
+        }
+    }
+    private void checkIfEmployeeHasEnoughDaysPaidLeave(EmployeeInfo employeeInfo, RequestEntity request) {
+        if (!(employeeInfo.checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
+            throw new PaidleaveNotEnoughException(
+                    String.format("%s@%s", request.getDaysRequested(), employeeInfo.getDaysLeave())
                     , "Add");
         }
     }
@@ -212,6 +223,7 @@ public class RequestServiceImpl implements RequestService {
             if (isLeaveRequest(requestDto.getRequestType())) {
                 EmployeeInfo e = request.getEmployee();
                 e.subtractFromAnnualPaidLeave(request.getDaysRequested());
+                increaseDaysUsedAccordingly(request);
             }
             request.setApproved(Boolean.TRUE);
             requestRepository.save(request);
@@ -219,8 +231,6 @@ public class RequestServiceImpl implements RequestService {
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
         }
-
-
     }
 
     @Override
@@ -308,15 +318,17 @@ public class RequestServiceImpl implements RequestService {
         int daysSpentDuringYear = 0;
         List<RequestEntity> allApprovedInYear = requestRepository.findAllApprovedLeaveInYearByEmployeeInfoId(year, id);
         for (RequestEntity request : allApprovedInYear) {
-            if (request.getStartDate().getYear() == year - 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year - 1, 1, 1), request.getEndDate());
+            if (request.getApprovedStartDate().getYear() == year - 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year, 1, 1), request.getApprovedEndDate());
                 daysSpentDuringYear += countOfBusinessDays.size();
+                continue;
             }
-            if (request.getEndDate().getYear() == year + 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(request.getStartDate(), LocalDate.of(year + 1, 12, 31));
+            if (request.getApprovedEndDate().getYear() == year + 1) {
+                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(year, 12, 31));
                 daysSpentDuringYear += countOfBusinessDays.size();
+                continue;
             }
-            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(request.getStartDate(), request.getEndDate());
+            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), request.getApprovedEndDate());
             daysSpentDuringYear += localDates.size();
 
         }
@@ -765,8 +777,35 @@ public class RequestServiceImpl implements RequestService {
         if (Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
             return;
         }
-        int approvedDays = (int) ChronoUnit.DAYS.between(request.getApprovedStartDate(), request.getApprovedEndDate()) + 1;
-        EmployeeInfo employeeInfo = request.getEmployee();
-        employeeInfo.setCurrentYearDaysLeave(employeeInfo.getCurrentYearDaysLeave() + approvedDays);
+        decreaseDaysUsedAccordingly(request);
+    }
+
+
+
+
+    private void increaseDaysUsedAccordingly(RequestEntity request) {
+        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
+            employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        } else {
+            int startYear = request.getApprovedStartDate().getYear();
+            int endYear = request.getApprovedEndDate().getYear();
+            List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
+            List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
+            employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), datesForStartYear.size(), startYear);
+            employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), datesForEndYear.size(), endYear);
+        }
+    }
+
+    private void decreaseDaysUsedAccordingly(RequestEntity request) {
+        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
+            employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        } else {
+            int startYear = request.getApprovedStartDate().getYear();
+            int endYear = request.getApprovedEndDate().getYear();
+            List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
+            List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
+            employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), datesForStartYear.size(), startYear);
+            employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), datesForEndYear.size(), endYear);
+        }
     }
 }

@@ -2,17 +2,15 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
+import com.example.leaves.util.HistoryEntityListener;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import java.util.Objects;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "employee_history", schema = "public")
 @NoArgsConstructor
+@EntityListeners(HistoryEntityListener.class)
 public class HistoryEntity extends BaseEntity<HistoryDto> {
     @Column(name = "calendar_year", nullable = false)
     private int calendarYear;
@@ -22,9 +20,9 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
     private int contractDays;
     @Column(name = "days_used", nullable = false)
     private int daysUsed;
-    @Column(name = "days_to_carry_over")
+    @Column(name = "days_left")
     private int daysLeft;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     private EmployeeInfo employeeInfo;
 
     public HistoryEntity(int calendarYear, int contractDays) {
@@ -35,7 +33,7 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysLeft = contractDays;
     }
 
-    public HistoryEntity(int calendarYear, int daysFromPreviousYear, int contractDays, int daysUsed, int daysLeft) {
+    public HistoryEntity(int calendarYear, int daysFromPreviousYear, int contractDays, int daysUsed) {
         this.calendarYear = calendarYear;
         this.daysFromPreviousYear = daysFromPreviousYear;
         this.contractDays = contractDays;
@@ -124,25 +122,14 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         this.daysLeft = baseDto.getDaysLeft();
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        HistoryEntity that = (HistoryEntity) o;
-        return calendarYear == that.calendarYear && Objects.equals(employeeInfo.getId(), that.employeeInfo.getId());
+    public void increaseDaysUsed(int days) {
+        setDaysUsed(this.daysUsed + days);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), calendarYear, employeeInfo.getId());
-    }
-
-    @Override
-    public String toString() {
-        return "HistoryEntity{" +
-                "calendarYear=" + calendarYear +
-                ", employeeInfo=" + employeeInfo.getId() +
-                '}';
+    public void decreaseDaysUsed(int days) {
+        if (this.daysUsed - days < 0) {
+            throw new  IllegalArgumentException("Days used cannot be negative value");
+        }
+        setDaysUsed(this.daysUsed - days);
     }
 }

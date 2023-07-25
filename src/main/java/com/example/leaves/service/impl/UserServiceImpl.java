@@ -96,7 +96,8 @@ public class UserServiceImpl implements UserService {
         superAdmin.setDepartment(administration);
 
         // Employee Info
-        employeeInfoService.createEmployeeInfoFor(superAdmin, LocalDate.of(2017, 1, 1), developer);
+        EmployeeInfo employeeInfo = employeeInfoService.createEmployeeInfoFor(LocalDate.of(2017, 1, 1), developer);
+        superAdmin.setEmployeeInfo(employeeInfo);
 
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
@@ -113,8 +114,8 @@ public class UserServiceImpl implements UserService {
         entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
-
+        EmployeeInfo employeeInfo = setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
+        entity.setEmployeeInfo(employeeInfo);
         entity = userRepository.save(entity);
         if (!isBlank(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
@@ -655,7 +656,7 @@ public class UserServiceImpl implements UserService {
         return department;
     }
 
-    private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private EmployeeInfo setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
         LocalDate startDate;
         if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null
@@ -670,7 +671,7 @@ public class UserServiceImpl implements UserService {
         } else {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
-        employeeInfoService.createEmployeeInfoFor(entity, startDate, type);
+        return employeeInfoService.createEmployeeInfoFor(startDate, type);
     }
 
 }

@@ -1,9 +1,6 @@
 package com.example.leaves.service.impl;
 
-import com.example.leaves.exceptions.ObjectNotFoundException;
-import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.HistoryDto;
-import com.example.leaves.model.entity.ContractEntity;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
 import com.example.leaves.repository.HistoryRepository;
@@ -31,12 +28,6 @@ public class HistoryServiceImpl implements HistoryService {
         this.employeeInfoService = employeeInfoService;
     }
 
-
-    @Override
-    public void importHistory(HistoryDto historyDto, long userId) {
-
-    }
-
     @Override
     public Map<Integer, Integer> createInitialHistory(LocalDate startDate) {
         Map<Integer, Integer> history = new HashMap<>();
@@ -49,13 +40,16 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public List<HistoryEntity> createInitialHistory(LocalDate startDate, List<ContractEntity> contracts) {
+    public List<HistoryEntity> createInitialHistory(LocalDate startDate, EmployeeInfo employeeInfo) {
         List<HistoryEntity> history = new ArrayList<>();
         int startYear = startDate.getYear();
         int currentYear = LocalDate.now().getYear();
         for (int year = startYear; year <= currentYear; year++) {
-            int days = employeeInfoService.calculateTotalContractDaysPerYear(contracts, year);
-            history.add(new HistoryEntity(year, days));
+            int days = employeeInfoService.calculateTotalContractDaysPerYear(employeeInfo.getContracts(), year);
+            HistoryEntity historyEntity = new HistoryEntity(year, days);
+            history.add(historyEntity);
+            historyEntity.setEmployeeInfo(employeeInfo);
+//            historyRepository.save(historyEntity);
         }
         return history;
     }
@@ -81,14 +75,44 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public List<HistoryEntity> toEntityList(List<HistoryDto> historyDtos) {
-        return historyDtos
+    public void updateEntityListFromDtoList(EmployeeInfo employeeInfo, List<HistoryDto> historyDtoList) {
+        employeeInfo
+                .getHistoryList()
+                .forEach(entity -> {
+                    HistoryDto dto = getHystoryDtoFromListByYear(historyDtoList, entity.getCalendarYear());
+                    entity.setDaysFromPreviousYear(dto.getDaysFromPreviousYear());
+                    entity.setContractDays(dto.getContractDays());
+                    entity.setDaysUsed(dto.getDaysUsed());
+                });
+    }
+
+    @Override
+    public List<HistoryDto> toDtoList(List<HistoryEntity> historyEntities) {
+        return historyEntities
                 .stream()
-                .map(dto -> {
-                    HistoryEntity entity = new HistoryEntity();
-                    entity.toEntity(dto);
-                    return entity;
-                        })
+                .map(entity -> {
+                    HistoryDto dto = new HistoryDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .sorted((a, b) -> Integer.compare(b.getCalendarYear(), a.getCalendarYear()))
                 .collect(Collectors.toList());
+    }
+
+    private HistoryDto getHystoryDtoFromListByYear(List<HistoryDto> historyDtoList, int year) {
+        return historyDtoList
+                .stream()
+                .filter(historyDto -> historyDto.getCalendarYear() == year)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No history for that year"));
+    }
+
+    @Override
+    public HistoryEntity getHystoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year) {
+        return historyEntityList
+                .stream()
+                .filter(historyEntity -> historyEntity.getCalendarYear() == year)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No history for that year"));
     }
 }

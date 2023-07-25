@@ -13,6 +13,10 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
 
+
+
+
+
 @EntityListeners(EntityListener.class)
 @NamedEntityGraph(
         name = "fullInfo",
@@ -56,7 +60,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "employeeInfo", cascade = {CascadeType.ALL})
     private List<ContractEntity> contracts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "employeeInfo")
+    @OneToMany(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private List<HistoryEntity> historyList = new ArrayList<>();
 
     @ElementCollection

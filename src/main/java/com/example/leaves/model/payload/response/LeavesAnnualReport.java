@@ -17,5 +17,5 @@ public class LeavesAnnualReport {
     private int fromPreviousYear;
     private int daysUsed;
     private double contractDays;
-    private int carryoverDays;
+    private int daysLeft;
 }

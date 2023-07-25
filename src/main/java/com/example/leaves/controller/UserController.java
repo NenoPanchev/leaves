@@ -115,13 +115,9 @@ public interface UserController {
 
     @GetMapping("/{userId}/get-history")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<Map<Integer, Integer>> getHistory(@PathVariable("userId") long userId);
+    ResponseEntity<List<HistoryDto>> getHistory(@PathVariable("userId") long userId);
 
     @PostMapping("/{userId}/import-history")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<String> importHistory(@RequestBody Map<Integer, Integer> daysUsedHistory, @PathVariable("userId") long userId);
-
-    @PostMapping("/{userId}/import-history2")
-    @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<String> importHistory(@RequestBody HistoryDto historyDto, @PathVariable("userId") long userId);
+    ResponseEntity<String> importHistory(@RequestBody List<HistoryDto> historyDtoList, @PathVariable("userId") long userId);
 }

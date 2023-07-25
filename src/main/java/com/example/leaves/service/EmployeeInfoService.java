@@ -52,12 +52,14 @@ public interface EmployeeInfoService {
 
     EmployeeInfo getByContractId(Long id);
 
-    void importHistory(Map<Integer, Integer> daysUsedHistory, long userId);
-    void importHistory(List<HistoryDto> historyDtos, long userId);
+    void importHistory(List<HistoryDto> historyDtoList, long userId);
 
     void save(EmployeeInfo employeeInfo);
 
-    Map<Integer, Integer> getHistoryByUserId(long userId);
+    List<HistoryDto> getHistoryListByUserId(long userId);
 
-    EmployeeInfo createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type);
+    EmployeeInfo createEmployeeInfoFor(LocalDate startDate, TypeEmployee type);
+
+    void increaseDaysUsedForYear(EmployeeInfo employee, int daysRequested, int year);
+    void decreaseDaysUsedForYear(EmployeeInfo employee, int daysRequested, int year);
 }

@@ -211,23 +211,15 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Map<Integer, Integer>> getHistory(long userId) {
+    public ResponseEntity<List<HistoryDto>> getHistory(long userId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getHistoryByUserId(userId));
+                .body(employeeInfoService.getHistoryListByUserId(userId));
     }
 
     @Override
-    public ResponseEntity<String> importHistory(Map<Integer, Integer> daysUsedHistory, long userId) {
-        employeeInfoService.importHistory(daysUsedHistory, userId);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("History imported");
-    }
-
-    @Override
-    public ResponseEntity<String> importHistory(HistoryDto historyDto, long userId) {
-        historyService.importHistory(historyDto, userId);
+    public ResponseEntity<String> importHistory(List<HistoryDto> historyDtoList, long userId) {
+        employeeInfoService.importHistory(historyDtoList, userId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("History imported");

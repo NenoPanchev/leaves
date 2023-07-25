@@ -105,14 +105,21 @@ alter table employee_info
 
 create table if not exists employee_history
 (
-    employee_info_id BIGSERIAL,
+    id                      serial
+        constraint employee_info_history_pk
+            primary key,
+    employee_info_id integer constraint employee_info_history_fk
+        references employee_info,
     calendar_year             INTEGER default 0 not null,
     days_from_previous_year   INTEGER default 0 not null,
     contract_days             INTEGER default 0 not null,
     days_used                 INTEGER default 0 not null,
     days_left        INTEGER default 0 not null,
-    PRIMARY KEY (employee_info_id, calendar_year),
-    FOREIGN KEY (employee_info_id) REFERENCES employee_info (id)
+    created_at              timestamp,
+    created_by              varchar,
+    deleted                 boolean,
+    last_modified_at        timestamp,
+    last_modified_by        varchar
 );
 alter table employee_history
     owner to postgres;
