@@ -17,7 +17,7 @@ import javax.validation.Valid;
 public interface AuthController {
 
     @PostMapping()
-    ResponseEntity<AuthenticationResponse> createAuthenticationToken(@Valid @RequestBody UserLoginDto authenticationRequest,
+    ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserLoginDto authenticationRequest,
                                                                      BindingResult bindingResult);
 
 
