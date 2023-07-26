@@ -47,8 +47,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @JsonBackReference
     private TypeEmployee employeeType;
 
-//    @Column(name = "carryover_days_leave")
-//    private int carryoverDaysLeave;
+    @Column(name = "carryover_days_leave")
+    private int carryoverDaysLeave;
     @Column(name = "current_year_days_leave")
     private int currentYearDaysLeave;
     @Column(name = "contract_start_date")
@@ -93,13 +93,13 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return this.currentYearDaysLeave;
     }
 
-//    public int getCarryoverDaysLeave() {
-//        return carryoverDaysLeave;
-//    }
-//
-//    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
-//        this.carryoverDaysLeave = carryoverDaysLeave;
-//    }
+    public int getCarryoverDaysLeave() {
+        return carryoverDaysLeave;
+    }
+
+    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
+        this.carryoverDaysLeave = carryoverDaysLeave;
+    }
 
     public int getCurrentYearDaysLeave() {
         return currentYearDaysLeave;
@@ -138,7 +138,7 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setTypeName(this.getEmployeeType().getTypeName());
         dto.setTypeDaysLeave(this.employeeType.getDaysLeave());
         dto.setDaysLeave(this.getDaysLeave());
-//        dto.setCarryoverDaysLeave(this.carryoverDaysLeave);
+        dto.setCarryoverDaysLeave(this.carryoverDaysLeave);
         dto.setCurrentYearDaysLeave(this.currentYearDaysLeave);
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());

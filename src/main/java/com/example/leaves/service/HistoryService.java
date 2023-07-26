@@ -18,5 +18,4 @@ public interface HistoryService {
     List<HistoryDto> toDtoList(List<HistoryEntity> historyEntities);
 
     HistoryEntity getHystoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year);
-
 }

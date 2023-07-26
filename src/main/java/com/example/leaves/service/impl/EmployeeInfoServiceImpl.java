@@ -24,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -303,18 +302,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    @Transactional
     public void increaseDaysUsedForYear(EmployeeInfo employeeInfo, int daysRequested, int year) {
         HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         if (historyEntity.getDaysLeft() < daysRequested) {
             throw new PaidleaveNotEnoughException(daysRequested, historyEntity.getDaysLeft());
         }
         historyEntity.increaseDaysUsed(daysRequested);
-        employeeInfoRepository.save(employeeInfo);
+        employeeInfoRepository.saveAndFlush(employeeInfo);
     }
 
     @Override
-    @Transactional
     public void decreaseDaysUsedForYear(EmployeeInfo employeeInfo, int daysRequested, int year) {
         HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         historyEntity.decreaseDaysUsed(daysRequested);

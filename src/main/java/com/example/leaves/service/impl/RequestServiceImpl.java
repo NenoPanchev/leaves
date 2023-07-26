@@ -56,7 +56,6 @@ public class RequestServiceImpl implements RequestService {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
 
-
     @Autowired
     public RequestServiceImpl(UserRepository employeeRepository,
                               RequestRepository requestRepository,
@@ -128,13 +127,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void checkIfEmployeeHasEnoughDaysPaidLeave(EmployeeInfo employeeInfo, RequestEntity request) {
-        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
-            checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        int startYear = request.getStartDate().getYear();
+        int endYear = request.getEndDate().getYear();
+        if (startYear == endYear) {
+            checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), request.getDaysRequested(), request.getStartDate().getYear());
         } else {
-            int startYear = request.getApprovedStartDate().getYear();
-            int endYear = request.getApprovedEndDate().getYear();
-            List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
-            List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
+            List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getStartDate(), LocalDate.of(startYear, 12, 31));
+            List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getEndDate());
             checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), datesForStartYear.size(), startYear);
             checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), datesForEndYear.size(), endYear);
         }
@@ -147,7 +146,7 @@ public class RequestServiceImpl implements RequestService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("No history for year: %d", year)));
 
-        if (historyEntity.getDaysLeft() > daysRequested) {
+        if (historyEntity.getDaysLeft() < daysRequested) {
             throw new PaidleaveNotEnoughException(
                     String.format("%s@%s", daysRequested, historyEntity.getDaysLeft())
                     , "Add");
@@ -214,7 +213,6 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Transactional
     public RequestEntity approveRequest(long id, RequestDto requestDto) {
-
         RequestEntity request = getById(id);
         if (request.getApproved() == null) {
             UserEntity userEntity = request.getEmployee().getUserInfo();
@@ -793,11 +791,12 @@ public class RequestServiceImpl implements RequestService {
 
 
     private void increaseDaysUsedAccordingly(RequestEntity request) {
-        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
-            employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        int startYear = request.getApprovedStartDate().getYear();
+        int endYear = request.getApprovedEndDate().getYear();
+        if (startYear == endYear) {
+            List<LocalDate> daysRequested = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), request.getApprovedEndDate());
+            employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), daysRequested.size(), request.getApprovedStartDate().getYear());
         } else {
-            int startYear = request.getApprovedStartDate().getYear();
-            int endYear = request.getApprovedEndDate().getYear();
             List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
             List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
             employeeInfoService.increaseDaysUsedForYear(request.getEmployee(), datesForStartYear.size(), startYear);
@@ -806,11 +805,12 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void decreaseDaysUsedAccordingly(RequestEntity request) {
-        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
-            employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        int startYear = request.getApprovedStartDate().getYear();
+        int endYear = request.getApprovedEndDate().getYear();
+        if (startYear == endYear) {
+            List<LocalDate> daysRequested = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), request.getApprovedEndDate());
+            employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), daysRequested.size(), request.getApprovedStartDate().getYear());
         } else {
-            int startYear = request.getApprovedStartDate().getYear();
-            int endYear = request.getApprovedEndDate().getYear();
             List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
             List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
             employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), datesForStartYear.size(), startYear);
