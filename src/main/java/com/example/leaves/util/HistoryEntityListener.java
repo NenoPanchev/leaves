@@ -9,13 +9,15 @@ import java.time.LocalDate;
 public class HistoryEntityListener {
     @PreUpdate
     public void onUpdate(HistoryEntity historyEntity) {
+        int updated = historyEntity.getDaysFromPreviousYear() + historyEntity.getContractDays() - historyEntity.getDaysUsed();
+        historyEntity.setDaysLeft(updated);
+
         if (historyEntity.getCalendarYear() != LocalDate.now().getYear()) {
             return;
         }
 
         EmployeeInfo employeeInfo = historyEntity.getEmployeeInfo();
         if (employeeInfo != null) {
-            int updated = historyEntity.getDaysFromPreviousYear() + historyEntity.getContractDays() - historyEntity.getDaysUsed();
             employeeInfo.setCurrentYearDaysLeave(updated);
         }
     }

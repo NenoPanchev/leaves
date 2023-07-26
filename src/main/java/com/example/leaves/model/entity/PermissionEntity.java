@@ -2,8 +2,11 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.PermissionDto;
 
-import javax.persistence.*;
-import java.util.Objects;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @AttributeOverrides(
         {
@@ -53,15 +56,11 @@ public class PermissionEntity extends BaseEntity<PermissionDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        PermissionEntity that = (PermissionEntity) o;
-        return Objects.equals(name, that.name);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name);
+        return super.hashCode();
     }
 }

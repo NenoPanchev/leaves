@@ -13,9 +13,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LeavesAnnualReport {
     private int year;
-    private List<ContractBreakdown> contractBreakdowns;
     private int fromPreviousYear;
     private int daysUsed;
-    private double contractDays;
+    private int contractDays;
     private int daysLeft;
 }

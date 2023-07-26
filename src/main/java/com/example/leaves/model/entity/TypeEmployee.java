@@ -3,10 +3,16 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.TypeEmployeeDto;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "types", schema = "public")
@@ -87,15 +93,11 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TypeEmployee that = (TypeEmployee) o;
-        return daysLeave == that.daysLeave && Objects.equals(typeName, that.typeName) && Objects.equals(employeeWithType, that.employeeWithType);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), typeName, daysLeave, employeeWithType);
+        return super.hashCode();
     }
 }

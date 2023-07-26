@@ -1,7 +1,5 @@
 package com.example.leaves.model.entity;
 
-import com.example.leaves.exceptions.EntityNotFoundException;
-import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.EntityListener;
@@ -9,13 +7,26 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.*;
-
-
-
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @EntityListeners(EntityListener.class)
 @NamedEntityGraph(
@@ -36,8 +47,8 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @JsonBackReference
     private TypeEmployee employeeType;
 
-    @Column(name = "carryover_days_leave")
-    private int carryoverDaysLeave;
+//    @Column(name = "carryover_days_leave")
+//    private int carryoverDaysLeave;
     @Column(name = "current_year_days_leave")
     private int currentYearDaysLeave;
     @Column(name = "contract_start_date")
@@ -57,9 +68,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToOne(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private UserEntity userInfo;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "employeeInfo", cascade = {CascadeType.ALL})
-    private List<ContractEntity> contracts = new ArrayList<>();
-
     @OneToMany(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private List<HistoryEntity> historyList = new ArrayList<>();
 
@@ -73,29 +81,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         this.setContractStartDate(LocalDate.now());
     }
 
-    public void subtractFromAnnualPaidLeave(int days) {
-        if (this.getDaysLeave() - days < 0) {
-            throw new PaidleaveNotEnoughException(days, this.getDaysLeave());
-        } else {
-            if (days >= this.carryoverDaysLeave) {
-                setCurrentYearDaysLeave(this.getDaysLeave() - days);
-                setCarryoverDaysLeave(0);
-            } else {
-                setCarryoverDaysLeave(this.carryoverDaysLeave - days);
-            }
-        }
-
-    }
-
-    public void subtractFromAnnualPaidLeaveWithoutThrowing(int days) {
-        if (days >= this.carryoverDaysLeave) {
-            setCurrentYearDaysLeave(this.getDaysLeave() - days);
-            setCarryoverDaysLeave(0);
-        } else {
-            setCarryoverDaysLeave(this.carryoverDaysLeave - days);
-        }
-    }
-
     public UserEntity getUserInfo() {
         return userInfo;
     }
@@ -105,16 +90,16 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     }
 
     public int getDaysLeave() {
-        return this.currentYearDaysLeave + this.carryoverDaysLeave;
+        return this.currentYearDaysLeave;
     }
 
-    public int getCarryoverDaysLeave() {
-        return carryoverDaysLeave;
-    }
-
-    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
-        this.carryoverDaysLeave = carryoverDaysLeave;
-    }
+//    public int getCarryoverDaysLeave() {
+//        return carryoverDaysLeave;
+//    }
+//
+//    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
+//        this.carryoverDaysLeave = carryoverDaysLeave;
+//    }
 
     public int getCurrentYearDaysLeave() {
         return currentYearDaysLeave;
@@ -122,18 +107,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     public void setCurrentYearDaysLeave(int currentYearDaysLeave) {
         this.currentYearDaysLeave = currentYearDaysLeave;
-    }
-
-    public void removeRequest(RequestEntity request) {
-        if (requests.contains(request)) {
-            requests.remove(request);
-        } else {
-            throw new EntityNotFoundException("request", request.getId());
-        }
-    }
-
-    public boolean checkIfPossibleToSubtractFromAnnualPaidLeave(int days) {
-        return this.getDaysLeave() - days >= 0 && days > 0;
     }
 
     public Set<RequestEntity> getRequests() {
@@ -159,17 +132,13 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         this.ssn = ssn;
     }
 
-    public void resetAnnualLeave() {
-        setCurrentYearDaysLeave(employeeType.getDaysLeave());
-    }
-
     public EmployeeInfoDto toDto() {
         EmployeeInfoDto dto = new EmployeeInfoDto();
         dto.setTypeId(this.getEmployeeType().getId());
         dto.setTypeName(this.getEmployeeType().getTypeName());
         dto.setTypeDaysLeave(this.employeeType.getDaysLeave());
         dto.setDaysLeave(this.getDaysLeave());
-        dto.setCarryoverDaysLeave(this.carryoverDaysLeave);
+//        dto.setCarryoverDaysLeave(this.carryoverDaysLeave);
         dto.setCurrentYearDaysLeave(this.currentYearDaysLeave);
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());
@@ -179,39 +148,19 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         return dto;
     }
 
-    public void addContract(ContractEntity entity) {
-        this.contracts.add(entity);
-    }
-
-    public void removeContract(ContractEntity entity) {
-        this.contracts.remove(entity);
-    }
-
-    public void removeContract(int index) {
-        this.contracts.remove(index);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        EmployeeInfo that = (EmployeeInfo) o;
-        return carryoverDaysLeave == that.carryoverDaysLeave && currentYearDaysLeave == that.currentYearDaysLeave && Objects.equals(employeeType, that.employeeType)
-                && Objects.equals(contractStartDate, that.contractStartDate) && Objects.equals(requests, that.requests) && Objects.equals(userInfo, that.userInfo)
-                && Objects.equals(contracts, that.contracts) && Objects.equals(history, that.history);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), employeeType, carryoverDaysLeave, currentYearDaysLeave, contractStartDate, requests, userInfo, contracts, history);
+        return super.hashCode();
     }
 
     @Override
     public String toString() {
         return "EmployeeInfo{" +
-                "employeeType=" + employeeType +
-                ", carryoverDaysLeave=" + carryoverDaysLeave +
                 ", currentYearDaysLeave=" + currentYearDaysLeave +
                 ", contractStartDate=" + contractStartDate +
                 '}';

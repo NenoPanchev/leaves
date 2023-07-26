@@ -3,10 +3,21 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @NamedEntityGraph(
         name = "full",
@@ -160,15 +171,11 @@ public class UserEntity extends BaseEntity<UserDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        UserEntity that = (UserEntity) o;
-        return Objects.equals(email, that.email);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), email);
+        return super.hashCode();
     }
 }

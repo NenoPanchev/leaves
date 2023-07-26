@@ -2,10 +2,17 @@ package com.example.leaves.model.entity;
 
 import com.example.leaves.model.dto.DepartmentDto;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Entity
@@ -120,15 +127,11 @@ public class DepartmentEntity extends BaseEntity<DepartmentDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        DepartmentEntity that = (DepartmentEntity) o;
-        return Objects.equals(name, that.name);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name);
+        return super.hashCode();
     }
 }

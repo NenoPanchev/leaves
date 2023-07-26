@@ -4,10 +4,18 @@ import com.example.leaves.model.dto.PermissionDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @AttributeOverrides(
         {
@@ -86,15 +94,11 @@ public class RoleEntity extends BaseEntity<RoleDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        RoleEntity that = (RoleEntity) o;
-        return Objects.equals(name, that.name);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name);
+        return super.hashCode();
     }
 }

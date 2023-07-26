@@ -45,11 +45,10 @@ public class HistoryServiceImpl implements HistoryService {
         int startYear = startDate.getYear();
         int currentYear = LocalDate.now().getYear();
         for (int year = startYear; year <= currentYear; year++) {
-            int days = employeeInfoService.calculateTotalContractDaysPerYear(employeeInfo.getContracts(), year);
+            int days = employeeInfo.getEmployeeType().getDaysLeave();
             HistoryEntity historyEntity = new HistoryEntity(year, days);
             history.add(historyEntity);
             historyEntity.setEmployeeInfo(employeeInfo);
-//            historyRepository.save(historyEntity);
         }
         return history;
     }
@@ -65,8 +64,8 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public int getDaysUsedForYearDto(List<HistoryDto> historyDtos, int year) {
-        return historyDtos
+    public int getDaysUsedForYearDto(List<HistoryDto> historyDtoList, int year) {
+        return historyDtoList
                 .stream()
                 .filter(historyDto -> historyDto.getCalendarYear() == year)
                 .findAny()
@@ -79,7 +78,7 @@ public class HistoryServiceImpl implements HistoryService {
         employeeInfo
                 .getHistoryList()
                 .forEach(entity -> {
-                    HistoryDto dto = getHystoryDtoFromListByYear(historyDtoList, entity.getCalendarYear());
+                    HistoryDto dto = getHistoryDtoFromListByYear(historyDtoList, entity.getCalendarYear());
                     entity.setDaysFromPreviousYear(dto.getDaysFromPreviousYear());
                     entity.setContractDays(dto.getContractDays());
                     entity.setDaysUsed(dto.getDaysUsed());
@@ -99,7 +98,7 @@ public class HistoryServiceImpl implements HistoryService {
                 .collect(Collectors.toList());
     }
 
-    private HistoryDto getHystoryDtoFromListByYear(List<HistoryDto> historyDtoList, int year) {
+    private HistoryDto getHistoryDtoFromListByYear(List<HistoryDto> historyDtoList, int year) {
         return historyDtoList
                 .stream()
                 .filter(historyDto -> historyDto.getCalendarYear() == year)

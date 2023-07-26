@@ -10,11 +10,8 @@ import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 public interface EmployeeInfoService {
-
-
     EmployeeInfoDto changeType(long employeeId, long typeId);
 
     byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
@@ -34,23 +31,11 @@ public interface EmployeeInfoService {
 
     void updatePaidLeaveAnnually();
 
-    int calculateCurrentYearPaidLeave(EmployeeInfo employeeInfo);
-
-    int calculateTotalContractDaysPerYear(List<ContractEntity> contracts, int year);
-
-    int getCurrentTotalAvailableDays(EmployeeInfo employeeInfo);
-
-    void removeContracts(List<ContractEntity> dummyContracts);
-
     Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
-
-    void recalculateCurrentYearDaysAfterChanges(EmployeeInfo employeeInfo);
 
     EmployeeInfo getById(Long id);
 
     Long getIdByUserId(Long userId);
-
-    EmployeeInfo getByContractId(Long id);
 
     void importHistory(List<HistoryDto> historyDtoList, long userId);
 

@@ -29,9 +29,7 @@ import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.util.Util.*;
@@ -48,7 +46,6 @@ public class UserServiceImpl implements UserService {
     private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
-    private final ContractService contractService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
@@ -61,7 +58,6 @@ public class UserServiceImpl implements UserService {
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
                            @Lazy EmployeeInfoService employeeInfoService,
-                           ContractService contractService,
                            ModelMapper modelMapper) {
 
         this.userRepository = userRepository;
@@ -70,7 +66,6 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.typeEmployeeRepository = typeEmployeeRepository;
         this.employeeInfoService = employeeInfoService;
-        this.contractService = contractService;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
@@ -83,7 +78,6 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // Get types of Employee
-        TypeEmployee trainee = typeEmployeeRepository.findById(2L);
         TypeEmployee developer = typeEmployeeRepository.findById(1L);
 
         // Super Admin
@@ -114,7 +108,7 @@ public class UserServiceImpl implements UserService {
         entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        EmployeeInfo employeeInfo = setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
+        EmployeeInfo employeeInfo = setEmployeeInfoFromDto(dto.getEmployeeInfo());
         entity.setEmployeeInfo(employeeInfo);
         entity = userRepository.save(entity);
         if (!isBlank(dto.getDepartment())) {
@@ -220,7 +214,7 @@ public class UserServiceImpl implements UserService {
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(departmentEntity);
         }
-        updateEmployeeInfo(entity, dto.getEmployeeInfo(), updateDto.getContractChange());
+        updateEmployeeInfo(entity, dto.getEmployeeInfo());
 
         entity = userRepository.saveAndFlush(entity);
 
@@ -235,85 +229,17 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo, String contractChange) {
+    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
         if (employeeInfo == null || isBlank(employeeInfo.getTypeName())) {
             return;
         }
-        if (contractChange.equals("Initial")) {
-            editInitialContract(entity.getEmployeeInfo(), employeeInfo);
-        } else if (contractChange.equals("New")) {
-            ContractEntity lastContract = contractService.getTheLastContract(entity.getEmployeeInfo().getContracts());
-
-            boolean isLastContractStartDate = lastContract.getStartDate().equals(employeeInfo.getContractStartDate());
-
-            boolean isAfterLastContractStartDate = employeeInfo.getContractStartDate().isAfter(lastContract.getStartDate());
-
-
-            if (isLastContractStartDate) {
-                editLastContract(entity.getEmployeeInfo(), employeeInfo, lastContract);
-            } else {
-                if (isAfterLastContractStartDate) {
-                    addNewContract(entity.getEmployeeInfo(), employeeInfo);
-                } else {
-                    throw new IllegalContractStartDateException("New contract start date must be in present or future and not between other contract dates");
-                }
-            }
+        if (!entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            entity.getEmployeeInfo().setEmployeeType(newType);
         }
-        employeeInfoService.recalculateCurrentYearDaysAfterChanges(entity.getEmployeeInfo());
-    }
-
-    private void editInitialContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
-        ContractEntity initialContract = entityInfo.getContracts().get(0);
-
-        if (isNewStartDate(initialContract, infoDto)) {
-            entityInfo.setContractStartDate(infoDto.getContractStartDate());
-            initialContract.setStartDate(infoDto.getContractStartDate());
+        if (entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
+            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
         }
-        if (isNewTypeEmployee(initialContract, infoDto)) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
-            initialContract.setTypeName(infoDto.getTypeName());
-
-            if (entityInfo.getContracts().size() == 1) {
-                entityInfo.setEmployeeType(newType);
-            }
-        }
-    }
-
-    private void editLastContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto, ContractEntity lastContract) {
-        if (isNewTypeEmployee(lastContract, infoDto)) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
-            lastContract.setTypeName(infoDto.getTypeName());
-            entityInfo.setEmployeeType(newType);
-            contractService.deleteDummyContracts(entityInfo.getContracts(), infoDto.getContractStartDate());
-        }
-    }
-
-    private void addNewContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
-        ContractEntity lastContract = contractService.getTheLastContract(entityInfo.getContracts());
-
-
-        if (!isNewTypeEmployee(lastContract, infoDto)) {
-            throw new IllegalArgumentException("New contract must have different type");
-        }
-
-        if (lastContract.getEndDate() == null) {
-            lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));
-        }
-        if (contractService.aDateIsBetweenOtherContractDates(infoDto.getContractStartDate(), entityInfo.getContracts())) {
-            throw new IllegalArgumentException("Contract date cannot be between other contract dates");
-        }
-        entityInfo.setEmployeeType(typeEmployeeRepository.findByTypeName(infoDto.getTypeName()));
-        ContractEntity newContract = new ContractEntity(infoDto.getTypeName(), infoDto.getContractStartDate(), entityInfo);
-        contractService.save(newContract);
-        entityInfo.addContract(newContract);
-    }
-
-    private boolean isNewTypeEmployee(ContractEntity contract, EmployeeInfoDto dto) {
-        return !contract.getTypeName().equals(dto.getTypeName());
-    }
-
-    private boolean isNewStartDate(ContractEntity contract, EmployeeInfoDto dto) {
-        return !contract.getStartDate().equals(dto.getContractStartDate());
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -656,7 +582,7 @@ public class UserServiceImpl implements UserService {
         return department;
     }
 
-    private EmployeeInfo setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private EmployeeInfo setEmployeeInfoFromDto(EmployeeInfoDto employeeInfo) {
         LocalDate startDate;
         if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null

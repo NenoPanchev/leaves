@@ -5,9 +5,18 @@ import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.util.DatesUtil;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name = "requests", schema = "public")
@@ -99,16 +108,12 @@ public class RequestEntity extends BaseEntity<RequestDto> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        RequestEntity that = (RequestEntity) o;
-        return startDate.equals(that.startDate) && endDate.equals(that.endDate) && employee.equals(that.employee);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), startDate, endDate, employee);
+        return super.hashCode();
     }
 
     public RequestDto toDto() {

@@ -65,4 +65,5 @@ public abstract class BaseDto {
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
     }
+
 }

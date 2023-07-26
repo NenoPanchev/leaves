@@ -5,7 +5,12 @@ import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.util.HistoryEntityListener;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "employee_history", schema = "public")
@@ -131,5 +136,15 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
             throw new  IllegalArgumentException("Days used cannot be negative value");
         }
         setDaysUsed(this.daysUsed - days);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

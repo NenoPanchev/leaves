@@ -37,7 +37,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
@@ -113,7 +112,7 @@ public class RequestServiceImpl implements RequestService {
         request.toEntity(requestDto);
         checkIfDateBeforeToday(requestDto);
         if (isLeaveRequest(requestDto.getRequestType())) {
-            checkIfEmployeeHasEnoughDaysPaidLeave(employee, request);
+            checkIfEmployeeHasEnoughDaysPaidLeave(employee.getEmployeeInfo(), request);
         }
         sameDates(requestDto, employee);
         requestWithDatesBetweenArgDates(requestDto, employee);
@@ -128,17 +127,29 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    private void checkIfEmployeeHasEnoughDaysPaidLeave(UserEntity employee, RequestEntity request) {
-        if (!(employee.getEmployeeInfo().checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
-            throw new PaidleaveNotEnoughException(
-                    String.format("%s@%s", request.getDaysRequested(), employee.getEmployeeInfo().getDaysLeave())
-                    , "Add");
+    private void checkIfEmployeeHasEnoughDaysPaidLeave(EmployeeInfo employeeInfo, RequestEntity request) {
+        if (request.getApprovedStartDate().getYear() == request.getApprovedEndDate().getYear()) {
+            checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), request.getDaysRequested(), request.getApprovedStartDate().getYear());
+        } else {
+            int startYear = request.getApprovedStartDate().getYear();
+            int endYear = request.getApprovedEndDate().getYear();
+            List<LocalDate> datesForStartYear = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(startYear, 12, 31));
+            List<LocalDate> datesForEndYear = DatesUtil.countBusinessDaysBetween(LocalDate.of(endYear, 1, 1), request.getApprovedEndDate());
+            checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), datesForStartYear.size(), startYear);
+            checkIfDaysLeftAreEnough(employeeInfo.getHistoryList(), datesForEndYear.size(), endYear);
         }
     }
-    private void checkIfEmployeeHasEnoughDaysPaidLeave(EmployeeInfo employeeInfo, RequestEntity request) {
-        if (!(employeeInfo.checkIfPossibleToSubtractFromAnnualPaidLeave(request.getDaysRequested()))) {
+
+    private void checkIfDaysLeftAreEnough(List<HistoryEntity> historyList, int daysRequested, int year) {
+        HistoryEntity historyEntity = historyList
+                .stream()
+                .filter(entity -> entity.getCalendarYear() == year)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(String.format("No history for year: %d", year)));
+
+        if (historyEntity.getDaysLeft() > daysRequested) {
             throw new PaidleaveNotEnoughException(
-                    String.format("%s@%s", request.getDaysRequested(), employeeInfo.getDaysLeave())
+                    String.format("%s@%s", daysRequested, historyEntity.getDaysLeft())
                     , "Add");
         }
     }
@@ -221,8 +232,6 @@ public class RequestServiceImpl implements RequestService {
             request.setApprovedStartDate(requestDto.getApprovedStartDate());
 
             if (isLeaveRequest(requestDto.getRequestType())) {
-                EmployeeInfo e = request.getEmployee();
-                e.subtractFromAnnualPaidLeave(request.getDaysRequested());
                 increaseDaysUsedAccordingly(request);
             }
             request.setApproved(Boolean.TRUE);
