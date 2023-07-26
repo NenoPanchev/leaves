@@ -1,6 +1,5 @@
 package com.example.leaves.model.entity;
 
-import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.util.HistoryEntityListener;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "employee_history", schema = "public")
+@Table(name = "history", schema = "public")
 @NoArgsConstructor
 @EntityListeners(HistoryEntityListener.class)
 public class HistoryEntity extends BaseEntity<HistoryDto> {
@@ -109,9 +108,6 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
         baseDto.setDaysFromPreviousYear(this.daysFromPreviousYear);
         baseDto.setDaysLeft(this.daysLeft);
         baseDto.setContractDays(this.contractDays);
-        EmployeeInfoDto employeeInfoDto = new EmployeeInfoDto();
-        this.employeeInfo.toDto(employeeInfoDto);
-        baseDto.setEmployeeInfo(employeeInfoDto);
     }
 
     @Override

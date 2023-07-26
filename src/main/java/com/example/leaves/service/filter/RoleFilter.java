@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-@EqualsAndHashCode
 public class RoleFilter extends BaseFilter {
     private List<Long> ids;
     private String name;

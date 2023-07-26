@@ -341,10 +341,10 @@ public class UserServiceImpl implements UserService {
                     .joinCompareDates(UserEntity_.employeeInfo,
                             filter.getStartDateComparisons(),
                             EmployeeInfo_.CONTRACT_START_DATE)
-                    .joinCompareIntegerWithSumOfTwoFields(UserEntity_.employeeInfo,
+                    .joinDeepCompareIntegers(UserEntity_.employeeInfo, EmployeeInfo_.historyList,
                             filter.getDaysLeaveComparisons(),
-                            EmployeeInfo_.CURRENT_YEAR_DAYS_LEAVE,
-                            EmployeeInfo_.CARRYOVER_DAYS_LEAVE)
+                            HistoryEntity_.CALENDAR_YEAR,
+                            HistoryEntity_.DAYS_LEFT)
                     .build()
                     .toArray(new Predicate[0]);
 

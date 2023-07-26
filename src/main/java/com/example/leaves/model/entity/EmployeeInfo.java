@@ -8,14 +8,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
@@ -23,9 +20,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @EntityListeners(EntityListener.class)
@@ -47,10 +42,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @JsonBackReference
     private TypeEmployee employeeType;
 
-    @Column(name = "carryover_days_leave")
-    private int carryoverDaysLeave;
-    @Column(name = "current_year_days_leave")
-    private int currentYearDaysLeave;
     @Column(name = "contract_start_date")
     private LocalDate contractStartDate;
 
@@ -71,12 +62,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @OneToMany(mappedBy = "employeeInfo", cascade = CascadeType.ALL)
     private List<HistoryEntity> historyList = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(name = "employee_info_history", joinColumns = @JoinColumn(name = "employee_info_id"))
-    @MapKeyColumn(name = "year")
-    @Column(name = "days_used")
-    private Map<Integer, Integer> history = new HashMap<>();
-
     public EmployeeInfo() {
         this.setContractStartDate(LocalDate.now());
     }
@@ -89,26 +74,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         this.userInfo = userInfo;
     }
 
-    public int getDaysLeave() {
-        return this.currentYearDaysLeave;
-    }
-
-    public int getCarryoverDaysLeave() {
-        return carryoverDaysLeave;
-    }
-
-    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
-        this.carryoverDaysLeave = carryoverDaysLeave;
-    }
-
-    public int getCurrentYearDaysLeave() {
-        return currentYearDaysLeave;
-    }
-
-    public void setCurrentYearDaysLeave(int currentYearDaysLeave) {
-        this.currentYearDaysLeave = currentYearDaysLeave;
-    }
-
     public Set<RequestEntity> getRequests() {
         return requests;
     }
@@ -119,9 +84,6 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
 
     public void setEmployeeType(TypeEmployee employeeType) {
         this.employeeType = employeeType;
-        if (this.getId() == null) {
-            setCurrentYearDaysLeave(employeeType.getDaysLeave());
-        }
     }
 
     public String getSsn() {
@@ -137,14 +99,12 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
         dto.setTypeId(this.getEmployeeType().getId());
         dto.setTypeName(this.getEmployeeType().getTypeName());
         dto.setTypeDaysLeave(this.employeeType.getDaysLeave());
-        dto.setDaysLeave(this.getDaysLeave());
-        dto.setCarryoverDaysLeave(this.carryoverDaysLeave);
-        dto.setCurrentYearDaysLeave(this.currentYearDaysLeave);
         dto.setName(userInfo.getName());
         dto.setId(userInfo.getId());
         dto.setAddress(this.address);
         dto.setSsn(EncryptionUtil.decrypt(this.ssn));
         dto.setContractStartDate(this.contractStartDate);
+        dto.setDaysLeave(getCurrentYearDaysLeave());
         return dto;
     }
 
@@ -161,8 +121,17 @@ public class EmployeeInfo extends BaseEntity<EmployeeInfoDto> {
     @Override
     public String toString() {
         return "EmployeeInfo{" +
-                ", currentYearDaysLeave=" + currentYearDaysLeave +
-                ", contractStartDate=" + contractStartDate +
+                "id: " + this.getId() +
                 '}';
+    }
+
+    private int getCurrentYearDaysLeave() {
+        int currentYear = LocalDate.now().getYear();
+        HistoryEntity historyEntity = getHistoryList()
+                .stream()
+                .filter(entity -> entity.getCalendarYear() == currentYear)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No history for year: " + currentYear));
+        return historyEntity.getDaysLeft();
     }
 }

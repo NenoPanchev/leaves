@@ -57,6 +57,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     List<UserEntity> findAllByDeletedIsFalseOrderById();
 
+    @Query("SELECT u FROM UserEntity u " +
+            "JOIN FETCH u.employeeInfo " +
+            "WHERE u.deleted = false")
     List<UserEntity> findAllByDeletedIsFalse();
 
     @Query("SELECT u.email FROM UserEntity u " +

@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 
-@EqualsAndHashCode(callSuper = false)
 public class RequestFilter extends BaseFilter {
     private String requestType;
 

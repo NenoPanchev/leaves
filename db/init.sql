@@ -103,7 +103,7 @@ create table if not exists employee_info
 alter table employee_info
     owner to postgres;
 
-create table if not exists employee_history
+create table if not exists history
 (
     id                      serial
         constraint employee_info_history_pk
@@ -121,18 +121,7 @@ create table if not exists employee_history
     last_modified_at        timestamp,
     last_modified_by        varchar
 );
-alter table employee_history
-    owner to postgres;
-
-create table if not exists employee_info_history
-(
-    employee_info_id BIGSERIAL,
-    year             INTEGER,
-    days_used        INTEGER,
-    PRIMARY KEY (employee_info_id, year),
-    FOREIGN KEY (employee_info_id) REFERENCES employee_info (id)
-);
-alter table employee_info_history
+alter table history
     owner to postgres;
 
 create table if not exists users

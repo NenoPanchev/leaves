@@ -6,11 +6,10 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.*;
-import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.*;
-import com.example.leaves.service.filter.LeavesReportFilter;
+import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
@@ -31,8 +30,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,8 +213,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeRepository.markAsDeleted(id);
     }
 
-    @Override
     @Scheduled(cron = "${cron-jobs.update.paid-leave:0 0 1 1 1 *}", zone = EUROPE_SOFIA)
+    @Transactional
     public void updatePaidLeaveAnnually() {
         // Specify the timezone "Europe/Sofia"
         ZoneId sofiaZone = ZoneId.of(EUROPE_SOFIA);
@@ -238,20 +235,46 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                     newYear.setDaysFromPreviousYear(daysLeftFromPreviousYear);
                     employeeInfoRepository.save(employeeInfo);
                 });
+        LOGGER.info("Transferred allowed paid leave to next year.");
+    }
+
+    @Scheduled(cron = "${cron-jobs.update.history:0 0 9 1 12 *}", zone = EUROPE_SOFIA)
+    @Transactional
+    public void addHistoryForUpcomingYear() {
+        // Specify the timezone "Europe/Sofia"
+        ZoneId sofiaZone = ZoneId.of(EUROPE_SOFIA);
+        // Get the current date in the specified timezone
+        LocalDate currentDateInSofia = ZonedDateTime.now(sofiaZone).toLocalDate();
+        int currentYear = currentDateInSofia.getYear();
+        employeeRepository
+                .findAllByDeletedIsFalse()
+                .stream()
+                .map(UserEntity::getEmployeeInfo)
+                .forEach(employeeInfo -> {
+                    HistoryEntity newYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear);
+                    HistoryEntity oldYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear - 1);
+                    int daysLeftFromPreviousYear = oldYear.getDaysLeft();
+                    if (daysLeftFromPreviousYear > allowedDaysPaidLeaveToCarryOver) {
+                        daysLeftFromPreviousYear = allowedDaysPaidLeaveToCarryOver;
+                    }
+                    newYear.setDaysFromPreviousYear(daysLeftFromPreviousYear);
+                    employeeInfoRepository.save(employeeInfo);
+                });
+        LOGGER.info("Added history for next year");
     }
 
     @Override
-    public Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter) {
+    public Page<HistoryDto> getHistoryInfoByUserId(Long id, HistoryFilter filter) {
         EmployeeInfo employeeInfo = employeeInfoRepository
-                .findByUserInfoId(id)
+                .findByUserInfoIdJoinFetchHistoryList(id)
                 .orElseThrow(() -> new ObjectNotFoundException("User not found"));
-        List<LeavesAnnualReport> annualLeavesList = getAnnualLeavesInfo(employeeInfo);
-        List<LeavesAnnualReport> content = annualLeavesList
+        List<HistoryDto> historyDtoList = historyService.toDtoList(employeeInfo.getHistoryList());
+        List<HistoryDto> content = historyDtoList
                 .subList(
-                        Math.min(annualLeavesList.size(), filter.getOffset()),
-                        Math.min(annualLeavesList.size(), filter.getOffset() + filter.getLimit()));
+                        Math.min(historyDtoList.size(), filter.getOffset()),
+                        Math.min(historyDtoList.size(), filter.getOffset() + filter.getLimit()));
         OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        return new PageImpl<>(content, pageable, annualLeavesList.size());
+        return new PageImpl<>(content, pageable, historyDtoList.size());
     }
 
     @Override
@@ -261,20 +284,13 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Override
-    public Long getIdByUserId(Long userId) {
-        return employeeInfoRepository.findIdByUserId(userId)
-                .orElseThrow(ObjectNotFoundException::new);
-    }
-
-    @Override
     @Transactional
     public void importHistory(List<HistoryDto> historyDtoList, long userId) {
         EmployeeInfo employeeInfo = employeeInfoRepository
-                .findByUserInfoId(userId)
+                .findByUserInfoIdJoinFetchHistoryList(userId)
                 .orElseThrow(javax.persistence.EntityNotFoundException::new);
         historyService.updateEntityListFromDtoList(employeeInfo, historyDtoList);
-        List<LeavesAnnualReport> annualLeavesInfo = getAnnualLeavesInfo(employeeInfo);
-        validateHistory(annualLeavesInfo);
+        validateHistory(historyDtoList);
         employeeInfoRepository.save(employeeInfo);
     }
 
@@ -286,7 +302,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Override
     public List<HistoryDto> getHistoryListByUserId(long userId) {
         EmployeeInfo employeeInfo = employeeInfoRepository
-                .findByUserInfoId(userId)
+                .findByUserInfoIdJoinFetchHistoryList(userId)
                 .orElseThrow(javax.persistence.EntityNotFoundException::new);
 
         return historyService.toDtoList(employeeInfo.getHistoryList());
@@ -318,67 +334,29 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeInfoRepository.save(employeeInfo);
     }
 
-    private void validateHistory(List<LeavesAnnualReport> annualLeavesInfo) {
-        List<Integer> carryOverDays = annualLeavesInfo
+    private void validateHistory(List<HistoryDto> historyDtoList) {
+        List<Integer> daysLeft = historyDtoList
                 .stream()
-                .map(LeavesAnnualReport::getDaysLeft)
+                .map(HistoryDto::getDaysLeft)
                 .collect(Collectors.toList());
-        List<Integer> fromPreviousYear = annualLeavesInfo
+        List<Integer> fromPreviousYear = historyDtoList
                 .stream()
-                .map(LeavesAnnualReport::getFromPreviousYear)
+                .map(HistoryDto::getDaysFromPreviousYear)
                 .collect(Collectors.toList());
-        List<Integer> contractDays = annualLeavesInfo
+        List<Integer> contractDays = historyDtoList
                 .stream()
-                .map(LeavesAnnualReport::getContractDays)
+                .map(HistoryDto::getContractDays)
                 .collect(Collectors.toList());
-        List<Integer> daysUsed = annualLeavesInfo
+        List<Integer> daysUsed = historyDtoList
                 .stream()
-                .map(LeavesAnnualReport::getDaysUsed)
+                .map(HistoryDto::getDaysUsed)
                 .collect(Collectors.toList());
-        if (Util.checkIfListHasNegativeNumber(carryOverDays)
+        if (Util.checkIfListHasNegativeNumber(daysLeft)
         ||  Util.checkIfListHasNegativeNumber(fromPreviousYear)
         ||  Util.checkIfListHasNegativeNumber(daysUsed)
         ||  Util.checkIfListHasNegativeNumber(contractDays)) {
             throw new PaidleaveNotEnoughException("Invalid days used history! There are negative numbers in result");
         }
-    }
-
-
-    private List<LeavesAnnualReport> getAnnualLeavesInfo(EmployeeInfo employeeInfo) {
-        List<Integer> yearsList = getAllYearsOfEmployment(employeeInfo.getHistoryList());
-        List<LeavesAnnualReport> leavesAnnualReportList = new ArrayList<>();
-        for (Integer year : yearsList) {
-            // Create and add Leave Annual Report
-            createAndAddLeaveAnnualReport(year, leavesAnnualReportList, employeeInfo);
-        }
-        Collections.reverse(leavesAnnualReportList);
-        return leavesAnnualReportList;
-    }
-
-    private List<Integer> getAllYearsOfEmployment(List<HistoryEntity> historyEntityList) {
-        return historyEntityList
-                .stream()
-                .map(HistoryEntity::getCalendarYear)
-                .sorted(Integer::compareTo)
-                .collect(Collectors.toList());
-    }
-
-    private void createAndAddLeaveAnnualReport(Integer year, List<LeavesAnnualReport> leavesAnnualReportList, EmployeeInfo employeeInfo) {
-        LeavesAnnualReport report = new LeavesAnnualReport();
-        report.setYear(year);
-        HistoryEntity history = employeeInfo
-                .getHistoryList()
-                .stream()
-                .filter(historyEntity -> historyEntity.getCalendarYear() == year)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("No such year found"));
-        int allApprovedDaysInYear = requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(year, employeeInfo.getId());
-        int daysUsedFromHistory = history.getDaysUsed();
-        report.setDaysUsed(allApprovedDaysInYear + daysUsedFromHistory);
-        report.setFromPreviousYear(history.getDaysFromPreviousYear());
-        report.setContractDays(history.getContractDays());
-        report.setDaysLeft(history.getDaysLeft());
-        leavesAnnualReportList.add(report);
     }
 
     @Override
@@ -388,7 +366,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         employeeRepository
                 .findAllByDeletedIsFalse()
                 .forEach(employee -> {
-                    int remainingPaidLeave = employee.getEmployeeInfo().getDaysLeave();
+                    int remainingPaidLeave = getDaysLeaveLeftForCurrentYear(employee.getEmployeeInfo());
                     if (remainingPaidLeave > allowedDaysPaidLeaveToCarryOver) {
                         try {
                             emailService.sendMailToNotifyAboutPaidLeave(employee.getName(),
@@ -404,18 +382,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 });
     }
 
-    @Override
-    public EmployeeInfoDto changeType(long employeeId, long typeId) {
-        UserEntity userEntity = employeeRepository.findById((int) typeId);
-        EmployeeInfo employeeInfo = userEntity.getEmployeeInfo();
-        employeeInfo.setEmployeeType(typeService.getById(typeId));
-        employeeRepository.save(userEntity);
-
-        return userEntity
-                .getEmployeeInfo()
-                .toDto();
-    }
-
     private int getDaysLeaveLeftForCurrentYear(EmployeeInfo employeeInfo) {
         int currentYear = LocalDate.now().getYear();
         return getDaysLeaveLeftForYear(employeeInfo, currentYear);
@@ -423,7 +389,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     private int getDaysLeaveLeftForYear(EmployeeInfo employeeInfo, int year) {
         HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
-        int allApprovedLeaveDaysInYear = requestService.getAllApprovedLeaveDaysInYearByEmployeeInfoId(year, employeeInfo.getId());
-        return historyEntity.getTotalDaysLeave() - historyEntity.getDaysUsed() - allApprovedLeaveDaysInYear;
+        return historyEntity.getTotalDaysLeave() - historyEntity.getDaysUsed();
     }
 }

@@ -36,6 +36,7 @@ public class HolidaysUtil {
         holidayDates.addAll(fetchAllHolidayDatesForYear(currentYear));
         holidayDates.addAll(fetchAllHolidayDatesForYear(nextYear));
         setHolidays(holidayDates);
+        LOGGER.info("Holidays set for current and next year.");
     }
 
     private List<LocalDate> fetchAllHolidayDatesForYear(int year) {

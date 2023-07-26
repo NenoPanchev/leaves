@@ -4,16 +4,13 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.entity.*;
-import com.example.leaves.model.payload.response.LeavesAnnualReport;
-import com.example.leaves.service.filter.LeavesReportFilter;
+import com.example.leaves.service.filter.HistoryFilter;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface EmployeeInfoService {
-    EmployeeInfoDto changeType(long employeeId, long typeId);
-
     byte[] getPdfOfRequest(long requestId, PdfRequestForm pdfRequestForm);
 
     List<EmployeeInfoDto> getAll();
@@ -29,13 +26,9 @@ public interface EmployeeInfoService {
 
     void notifyEmployeesOfTheirPaidLeaveLeft();
 
-    void updatePaidLeaveAnnually();
-
-    Page<LeavesAnnualReport> getAnnualLeavesInfoByUserId(Long id, LeavesReportFilter filter);
+    Page<HistoryDto> getHistoryInfoByUserId(Long id, HistoryFilter filter);
 
     EmployeeInfo getById(Long id);
-
-    Long getIdByUserId(Long userId);
 
     void importHistory(List<HistoryDto> historyDtoList, long userId);
 

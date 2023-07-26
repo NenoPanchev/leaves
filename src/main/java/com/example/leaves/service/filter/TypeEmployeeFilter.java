@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
 public class TypeEmployeeFilter extends BaseFilter {
     private List<String> typeName;
     private List<Integer> daysLeave;

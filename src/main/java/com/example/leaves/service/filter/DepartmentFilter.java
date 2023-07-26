@@ -4,7 +4,6 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
-@EqualsAndHashCode
 public class DepartmentFilter extends BaseFilter {
     private List<Long> ids;
     private String name;

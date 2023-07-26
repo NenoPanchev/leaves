@@ -8,11 +8,9 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
-import com.example.leaves.model.payload.response.LeavesAnnualReport;
 import com.example.leaves.service.EmployeeInfoService;
-import com.example.leaves.service.HistoryService;
 import com.example.leaves.service.UserService;
-import com.example.leaves.service.filter.LeavesReportFilter;
+import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -24,19 +22,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
 public class UserControllerImpl implements UserController {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
-    private final HistoryService historyService;
 
-    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService, HistoryService historyService) {
+    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService) {
         this.userService = userService;
         this.employeeInfoService = employeeInfoService;
-        this.historyService = historyService;
     }
 
     @Override
@@ -203,10 +198,10 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id, LeavesReportFilter filter) {
+    public ResponseEntity<Page<HistoryDto>> getHistoryReportByUserId(Long id, HistoryFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id, filter));
+                .body(employeeInfoService.getHistoryInfoByUserId(id, filter));
 
     }
 
@@ -218,7 +213,10 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<String> importHistory(List<HistoryDto> historyDtoList, long userId) {
+    public ResponseEntity<String> importHistory(List<HistoryDto> historyDtoList, BindingResult bindingResult, long userId) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
         employeeInfoService.importHistory(historyDtoList, userId);
         return ResponseEntity
                 .status(HttpStatus.OK)

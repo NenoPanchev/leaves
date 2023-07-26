@@ -5,8 +5,7 @@ import com.example.leaves.model.dto.PdfRequestForm;
 import com.example.leaves.model.dto.UserDto;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
-import com.example.leaves.model.payload.response.LeavesAnnualReport;
-import com.example.leaves.service.filter.LeavesReportFilter;
+import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.service.filter.UserFilter;
 import org.mapstruct.Context;
 import org.springframework.core.io.ByteArrayResource;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin
 @RequestMapping("/users")
@@ -111,7 +109,7 @@ public interface UserController {
 
     @PostMapping("/leaves-report/{id}")
     @PreAuthorize("hasAnyAuthority('READ')")
-    ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(@PathVariable("id") Long id, @RequestBody LeavesReportFilter filter);
+    ResponseEntity<Page<HistoryDto>> getHistoryReportByUserId(@PathVariable("id") Long id, @RequestBody HistoryFilter filter);
 
     @GetMapping("/{userId}/get-history")
     @PreAuthorize("hasAuthority('WRITE')")
@@ -119,5 +117,5 @@ public interface UserController {
 
     @PostMapping("/{userId}/import-history")
     @PreAuthorize("hasAuthority('WRITE')")
-    ResponseEntity<String> importHistory(@RequestBody List<HistoryDto> historyDtoList, @PathVariable("userId") long userId);
+    ResponseEntity<String> importHistory(@RequestBody List<@Valid HistoryDto> historyDtoList, BindingResult bindingResult, @PathVariable("userId") long userId);
 }

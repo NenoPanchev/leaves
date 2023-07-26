@@ -10,7 +10,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
 public class ContractFilter extends BaseFilter{
     private List<DateComparison> startDateComparisons = new ArrayList<>();
     private List<DateComparison> endDateComparisons = new ArrayList<>();

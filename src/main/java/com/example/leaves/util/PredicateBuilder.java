@@ -229,6 +229,32 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
+    public <T, Y> PredicateBuilder<ENTITY> joinDeepCompareIntegers(final SingularAttribute<?, T> attribute,
+                                                                   final ListAttribute<?, Y> secondAttribute,
+                                                                   final List<IntegerComparison> comparisons,
+                                                                   final String fieldYearName,
+                                                                   final String fieldValueName) {
+        if (comparisons != null && !comparisons.isEmpty()) {
+            int currentYear = LocalDate.now().getYear();
+            final Join<ENTITY, T> firstJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
+            final Join<T, Y> secondJoin = firstJoin.join((ListAttribute<? super T, Y>) secondAttribute);
+
+
+            // Create a Predicate to filter HistoryEntity records by calendarYear
+
+            // Combine the current year Predicate with other comparisons using 'and' or 'or' depending on your needs
+            Predicate finalPredicate = builder.equal(secondJoin.get(fieldYearName), currentYear);
+            for (IntegerComparison comparison : comparisons) {
+                int value = comparison.getValue();
+                Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), secondJoin.get(fieldValueName), value);
+                finalPredicate = builder.and(finalPredicate, predicate);
+            }
+
+            this.predicates.add(finalPredicate);
+        }
+        return this;
+    }
+
     public <T> PredicateBuilder<ENTITY> compareDates(final SingularAttribute<?, T> attribute,
                                                          final List<DateComparison> comparisons) {
         if (comparisons != null && !comparisons.isEmpty()) {

@@ -7,6 +7,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LeavesReportFilter extends BaseFilter {
+public class HistoryFilter extends BaseFilter {
 
 }
