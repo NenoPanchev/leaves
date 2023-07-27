@@ -48,7 +48,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendMailToNotifyAboutPaidLeave(
             final String recipientName, final String recipientEmail, String subject, int paidLeaveLeft) throws MessagingException {
         if (!shouldSendEmails) {
-            return;
+            throw new MessagingException();
         }
         // Prepare the evaluation context
         final Context ctx = prepareContext(recipientName, String.format(LEAVE_NOTIFY_STRING, paidLeaveLeft));
@@ -66,7 +66,7 @@ public class EmailServiceImpl implements EmailService {
                                                 String subject,
                                                 RequestEntity request) throws MessagingException {
         if (!shouldSendEmails) {
-            return;
+            throw new MessagingException();
         }
         String employeeName = request.getEmployee().getUserInfo().getName();
         String employeeEmail = request.getEmployee().getUserInfo().getEmail();
@@ -86,7 +86,7 @@ public class EmailServiceImpl implements EmailService {
                                         String recipientEmail,
                                         String token) throws MessagingException {
         if (!shouldSendEmails) {
-            return;
+            throw new MessagingException();
         }
         final Context ctx = prepareContext(recipientName,
                 String.format(CHANGE_PASSWORD_TOKEN_MSG,

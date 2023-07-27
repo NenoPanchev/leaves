@@ -241,23 +241,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Scheduled(cron = "${cron-jobs.update.history:0 0 9 1 12 *}", zone = EUROPE_SOFIA)
     @Transactional
     public void addHistoryForUpcomingYear() {
-        // Specify the timezone "Europe/Sofia"
-        ZoneId sofiaZone = ZoneId.of(EUROPE_SOFIA);
-        // Get the current date in the specified timezone
-        LocalDate currentDateInSofia = ZonedDateTime.now(sofiaZone).toLocalDate();
-        int currentYear = currentDateInSofia.getYear();
+        int currentYear = LocalDate.now().getYear();
         employeeRepository
                 .findAllByDeletedIsFalse()
                 .stream()
                 .map(UserEntity::getEmployeeInfo)
                 .forEach(employeeInfo -> {
-                    HistoryEntity newYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear);
-                    HistoryEntity oldYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear - 1);
-                    int daysLeftFromPreviousYear = oldYear.getDaysLeft();
-                    if (daysLeftFromPreviousYear > allowedDaysPaidLeaveToCarryOver) {
-                        daysLeftFromPreviousYear = allowedDaysPaidLeaveToCarryOver;
-                    }
-                    newYear.setDaysFromPreviousYear(daysLeftFromPreviousYear);
+                    int contractDays = employeeInfo.getEmployeeType().getDaysLeave();
+                    HistoryEntity upcomingYearHistory = new HistoryEntity(currentYear + 1, contractDays);
+                    upcomingYearHistory.setEmployeeInfo(employeeInfo);
+                    employeeInfo.getHistoryList().add(upcomingYearHistory);
                     employeeInfoRepository.save(employeeInfo);
                 });
         LOGGER.info("Added history for next year");
@@ -362,7 +355,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     @Override
     @Scheduled(cron = "${cron-jobs.notify.paid-leave.left:0 0 9 1 10,11 *}", zone = EUROPE_SOFIA)
     public void notifyEmployeesOfTheirPaidLeaveLeft() {
-
         employeeRepository
                 .findAllByDeletedIsFalse()
                 .forEach(employee -> {
@@ -376,7 +368,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                             LOGGER.info("Sent notifying email about paid leave left to {}.", employee.getName());
 
                         } catch (MessagingException e) {
-                            LOGGER.warn("cron job error notifying employees of paid leave left");
+                            LOGGER.warn("cron job error notifying {} of paid leave left", employee.getName());
                         }
                     }
                 });

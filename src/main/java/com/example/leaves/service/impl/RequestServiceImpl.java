@@ -15,10 +15,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RequestFilter;
-import com.example.leaves.util.DatesUtil;
-import com.example.leaves.util.ListHelper;
-import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.PredicateBuilderV2;
+import com.example.leaves.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +33,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
-import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -350,14 +346,14 @@ public class RequestServiceImpl implements RequestService {
         LocalDate date = LocalDate.now().minusMonths(1);
         int year = date.getYear();
         int month = date.getMonthValue();
-        Map<String, Set<Integer>> employeesDaysUsed = new TreeMap<>();
+        Map<String, List<Integer>> employeesDaysUsed = new TreeMap<>();
         List<RequestEntity> requests = requestRepository
                 .findAllApprovedLeaveRequestsInAMonthOfYear(month, year);
         requests
                 .forEach(request -> {
                     String name = request.getEmployee().getUserInfo().getName();
-                    employeesDaysUsed.putIfAbsent(name, new TreeSet<>());
-                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request, date));
+                    employeesDaysUsed.putIfAbsent(name, new ArrayList<>());
+                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request.toDto(), date));
                 });
         String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG")).toLowerCase();
         if (employeesDaysUsed.isEmpty()) {
@@ -765,25 +761,13 @@ public class RequestServiceImpl implements RequestService {
         return RequestTypeEnum.LEAVE.name().equals(requestType);
     }
 
-    private Set<Integer> getDaysOfMonthUsed(RequestEntity request, LocalDate date) {
-        Set<Integer> daysSet = new TreeSet<>();
-        int requiredMonth = date.getMonthValue();
-        int year = date.getYear();
-        int startDay = request.getApprovedStartDate().getDayOfMonth();
-        int endDay = request.getApprovedEndDate().getDayOfMonth();
+    private List<Integer> getDaysOfMonthUsed(RequestDto dto, LocalDate date) {
+        trimApprovedDaysJustInAMonth(dto, date);
+        return DatesUtil.countBusinessDaysBetween(dto.getApprovedStartDate(), dto.getApprovedEndDate())
+                .stream()
+                .map(LocalDate::getDayOfMonth)
+                .collect(Collectors.toList());
 
-        if (request.getApprovedStartDate().getMonthValue() != requiredMonth) {
-            startDay = 1;
-        }
-
-        if (request.getApprovedEndDate().getMonthValue() != requiredMonth) {
-            endDay = YearMonth.of(year, requiredMonth).lengthOfMonth();
-        }
-
-        for (int day = startDay; day <= endDay; day++) {
-            daysSet.add(day);
-        }
-        return daysSet;
     }
 
     private void trimApprovedDaysJustInAMonth(RequestDto dto, LocalDate date) {
@@ -802,11 +786,11 @@ public class RequestServiceImpl implements RequestService {
     }
 
 
-    private String generateMessageForAccountingNote(Map<String, Set<Integer>> employeesDaysUsed, String monthName, int year) {
+    private String generateMessageForAccountingNote(Map<String, List<Integer>> employeesDaysUsed, String monthName, int year) {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(MAIL_TO_ACCOUNTING_GREETING_PREFIX, monthName, year));
         sb.append(System.lineSeparator());
-        for (Map.Entry<String, Set<Integer>> entry : employeesDaysUsed.entrySet()) {
+        for (Map.Entry<String, List<Integer>> entry : employeesDaysUsed.entrySet()) {
             String stringJoin = String.join(",", entry.getValue().toString());
             sb.append(String.format("%s: Общо (%d дни) - %s%n%n", entry.getKey(), entry.getValue().size(), stringJoin));
         }

@@ -108,7 +108,7 @@ public class UserServiceImpl implements UserService {
         entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        EmployeeInfo employeeInfo = setEmployeeInfoFromDto(dto.getEmployeeInfo());
+        EmployeeInfo employeeInfo = getEmployeeInfoFromDto(dto.getEmployeeInfo());
         entity.setEmployeeInfo(employeeInfo);
         entity = userRepository.save(entity);
         if (!isBlank(dto.getDepartment())) {
@@ -582,7 +582,7 @@ public class UserServiceImpl implements UserService {
         return department;
     }
 
-    private EmployeeInfo setEmployeeInfoFromDto(EmployeeInfoDto employeeInfo) {
+    private EmployeeInfo getEmployeeInfoFromDto(EmployeeInfoDto employeeInfo) {
         LocalDate startDate;
         if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null
