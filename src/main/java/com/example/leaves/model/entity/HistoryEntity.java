@@ -24,7 +24,7 @@ public class HistoryEntity extends BaseEntity<HistoryDto> {
     private int contractDays;
     @Column(name = "days_used", nullable = false)
     private int daysUsed;
-    @Column(name = "days_left")
+    @Column(name = "days_left", nullable = false)
     private int daysLeft;
     @ManyToOne(cascade = CascadeType.ALL)
     private EmployeeInfo employeeInfo;
