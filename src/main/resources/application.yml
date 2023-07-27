@@ -63,7 +63,10 @@ cron-jobs:
   notify:
     paid-leave:
       left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.   Notifies employees to spend their remaining surplus days leave.
-      used: "0 0 8 1 * *"       # At 08:00 on day-of-month 1.                           Sends report about each employee's spent days during previous month.
+      used: "0 0 9 1 * *"       # At 08:00 on day-of-month 1.                           Sends report about each employee's spent days during previous month.
+    email-recipients:
+      - "aleksandar.vasilev@lightsoftbulgaria.com"
+
 
 ui:
   address: "https://vacation.lightsoftbulgaria.com"

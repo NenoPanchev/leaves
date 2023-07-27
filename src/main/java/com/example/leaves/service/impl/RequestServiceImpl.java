@@ -1,6 +1,7 @@
 package com.example.leaves.service.impl;
 
 
+import com.example.leaves.AppYmlRecipientsToNotifyConfig;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
@@ -46,26 +47,27 @@ public class RequestServiceImpl implements RequestService {
     public static final String APPROVE_REQUEST_EXCEPTION_MSG = "You can not approve start date that is before requested date or end date that is after";
     public static final String MAIL_TO_ACCOUNTING_GREETING_PREFIX = "Здравейте,\nПредоставяме Ви списък с дните използван платен годишен отпуск за месец %s %d г. както следва:\n";
     public static final String MAIL_TO_ACCOUNTING_POSTFIX = "Поздрави,\nЕкипът на Лайт Софт България\n";
-    public static final String ACCOUNTING_EMAIL = "neno.panchev@gmail.com";
     public static final String MONTHLY_PAID_LEAVE_REPORT_SUBJECT = "Месечен доклад за отпуски";
     private final EmailService emailService;
     private final UserRepository employeeRepository;
     private final RequestRepository requestRepository;
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
+    private final AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig;
 
     @Autowired
     public RequestServiceImpl(UserRepository employeeRepository,
                               RequestRepository requestRepository,
                               @Lazy UserService userService,
                               EmailService emailService,
-                              @Lazy EmployeeInfoService employeeInfoService) {
+                              @Lazy EmployeeInfoService employeeInfoService, AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig) {
 
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
         this.userService = userService;
         this.emailService = emailService;
         this.employeeInfoService = employeeInfoService;
+        this.appYmlRecipientsToNotifyConfig = appYmlRecipientsToNotifyConfig;
     }
 
 
@@ -343,6 +345,10 @@ public class RequestServiceImpl implements RequestService {
     @Override
     @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 8 1 * *}", zone = EUROPE_SOFIA)
     public void notifyAccountingOfPaidLeaveUsed() {
+        if (appYmlRecipientsToNotifyConfig.getEmailRecipients().isEmpty()) {
+            LOGGER.warn("Notifying about paid leave used cancelled. No recipients.");
+            return;
+        }
         LocalDate date = LocalDate.now().minusMonths(1);
         int year = date.getYear();
         int month = date.getMonthValue();
@@ -361,8 +367,8 @@ public class RequestServiceImpl implements RequestService {
             return;
         }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
-        emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
-        LOGGER.info("Monthly paid leave used notify to accounting sent.");
+        emailService.send(appYmlRecipientsToNotifyConfig.getEmailRecipients(), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
+        LOGGER.info("Monthly paid leave used notify sent.");
     }
 
     @Override

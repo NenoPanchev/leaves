@@ -14,6 +14,7 @@ import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
+import com.sun.mail.smtp.SMTPAddressFailedException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.mail.MailSendException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
@@ -367,6 +369,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                     remainingPaidLeave);
                             LOGGER.info("Sent notifying email about paid leave left to {}.", employee.getName());
 
+                        } catch (MailSendException e) {
+                            LOGGER.warn("cron job error notifying {} of paid leave left. Reason - Invalid email address.", employee.getName());
                         } catch (MessagingException e) {
                             LOGGER.warn("cron job error notifying {} of paid leave left", employee.getName());
                         }
