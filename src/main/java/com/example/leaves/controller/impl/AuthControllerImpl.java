@@ -8,8 +8,10 @@ import com.example.leaves.model.payload.request.RefreshRequest;
 import com.example.leaves.model.payload.request.UserLoginDto;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
 import com.example.leaves.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,13 +39,20 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<AuthenticationResponse> createAuthenticationToken(UserLoginDto authenticationRequest, BindingResult bindingResult) {
+    public ResponseEntity<?> createAuthenticationToken(UserLoginDto authenticationRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Bad credentials");
+        }
+
 
         final UserDetails userDetails = userDetailService
                 .loadUserByUsername(authenticationRequest.getEmail());
