@@ -3,9 +3,11 @@ package com.example.leaves.controller;
 import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequestMapping("/api/requests")
@@ -58,5 +60,10 @@ public interface RequestController {
     @PostMapping("/Page")
     @PreAuthorize("hasRole('ADMIN')")
     Page<RequestDto> getPageFiltered(@RequestBody RequestFilter filter);
+
+    @PostMapping("/approved")
+    @PreAuthorize("hasAnyAuthority('READ')")
+    ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(@RequestBody LocalDate date);
+
 
 }

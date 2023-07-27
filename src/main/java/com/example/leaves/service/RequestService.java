@@ -5,6 +5,7 @@ import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface RequestService {
@@ -35,4 +36,6 @@ public interface RequestService {
     int getAllApprovedLeaveDaysInYearByEmployeeInfoId(int year, Long id);
 
     void notifyAccountingOfPaidLeaveUsed();
+
+    List<RequestDto> getAllApprovedRequestsInAMonth(LocalDate date);
 }

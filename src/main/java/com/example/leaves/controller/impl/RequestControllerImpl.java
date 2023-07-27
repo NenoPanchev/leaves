@@ -10,10 +10,12 @@ import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -102,5 +104,12 @@ public class RequestControllerImpl implements RequestController {
     @Override
     public Page<RequestDto> getPageFiltered(RequestFilter filter) {
         return requestService.getLeaveRequestDtoFilteredPage(filter);
+    }
+
+    @Override
+    public ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(LocalDate date) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getAllApprovedRequestsInAMonth(date));
     }
 }

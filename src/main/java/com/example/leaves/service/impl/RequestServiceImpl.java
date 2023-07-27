@@ -35,9 +35,11 @@ import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
 
@@ -350,12 +352,12 @@ public class RequestServiceImpl implements RequestService {
         int month = date.getMonthValue();
         Map<String, Set<Integer>> employeesDaysUsed = new TreeMap<>();
         List<RequestEntity> requests = requestRepository
-                .findAllApprovedLeaveRequestsInPreviousMonth(month, year);
+                .findAllApprovedLeaveRequestsInAMonthOfYear(month, year);
         requests
                 .forEach(request -> {
                     String name = request.getEmployee().getUserInfo().getName();
                     employeesDaysUsed.putIfAbsent(name, new TreeSet<>());
-                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request));
+                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request, date));
                 });
         String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG")).toLowerCase();
         if (employeesDaysUsed.isEmpty()) {
@@ -365,6 +367,21 @@ public class RequestServiceImpl implements RequestService {
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
         emailService.send(Collections.singletonList(ACCOUNTING_EMAIL), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify to accounting sent.");
+    }
+
+    @Override
+    public List<RequestDto> getAllApprovedRequestsInAMonth(LocalDate date) {
+        List<RequestEntity> requests = requestRepository
+                .findAllApprovedLeaveRequestsInAMonthOfYear(date.getMonthValue(), date.getYear());
+
+        return requests
+                .stream()
+                .map(entity -> {
+                    RequestDto dto = entity.toDto();
+                    trimApprovedDaysJustInAMonth(dto, date);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -748,20 +765,40 @@ public class RequestServiceImpl implements RequestService {
         return RequestTypeEnum.LEAVE.name().equals(requestType);
     }
 
-    private Set<Integer> getDaysOfMonthUsed(RequestEntity request) {
+    private Set<Integer> getDaysOfMonthUsed(RequestEntity request, LocalDate date) {
         Set<Integer> daysSet = new TreeSet<>();
-        LocalDate startDate = request.getApprovedStartDate();
-        Calendar calendarStartDay = Calendar.getInstance();
-        calendarStartDay.setTime(Date.from(startDate.atStartOfDay(ZoneId.of(EUROPE_SOFIA)).toInstant()));
-        int startDay = startDate.getDayOfMonth();
-        int maxDay = request.getApprovedEndDate().getDayOfMonth();
-        if (startDate.getMonthValue() != request.getApprovedEndDate().getMonthValue()) {
-            maxDay = calendarStartDay.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int requiredMonth = date.getMonthValue();
+        int year = date.getYear();
+        int startDay = request.getApprovedStartDate().getDayOfMonth();
+        int endDay = request.getApprovedEndDate().getDayOfMonth();
+
+        if (request.getApprovedStartDate().getMonthValue() != requiredMonth) {
+            startDay = 1;
         }
-        for (int day = startDay; day <= maxDay; day++) {
+
+        if (request.getApprovedEndDate().getMonthValue() != requiredMonth) {
+            endDay = YearMonth.of(year, requiredMonth).lengthOfMonth();
+        }
+
+        for (int day = startDay; day <= endDay; day++) {
             daysSet.add(day);
         }
         return daysSet;
+    }
+
+    private void trimApprovedDaysJustInAMonth(RequestDto dto, LocalDate date) {
+        int requiredMonth = date.getMonthValue();
+        int year = date.getYear();
+        // Check if approvedStartDate is before the required month
+        if (dto.getApprovedStartDate().getMonthValue() != requiredMonth) {
+            dto.setApprovedStartDate(LocalDate.of(year, requiredMonth, 1));
+        }
+
+        // Check if approvedEndDate is after the required month
+        if (dto.getApprovedEndDate().getMonthValue() != requiredMonth) {
+            int lastDayOfMonth = YearMonth.of(year, requiredMonth).lengthOfMonth();
+            dto.setApprovedEndDate(LocalDate.of(year, requiredMonth, lastDayOfMonth));
+        }
     }
 
 
