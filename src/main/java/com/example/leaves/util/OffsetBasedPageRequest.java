@@ -43,7 +43,7 @@ public class OffsetBasedPageRequest implements Pageable {
         if (filter.getSort() != null && !filter.getSort().isEmpty()) {
             pageRequest = new OffsetBasedPageRequest(filter.getOffset()
                     , filter.getLimit()
-                    , Sort.by(Sort.Direction.DESC,filter.getSort()));
+                    , Sort.by(filter.getSort()));
         } else {
             pageRequest = new OffsetBasedPageRequest(filter.getOffset()
                     , filter.getLimit());

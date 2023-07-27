@@ -12,7 +12,6 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RoleFilter;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -179,7 +178,7 @@ public class RoleServiceImpl implements RoleService {
         if (roleFilter.getLimit() != null && roleFilter.getLimit() > 0) {
             int offset = roleFilter.getOffset() == null ? 0 : roleFilter.getOffset();
             int limit = roleFilter.getLimit();
-            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            OffsetBasedPageRequest pageable = new OffsetBasedPageRequest(offset, limit);
             Page<RoleEntity> page = roleRepository.findAll(getSpecification(roleFilter), pageable);
             entities = page.getContent();
         } else {

@@ -306,7 +306,7 @@ public class UserServiceImpl implements UserService {
         if (filter.getLimit() != null && filter.getLimit() > 0) {
             int offset = filter.getOffset() == null ? 0 : filter.getOffset();
             int limit = filter.getLimit();
-            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            OffsetBasedPageRequest pageable = new OffsetBasedPageRequest(offset, limit);
             Page<UserEntity> page = userRepository.findAll(getSpecification(filter), pageable);
             entities = page.getContent();
         } else {

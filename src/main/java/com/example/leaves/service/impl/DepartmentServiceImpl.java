@@ -9,7 +9,6 @@ import com.example.leaves.service.DepartmentService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.DepartmentFilter;
 import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetLimitPageRequest;
 import com.example.leaves.util.PredicateBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -164,7 +163,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (filter.getLimit() != null && filter.getLimit() > 0) {
             int offset = filter.getOffset() == null ? 0 : filter.getOffset();
             int limit = filter.getLimit();
-            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            OffsetBasedPageRequest pageable = new OffsetBasedPageRequest(offset, limit);
             Page<DepartmentEntity> page = departmentRepository.findAll(getSpecification(filter), pageable);
             entities = page.getContent();
         } else {
