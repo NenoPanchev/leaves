@@ -57,13 +57,13 @@ holidays:
 
 cron-jobs:
   update:
-    holidays: "0 0 0 1 6 *"     # At 00:00 on day-of-month 1 in June.
-    paid-leave: "0 0 1 1 1 *"   # At 01:00 on day-of-month 1 in January.
-    history: "0 0 9 1 12 *"     # # At 09:00 on day-of-month 1 in December.
+    holidays: "0 0 0 1 6 *"     # At 00:00 on day-of-month 1 in June.                   Updates holidays for current and next year.
+    paid-leave: "0 0 1 1 1 *"   # At 01:00 on day-of-month 1 in January.                Transfers allowed days leave to next year's.
+    history: "0 0 9 1 12 *"     # # At 09:00 on day-of-month 1 in December.             Adds data for next year, so it allows merged December-January vacations.
   notify:
     paid-leave:
-      left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.
-      used: "0 0 8 1 * *"       # At 08:00 on day-of-month 1.
+      left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.   Notifies employees to spend their remaining surplus days leave.
+      used: "0 0 8 1 * *"       # At 08:00 on day-of-month 1.                           Sends report about each employee's spent days during previous month.
 
 ui:
   address: "https://vacation.lightsoftbulgaria.com"
