@@ -237,7 +237,7 @@ public class UserServiceImpl implements UserService {
             TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
             entity.getEmployeeInfo().setEmployeeType(newType);
         }
-        if (entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
+        if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
             entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
         }
     }
