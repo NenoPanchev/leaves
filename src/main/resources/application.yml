@@ -27,7 +27,7 @@ notification:
     host: mail.lightsoftbulgaria.com
     port: 465
     username: vacation@lightsoftbulgaria.com
-    password: ${EMAIL_SENDER_PASSWORD}
+    password: B6=5=g!F.?KU
     protocol: smtp
     java-mail-properties:
       mail:
@@ -65,10 +65,11 @@ cron-jobs:
       left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.   Notifies employees to spend their remaining surplus days leave.
       used: "0 0 9 1 * *"       # At 08:00 on day-of-month 1.                           Sends report about each employee's spent days during previous month.
     email-recipients:
-      - "aleksandar.vasilev@lightsoftbulgaria.com"
+#      - "aleksandar.vasilev@lightsoftbulgaria.com"
+      - "neno.panchev@lightsoftbulgaria.com"
 
 
 ui:
   address: "https://vacation.lightsoftbulgaria.com"
 
-should-send-emails: false
+should-send-emails: true
