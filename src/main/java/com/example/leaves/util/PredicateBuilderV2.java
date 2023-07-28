@@ -58,7 +58,7 @@ public class PredicateBuilderV2<ENTITY> {
         return this;
     }
 
-    public <T> PredicateBuilderV2<?> equal(final SingularAttribute<?, T> attribute, final T value) {
+    public <T> PredicateBuilderV2<?> equals(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
             this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
         }

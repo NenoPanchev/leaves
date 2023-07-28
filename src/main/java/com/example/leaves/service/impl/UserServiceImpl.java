@@ -354,6 +354,7 @@ public class UserServiceImpl implements UserService {
         {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
                     .in(BaseEntity_.id, filter.getIds())
+                    .notEquals(BaseEntity_.id, 1L)
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())
                     .equals(BaseEntity_.deleted, filter.isDeleted())

@@ -476,7 +476,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -495,7 +495,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -514,7 +514,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -533,7 +533,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -552,7 +552,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt,filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -571,7 +571,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -592,7 +592,7 @@ public class RequestServiceImpl implements RequestService {
                     .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -679,7 +679,7 @@ public class RequestServiceImpl implements RequestService {
                     .graterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .greaterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -700,7 +700,7 @@ public class RequestServiceImpl implements RequestService {
                     .graterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .graterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -722,7 +722,7 @@ public class RequestServiceImpl implements RequestService {
                     .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -749,7 +749,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -770,7 +770,7 @@ public class RequestServiceImpl implements RequestService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 

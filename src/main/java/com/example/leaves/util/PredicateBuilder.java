@@ -147,6 +147,15 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
+    public <T> PredicateBuilder<?> notEquals(final SingularAttribute<?, T> attribute,
+                                          final T value) {
+        if (value != null) {
+            this.predicates.add(this.builder.notEqual(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
+                    value));
+        }
+        return this;
+    }
+
     public <T> PredicateBuilder<ENTITY> joinGraterThanOrEqualToDate(final SingularAttribute<?, T> attribute, final LocalDate value, final String fieldName) {
         if (value != null) {
             Expression<LocalDate> exp = root

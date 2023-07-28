@@ -171,7 +171,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -189,7 +189,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
                     .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -207,7 +207,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
                     .lessThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .lessThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
@@ -225,7 +225,7 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
                     .greaterThan(BaseEntity_.createdAt, ListHelper.getLatestDateTime(filter.getDateCreated()))
                     .graterThan(BaseEntity_.lastModifiedAt, ListHelper.getLatestDateTime(filter.getLastUpdated()))
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
-                    .equal(BaseEntity_.deleted, filter.getDeleted())
+                    .equals(BaseEntity_.deleted, filter.getDeleted())
                     .build()
                     .toArray(new Predicate[0]);
 
