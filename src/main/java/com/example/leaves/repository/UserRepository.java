@@ -2,7 +2,11 @@ package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.UserEntity;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -41,7 +45,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
 
     @Query("SELECT u FROM UserEntity u " +
             "JOIN u.roles AS r " +
-            "WHERE r.id = :id ")
+            "WHERE r.id = :id " +
+            "AND u.deleted = false ")
     List<UserEntity> findAllByRoleId(@Param("id") Long id);
 
     @Query("SELECT u FROM UserEntity u " +

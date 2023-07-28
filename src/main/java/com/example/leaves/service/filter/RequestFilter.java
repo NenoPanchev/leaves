@@ -1,7 +1,5 @@
 package com.example.leaves.service.filter;
 
-import lombok.EqualsAndHashCode;
-
 import java.time.LocalDate;
 import java.util.List;
 

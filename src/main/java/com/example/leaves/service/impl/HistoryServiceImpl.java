@@ -3,13 +3,8 @@ package com.example.leaves.service.impl;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
-import com.example.leaves.repository.HistoryRepository;
-import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.HistoryService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,14 +16,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class HistoryServiceImpl implements HistoryService {
-    private final HistoryRepository historyRepository;
-    private final EmployeeInfoService employeeInfoService;
-
-    public HistoryServiceImpl(HistoryRepository historyRepository,
-                              @Lazy EmployeeInfoService employeeInfoService) {
-        this.historyRepository = historyRepository;
-        this.employeeInfoService = employeeInfoService;
-    }
 
     @Override
     public Map<Integer, Integer> createInitialHistory(LocalDate startDate) {

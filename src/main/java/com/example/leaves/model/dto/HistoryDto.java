@@ -1,9 +1,7 @@
 package com.example.leaves.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import javax.validation.constraints.PositiveOrZero;
 

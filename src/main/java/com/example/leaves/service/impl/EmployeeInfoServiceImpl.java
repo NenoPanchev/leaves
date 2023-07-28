@@ -1,20 +1,34 @@
 package com.example.leaves.service.impl;
 
 
-import com.example.leaves.exceptions.*;
+import com.example.leaves.exceptions.EntityNotFoundException;
+import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.PaidleaveNotEnoughException;
+import com.example.leaves.exceptions.PdfInvalidException;
+import com.example.leaves.exceptions.RequestNotApproved;
+import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.HistoryEntity;
+import com.example.leaves.model.entity.RequestEntity;
+import com.example.leaves.model.entity.TypeEmployee;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.repository.EmployeeInfoRepository;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.*;
+import com.example.leaves.service.EmailService;
+import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.HistoryService;
+import com.example.leaves.service.RequestService;
+import com.example.leaves.service.RoleService;
+import com.example.leaves.service.TypeEmployeeService;
+import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.util.EncryptionUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
-import com.sun.mail.smtp.SMTPAddressFailedException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.example.leaves.constants.GlobalConstants.*;
+import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
 
 @Service
 public class EmployeeInfoServiceImpl implements EmployeeInfoService {

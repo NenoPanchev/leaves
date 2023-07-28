@@ -1,7 +1,5 @@
 package com.example.leaves.service.filter;
 
-import lombok.EqualsAndHashCode;
-
 import java.util.List;
 
 public class RoleFilter extends BaseFilter {

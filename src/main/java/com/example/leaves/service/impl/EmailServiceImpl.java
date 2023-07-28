@@ -78,7 +78,7 @@ public class EmailServiceImpl implements EmailService {
 
         // Send mail
         this.emailSender.send(mimeMessage);
-
+        LOGGER.info("Mail sent to {} regarding leave request by {}", recipientName, employeeName);
     }
 
     @Override

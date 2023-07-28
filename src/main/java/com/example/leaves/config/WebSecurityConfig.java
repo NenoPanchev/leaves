@@ -16,8 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-//         securedEnabled = true,
-//         jsr250Enabled = true,
+
         prePostEnabled = true)
 
 public class WebSecurityConfig { // extends WebSecurityConfigurer Adapter {   // deprecated from Spring 2.7.0

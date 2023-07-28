@@ -2,7 +2,6 @@ package com.example.leaves.service.filter;
 
 import com.example.leaves.model.entity.enums.SearchOperation;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

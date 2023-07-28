@@ -3,7 +3,9 @@ package com.example.leaves.service;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.TypeEmployee;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.service.filter.HistoryFilter;
 import org.springframework.data.domain.Page;
 

@@ -2,10 +2,7 @@ package com.example.leaves.service.filter;
 
 import com.example.leaves.service.filter.comparison.DateComparison;
 import com.example.leaves.service.filter.comparison.IntegerComparison;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.EqualsAndHashCode;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

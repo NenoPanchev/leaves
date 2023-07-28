@@ -1,13 +1,18 @@
 package com.example.leaves.service.impl;
 
 
-import com.example.leaves.AppYmlRecipientsToNotifyConfig;
+import com.example.leaves.config.AppYmlRecipientsToNotifyConfig;
 import com.example.leaves.exceptions.DuplicateEntityException;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
 import com.example.leaves.model.dto.RequestDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.BaseEntity_;
+import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.HistoryEntity;
+import com.example.leaves.model.entity.RequestEntity;
+import com.example.leaves.model.entity.RequestEntity_;
+import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.repository.RequestRepository;
 import com.example.leaves.repository.UserRepository;
@@ -16,13 +21,17 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RequestFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.DatesUtil;
+import com.example.leaves.util.ListHelper;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.PredicateBuilderV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.mail.MailSendException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +44,11 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
@@ -89,6 +102,8 @@ public class RequestServiceImpl implements RequestService {
                                 admin.getEmail(),
                                 "New Leave Request", request);
 
+                    } catch (MailSendException e) {
+                        LOGGER.warn("error sending notification email to admin: {} for added leave request. Reason - Invalid email address.", admin.getName());
                     } catch (MessagingException e) {
                         LOGGER.warn("error sending notification email to admins for added leave request");
                     }
