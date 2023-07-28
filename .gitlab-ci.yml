@@ -42,10 +42,13 @@ build-image-and-push:
         TAG="$CI_COMMIT_REF_NAME"
       fi
       cp /certificates/vacation/service/service.vacation.lightsoftbulgaria.jks service.vacation.lightsoftbulgaria.jks
-      docker build -t vacation_management_service:$TAG .
-      docker tag vacation_management_service:$TAG docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
-      docker push docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG
-      echo "DOCKER_IMAGE=docker.regisrty.lightsoftbulgaria.com/vacation_management_service:$TAG" >> build.env
+      docker build -t $DOCKER_IMAGE_NAME:$TAG .
+      docker tag $DOCKER_IMAGE_NAME:$TAG $DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG
+      docker push $DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG
+      echo "DOCKER_IMAGE=$DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG" >> build.env
+      docker rmi $DOCKER_IMAGE_NAME:$TAG
+      docker rmi $DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG
+      yes | docker system prune
   artifacts:
     reports:
       dotenv: build.env
