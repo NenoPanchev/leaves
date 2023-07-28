@@ -48,7 +48,7 @@ build-image-and-push:
       echo "DOCKER_IMAGE=$DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG" >> build.env
       docker rmi $DOCKER_IMAGE_NAME:$TAG
       docker rmi $DOCKER_REGISTRY_NAME/$DOCKER_IMAGE_NAME:$TAG
-      # yes | docker system prune
+      yes | docker system prune
   artifacts:
     reports:
       dotenv: build.env
