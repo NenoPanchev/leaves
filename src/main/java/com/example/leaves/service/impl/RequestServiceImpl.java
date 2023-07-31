@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.MailSendException;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
@@ -85,15 +86,17 @@ public class RequestServiceImpl implements RequestService {
 
 
     private RequestEntity addRequestIn(EmployeeInfo employee, RequestDto requestDto) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         RequestEntity request = new RequestEntity();
         request.toEntity(requestDto);
         request.setEmployee(employee);
-
-        sendNotificationEmailToAdmins(request);
+        executor.submit(() -> sendNotificationEmailToAdmins(request));
+        executor.shutdown();
         return requestRepository.save(request);
     }
 
     private void sendNotificationEmailToAdmins(RequestEntity request) {
+        LOGGER.warn("Job Thread: {}", Thread.currentThread().getName());
         userService.getAllAdmins().forEach(
                 (admin -> {
 
@@ -389,7 +392,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<RequestDto> getAllApprovedRequestsInAMonth(LocalDate date) {
         List<RequestEntity> requests = requestRepository
-                .findAllApprovedLeaveRequestsInAMonthOfYear(date.getMonthValue(), date.getYear());
+                .findAllApprovedRequestsInAMonthOfYear(date.getMonthValue(), date.getYear());
 
         return requests
                 .stream()
@@ -823,7 +826,7 @@ public class RequestServiceImpl implements RequestService {
 
     private void refundApprovedDays(long id) {
         RequestEntity request = getById(id);
-        if (Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
+        if (request.getApproved() == null || Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
             return;
         }
         decreaseDaysUsedAccordingly(request);

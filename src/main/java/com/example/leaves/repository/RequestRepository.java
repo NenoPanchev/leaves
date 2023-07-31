@@ -49,4 +49,13 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
             "AND ((MONTH(r.approvedStartDate) = :auditMonth AND YEAR(r.approvedStartDate) = :auditYear) " +
             "   OR (MONTH(r.approvedEndDate) = :auditMonth AND YEAR(r.approvedEndDate) = :auditYear))")
     List<RequestEntity> findAllApprovedLeaveRequestsInAMonthOfYear(int auditMonth, int auditYear);
+
+    @Query("SELECT r FROM RequestEntity r " +
+            "JOIN FETCH r.employee AS e " +
+            "JOIN FETCH e.userInfo AS u " +
+            "WHERE r.approved = true " +
+            "AND r.deleted = false " +
+            "AND ((MONTH(r.approvedStartDate) = :auditMonth AND YEAR(r.approvedStartDate) = :auditYear) " +
+            "   OR (MONTH(r.approvedEndDate) = :auditMonth AND YEAR(r.approvedEndDate) = :auditYear))")
+    List<RequestEntity> findAllApprovedRequestsInAMonthOfYear(int auditMonth, int auditYear);
 }
