@@ -555,6 +555,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(ObjectNotFoundException::new);
     }
 
+    @Override
+    public List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin() {
+        return userRepository.findAllNamesByDeletedIsFalseWithoutDevAdmin();
+    }
+
     private UserEntity getUserEntity(Long id) {
         return userRepository
                 .findById(id).orElseThrow(() -> new ObjectNotFoundException(USER_NOT_FOUND_MESSAGE));

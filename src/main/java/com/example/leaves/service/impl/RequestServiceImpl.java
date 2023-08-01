@@ -2,11 +2,8 @@ package com.example.leaves.service.impl;
 
 
 import com.example.leaves.config.AppYmlRecipientsToNotifyConfig;
-import com.example.leaves.exceptions.DuplicateEntityException;
-import com.example.leaves.exceptions.EntityNotFoundException;
-import com.example.leaves.exceptions.PaidleaveNotEnoughException;
-import com.example.leaves.exceptions.RequestAlreadyProcessed;
-import com.example.leaves.model.dto.RequestDto;
+import com.example.leaves.exceptions.*;
+import com.example.leaves.model.dto.*;
 import com.example.leaves.model.entity.BaseEntity_;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
@@ -44,11 +41,7 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -338,29 +331,6 @@ public class RequestServiceImpl implements RequestService {
         return list;
     }
 
-    @Override
-    public int getAllApprovedLeaveDaysInYearByEmployeeInfoId(int year, Long id) {
-        int daysSpentDuringYear = 0;
-        List<RequestEntity> allApprovedInYear = requestRepository.findAllApprovedLeaveInYearByEmployeeInfoId(year, id);
-        for (RequestEntity request : allApprovedInYear) {
-            if (request.getApprovedStartDate().getYear() == year - 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(LocalDate.of(year, 1, 1), request.getApprovedEndDate());
-                daysSpentDuringYear += countOfBusinessDays.size();
-                continue;
-            }
-            if (request.getApprovedEndDate().getYear() == year + 1) {
-                List<LocalDate> countOfBusinessDays = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), LocalDate.of(year, 12, 31));
-                daysSpentDuringYear += countOfBusinessDays.size();
-                continue;
-            }
-            List<LocalDate> localDates = DatesUtil.countBusinessDaysBetween(request.getApprovedStartDate(), request.getApprovedEndDate());
-            daysSpentDuringYear += localDates.size();
-
-        }
-        return daysSpentDuringYear;
-    }
-
-    @Override
     @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 8 1 * *}", zone = EUROPE_SOFIA)
     public void notifyAccountingOfPaidLeaveUsed() {
         if (appYmlRecipientsToNotifyConfig.getEmailRecipients().isEmpty()) {
@@ -387,6 +357,54 @@ public class RequestServiceImpl implements RequestService {
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
         emailService.send(appYmlRecipientsToNotifyConfig.getEmailRecipients(), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify sent.");
+    }
+
+    @Override
+    public List<DaysUsedByMonthViewDto> getDaysLeaveUsedTableView(int year) {
+        List<DaysUsedByMonthViewDto> dtoList = new ArrayList<>();
+        Map<String, Map<String, List<Integer>>> maps = new TreeMap<>();
+        userService
+                .findAllNamesByDeletedIsFalseWithoutDevAdmin()
+                .forEach(name -> maps.put(name, new HashMap<>()));
+
+        for (int i = 1; i <= 12; i++) {
+            String monthName = Month.of(i).getDisplayName(TextStyle.FULL, new Locale("en", "UK"));
+            LocalDate date = LocalDate.of(year, i, 1);
+            List<RequestEntity> requests = requestRepository.findAllApprovedLeaveRequestsInAMonthOfYear(i, year);
+            requests
+                    .forEach(request -> {
+                        String name = request.getEmployee().getUserInfo().getName();
+                        maps.get(name).putIfAbsent(monthName, new ArrayList<>());
+                        maps.get(name).get(monthName).addAll(getDaysOfMonthUsed(request.toDto(), date));
+                    });
+        }
+        for (Map.Entry<String, Map<String, List<Integer>>> entry : maps.entrySet()) {
+            DaysUsedByMonthViewDto dto = new DaysUsedByMonthViewDto();
+            dto.setName(entry.getKey());
+            dto.setMonthDaysUsed(entry.getValue());
+            dtoList.add(dto);
+        }
+        return dtoList;
+    }
+
+    @Override
+    public DaysUsedByMonthViewDto getDaysLeaveUsedByYearAndEmployeeId(int year, long id) {
+        DaysUsedByMonthViewDto dto = new DaysUsedByMonthViewDto();
+        dto.setMonthDaysUsed(new HashMap<>());
+        for (int i = 1; i <= 12; i++) {
+            String monthName = Month.of(i).getDisplayName(TextStyle.FULL, new Locale("en", "UK"));
+            LocalDate date = LocalDate.of(year, i, 1);
+            RequestEntity request = requestRepository
+                    .findApprovedRequestsInAMonthOfYearByEmployeeInfoId(i, year, id)
+                    .orElseThrow(ObjectNotFoundException::new);
+
+            String name = request.getEmployee().getUserInfo().getName();
+            dto.setName(name);
+            dto.getMonthDaysUsed().putIfAbsent(monthName, new ArrayList<>());
+            dto.getMonthDaysUsed().get(monthName).addAll(getDaysOfMonthUsed(request.toDto(), date));
+
+        }
+        return dto;
     }
 
     @Override
@@ -445,8 +463,7 @@ public class RequestServiceImpl implements RequestService {
 
     private Page<RequestDto> getLeaveRequestDtoFilteredRange(RequestFilter filter) {
         OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
-        if (filter.getEndDate().isEmpty())
-        {
+        if (filter.getEndDate().isEmpty()) {
             //START DATE - START DATE RANGE
 
             return requestRepository.findAll(getSpecificationStartDateRange(filter)
@@ -459,15 +476,14 @@ public class RequestServiceImpl implements RequestService {
             return requestRepository.findAll(getSpecificationEndDateRange(filter)
                             .or(ifApprovedHasNullEndDateRange(filter)), pageRequest)
                     .map(RequestEntity::toDto);
-        }
-        else
-        {
+        } else {
             //START DATE - END DATE RANGE
             return requestRepository.findAll(getSpecificationRange(filter)
                             .or(ifApprovedHasNullRange(filter)), pageRequest)
                     .map(RequestEntity::toDto);
         }
     }
+
     private Specification<RequestEntity> getSpecificationStartDateRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
@@ -476,7 +492,7 @@ public class RequestServiceImpl implements RequestService {
                     .graterThan(RequestEntity_.startDate, filter.getStartDate().get(0))
                     .lessThan(RequestEntity_.startDate, filter.getStartDate().get(1))
                     .in(RequestEntity_.approved, filter.getApproved())
-                    .in(BaseEntity_.createdAt,filter.getDateCreated())
+                    .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
                     .equals(BaseEntity_.deleted, filter.getDeleted())
@@ -486,6 +502,7 @@ public class RequestServiceImpl implements RequestService {
             return criteriaBuilder.and(predicates);
         };
     }
+
     private Specification<RequestEntity> ifApprovedHasNullStartDateRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
@@ -506,6 +523,7 @@ public class RequestServiceImpl implements RequestService {
         };
 
     }
+
     private Specification<RequestEntity> getSpecificationEndDateRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
@@ -514,7 +532,7 @@ public class RequestServiceImpl implements RequestService {
                     .graterThan(RequestEntity_.endDate, filter.getEndDate().get(0))
                     .lessThan(RequestEntity_.endDate, filter.getEndDate().get(1))
                     .in(RequestEntity_.approved, filter.getApproved())
-                    .in(BaseEntity_.createdAt,filter.getDateCreated())
+                    .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
                     .equals(BaseEntity_.deleted, filter.getDeleted())
@@ -524,6 +542,7 @@ public class RequestServiceImpl implements RequestService {
             return criteriaBuilder.and(predicates);
         };
     }
+
     private Specification<RequestEntity> ifApprovedHasNullEndDateRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
@@ -544,6 +563,7 @@ public class RequestServiceImpl implements RequestService {
         };
 
     }
+
     private Specification<RequestEntity> getSpecificationRange(RequestFilter filter) {
         return (root, query, criteriaBuilder) ->
         {
@@ -552,7 +572,7 @@ public class RequestServiceImpl implements RequestService {
                     .graterThan(RequestEntity_.startDate, ListHelper.getLatestDate(filter.getStartDate()))
                     .lessThan(RequestEntity_.endDate, ListHelper.getLatestDate(filter.getEndDate()))
                     .in(RequestEntity_.approved, filter.getApproved())
-                    .in(BaseEntity_.createdAt,filter.getDateCreated())
+                    .in(BaseEntity_.createdAt, filter.getDateCreated())
                     .in(BaseEntity_.lastModifiedAt, filter.getLastUpdated())
                     .in(BaseEntity_.createdBy, filter.getCreatedBy())
                     .equals(BaseEntity_.deleted, filter.getDeleted())
@@ -562,6 +582,7 @@ public class RequestServiceImpl implements RequestService {
             return criteriaBuilder.and(predicates);
         };
     }
+
     private Specification<RequestEntity> ifApprovedHasNullRange(RequestFilter filter) {
 
         return (root, query, criteriaBuilder) ->
@@ -831,8 +852,6 @@ public class RequestServiceImpl implements RequestService {
         }
         decreaseDaysUsedAccordingly(request);
     }
-
-
 
 
     private void increaseDaysUsedAccordingly(RequestEntity request) {

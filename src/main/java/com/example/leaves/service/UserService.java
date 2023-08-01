@@ -74,4 +74,6 @@ public interface UserService {
     UserDto updatePersonalInfo(UserUpdateDto dto);
 
     String findNameByEmail(String email);
+
+    List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
 }

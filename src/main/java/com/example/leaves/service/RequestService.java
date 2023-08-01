@@ -1,6 +1,6 @@
 package com.example.leaves.service;
 
-import com.example.leaves.model.dto.RequestDto;
+import com.example.leaves.model.dto.*;
 import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
@@ -33,9 +33,8 @@ public interface RequestService {
 
     List<RequestDto> getAllByUserId(long id);
 
-    int getAllApprovedLeaveDaysInYearByEmployeeInfoId(int year, Long id);
-
-    void notifyAccountingOfPaidLeaveUsed();
-
     List<RequestDto> getAllApprovedRequestsInAMonth(LocalDate date);
+
+    List<DaysUsedByMonthViewDto> getDaysLeaveUsedTableView(int year);
+    DaysUsedByMonthViewDto getDaysLeaveUsedByYearAndEmployeeId(int year, long id);
 }

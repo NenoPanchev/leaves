@@ -4,7 +4,7 @@ import com.example.leaves.controller.RequestController;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
-import com.example.leaves.model.dto.RequestDto;
+import com.example.leaves.model.dto.*;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,5 +111,12 @@ public class RequestControllerImpl implements RequestController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.getAllApprovedRequestsInAMonth(date));
+    }
+
+    @Override
+    public ResponseEntity<List<DaysUsedByMonthViewDto>> getDaysLeaveUsedTableView(int year) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getDaysLeaveUsedTableView(year));
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 @Repository
 public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
@@ -32,18 +32,9 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
 
     @Query("SELECT r FROM RequestEntity r " +
             "JOIN FETCH r.employee AS e " +
-            "WHERE e.id = :id " +
-            "AND r.deleted = false " +
-            "AND r.requestType = 'LEAVE' " +
-            "AND (YEAR(r.approvedStartDate) = :year " +
-            "OR YEAR(r.approvedEndDate) = :year) " +
-            "AND r.approved = true ")
-    List<RequestEntity> findAllApprovedLeaveInYearByEmployeeInfoId(@Param("year") int year, @Param("id") Long id);
-
-    @Query("SELECT r FROM RequestEntity r " +
-            "JOIN FETCH r.employee AS e " +
             "JOIN FETCH e.userInfo AS u " +
             "WHERE r.approved = true " +
+            "AND e.id != 1 " +
             "AND r.requestType = 'LEAVE' " +
             "AND r.deleted = false " +
             "AND ((MONTH(r.approvedStartDate) = :auditMonth AND YEAR(r.approvedStartDate) = :auditYear) " +
@@ -54,8 +45,19 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
             "JOIN FETCH r.employee AS e " +
             "JOIN FETCH e.userInfo AS u " +
             "WHERE r.approved = true " +
+            "AND e.id != 1 " +
             "AND r.deleted = false " +
             "AND ((MONTH(r.approvedStartDate) = :auditMonth AND YEAR(r.approvedStartDate) = :auditYear) " +
             "   OR (MONTH(r.approvedEndDate) = :auditMonth AND YEAR(r.approvedEndDate) = :auditYear))")
     List<RequestEntity> findAllApprovedRequestsInAMonthOfYear(int auditMonth, int auditYear);
+
+    @Query("SELECT r FROM RequestEntity r " +
+            "JOIN FETCH r.employee AS e " +
+            "JOIN FETCH e.userInfo AS u " +
+            "WHERE r.approved = true " +
+            "AND e.id = :id " +
+            "AND r.deleted = false " +
+            "AND ((MONTH(r.approvedStartDate) = :auditMonth AND YEAR(r.approvedStartDate) = :auditYear) " +
+            "   OR (MONTH(r.approvedEndDate) = :auditMonth AND YEAR(r.approvedEndDate) = :auditYear))")
+    Optional<RequestEntity> findApprovedRequestsInAMonthOfYearByEmployeeInfoId(int auditMonth, int auditYear, @Param("id") long id);
 }

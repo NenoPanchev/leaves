@@ -87,4 +87,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     @Query("SELECT u.name FROM UserEntity u " +
             "WHERE u.email = :email ")
     Optional<String> findNameByEmail(@Param("email") String email);
+    @Query("SELECT u.name FROM UserEntity u " +
+            "WHERE u.deleted = false " +
+            "AND u.id != 1 ")
+    List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
 }
