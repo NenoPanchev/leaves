@@ -23,11 +23,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RequestFilter;
-import com.example.leaves.util.DatesUtil;
-import com.example.leaves.util.ListHelper;
-import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.OffsetBasedPageRequestForRequests;
-import com.example.leaves.util.PredicateBuilderV2;
+import com.example.leaves.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -377,7 +373,9 @@ public class RequestServiceImpl implements RequestService {
         Map<String, Map<String, List<Integer>>> maps = new TreeMap<>();
         userService
                 .findAllNamesByDeletedIsFalseWithoutDevAdmin()
-                .forEach(name -> maps.put(name, new HashMap<>()));
+                .forEach(name -> {
+                    maps.put(Util.getFirstAndLastNameFromFullName(name), new HashMap<>());
+                });
 
         for (int i = 1; i <= 12; i++) {
             String monthName = Month.of(i).getDisplayName(TextStyle.FULL, new Locale("en", "UK"));
