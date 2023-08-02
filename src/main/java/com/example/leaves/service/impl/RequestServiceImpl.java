@@ -2,8 +2,13 @@ package com.example.leaves.service.impl;
 
 
 import com.example.leaves.config.AppYmlRecipientsToNotifyConfig;
-import com.example.leaves.exceptions.*;
-import com.example.leaves.model.dto.*;
+import com.example.leaves.exceptions.DuplicateEntityException;
+import com.example.leaves.exceptions.EntityNotFoundException;
+import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.PaidleaveNotEnoughException;
+import com.example.leaves.exceptions.RequestAlreadyProcessed;
+import com.example.leaves.model.dto.DaysUsedByMonthViewDto;
+import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.model.entity.BaseEntity_;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
@@ -21,6 +26,7 @@ import com.example.leaves.service.filter.RequestFilter;
 import com.example.leaves.util.DatesUtil;
 import com.example.leaves.util.ListHelper;
 import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.OffsetBasedPageRequestForRequests;
 import com.example.leaves.util.PredicateBuilderV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +47,14 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
@@ -448,13 +460,15 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredGraterThan(RequestFilter filter) {
-        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecificationGraterThanDates(filter)
                 .or(ifApprovedHasNullGraterThanDates(filter)), pageRequest).map(RequestEntity::toDto);
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredLessThan(RequestFilter filter) {
-        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecificationLessThanDates(filter)
                         .or(ifApprovedHasNullLessThanDates(filter)), pageRequest)
                 .map(RequestEntity::toDto);
@@ -462,7 +476,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredRange(RequestFilter filter) {
-        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         if (filter.getEndDate().isEmpty()) {
             //START DATE - START DATE RANGE
 
@@ -756,7 +771,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredEqual(RequestFilter filter) {
-        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
+        OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecification(filter).or(ifApprovedHasNull(filter)), pageRequest).map(RequestEntity::toDto);
     }
 

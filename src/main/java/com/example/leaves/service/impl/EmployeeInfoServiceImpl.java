@@ -255,7 +255,6 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     @Scheduled(cron = "${cron-jobs.update.history:0 0 9 1 12 *}", zone = EUROPE_SOFIA)
-    @Transactional
     public void addHistoryForUpcomingYear() {
         int currentYear = LocalDate.now().getYear();
         employeeRepository
