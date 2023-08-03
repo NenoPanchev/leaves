@@ -24,7 +24,7 @@ public class UserDto extends BaseDto {
     private List<RoleDto> roles;
     private EmployeeInfoDto employeeInfo;
 
-    @Size(min = 2, max = 20, message = "Username must be between 2 and 20 characters")
+    @Size(min = 2, max = 70, message = "Username must be between 2 and 70 characters")
     public String getName() {
         return name;
     }
