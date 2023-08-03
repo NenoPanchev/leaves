@@ -164,7 +164,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                                                            UserEntity userOfRequest) {
         Map<String, String> words = new HashMap<>();
 
-        words.put("fullName", userOfRequest.getFullName());
+        words.put("fullName", userOfRequest.getName());
         if (pdfRequestForm.isUsePersonalInfo()) {
 
             if (userOfRequest.getEmployeeInfo().getSsn() != null &&

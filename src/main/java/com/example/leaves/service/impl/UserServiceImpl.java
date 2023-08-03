@@ -549,7 +549,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public String findNameByEmail(String email) {
         return userRepository.findNameByEmail(email)
-                .map(Util::getFirstAndLastNameFromFullName)
                 .orElseThrow(ObjectNotFoundException::new);
     }
 

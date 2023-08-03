@@ -374,7 +374,7 @@ public class RequestServiceImpl implements RequestService {
         userService
                 .findAllNamesByDeletedIsFalseWithoutDevAdmin()
                 .forEach(name -> {
-                    maps.put(Util.getFirstAndLastNameFromFullName(name), new HashMap<>());
+                    maps.put(name, new HashMap<>());
                 });
 
         for (int i = 1; i <= 12; i++) {

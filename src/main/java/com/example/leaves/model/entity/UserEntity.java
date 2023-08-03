@@ -99,21 +99,12 @@ public class UserEntity extends BaseEntity<UserDto> {
         return this;
     }
 
-
     public String getName() {
-        String[] split = name.split("\\s");
-        if (split.length == 3) {
-            return split[0] + " " + split[2];
-        }
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getFullName() {
-        return this.name;
     }
 
     @Override
