@@ -34,10 +34,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.EncryptionUtil;
-import com.example.leaves.util.OffsetBasedPageRequest;
-import com.example.leaves.util.PredicateBuilder;
-import com.example.leaves.util.TokenUtil;
+import com.example.leaves.util.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -552,6 +549,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String findNameByEmail(String email) {
         return userRepository.findNameByEmail(email)
+                .map(Util::getFirstAndLastNameFromFullName)
                 .orElseThrow(ObjectNotFoundException::new);
     }
 
