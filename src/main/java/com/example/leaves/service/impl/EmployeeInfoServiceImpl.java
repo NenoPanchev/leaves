@@ -60,6 +60,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private static final String LOCATION = "location";
     private static final String POSITION = "position";
     private static final String POSITION_NAME = "Техник компютърно програмиране";
+    public static final String DOTS = "..........................................";
     private final UserRepository employeeRepository;
     private final UserService userService;
     private final EmailService emailService;
@@ -174,14 +175,14 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
 
             } else {
-                words.put("egn", " ");
+                words.put("egn", DOTS);
             }
 
             if (userOfRequest.getEmployeeInfo().getAddress() != null &&
                     !userOfRequest.getEmployeeInfo().getAddress().isEmpty()) {
                 words.put(LOCATION, userOfRequest.getEmployeeInfo().getAddress());
             } else {
-                words.put(LOCATION, " ");
+                words.put(LOCATION, DOTS + DOTS);
             }
 
             if (userOfRequest.getEmployeeInfo().getPosition() != null &&
@@ -194,11 +195,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         } else {
 
 
-                words.put("egn", " ");
+                words.put("egn", DOTS);
 
 
 
-                words.put(LOCATION, " ");
+                words.put(LOCATION, DOTS + DOTS);
 
 
                 words.put(POSITION, POSITION_NAME);
@@ -211,11 +212,11 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         words.put("year", pdfRequestForm.getYear());
 
         words.put("startDate", request.getApprovedStartDate()
-                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
         words.put("endDate", request.getApprovedEndDate()
                 .plusDays(1)
-                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
 
         words.put("daysNumber", String.valueOf(request.getDaysRequested()));
         words.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
