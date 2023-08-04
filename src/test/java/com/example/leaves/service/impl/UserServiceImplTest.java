@@ -131,7 +131,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void seedUsers() {
+    void seedUsers() {
         List<RoleEntity> roles = Arrays.asList(adminRole, userRole);
         when(mockRoleService.findAllByRoleIn("ADMIN", "USER"))
                 .thenReturn(roles);
@@ -141,7 +141,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void createUser() {
+    void createUser() {
 
         UserDto dto = new UserDto();
         dto.setName("Test Test");
@@ -154,46 +154,42 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void findByEmail() {
+    void findByEmail() {
         UserEntity actual = userService.findByEmail(user.getEmail());
         assertEquals(user.getName(), actual.getName());
     }
 
     @Test
-    public void findByEmailThrowsIfNonExistentUser() {
+    void findByEmailThrowsIfNonExistentUser() {
         assertThrows(ObjectNotFoundException.class, () -> userService.findByEmail("safhaosogaas"));
     }
 
     @Test
-    public void getUserById() {
+    void getUserById() {
         UserDto actual = userService.getUserDtoById(2L);
         assertEquals(admin.getName(), actual.getName());
         assertEquals(admin.getEmail(), actual.getEmail());
     }
 
     @Test
-    public void getUserByIdThrowsIfNonExistentUser() {
+    void getUserByIdThrowsIfNonExistentUser() {
         assertThrows(ObjectNotFoundException.class, () -> userService.getUserDtoById(3123213L));
     }
 
     @Test
-    public void getAllUserDtos() {
+    void getAllUserDtos() {
         List<UserDto> actual = userService.getAllUserDtos();
         assertEquals(userRepository.findAllByDeletedIsFalseOrderById().size(), actual.size());
     }
 
     @Test
-    public void getAllUsersFiltered() {
-    }
-
-    @Test
-    public void existsByEmail() {
+    void existsByEmail() {
         assertTrue(userService.existsByEmailAndDeletedIsFalse(admin.getEmail()));
         assertFalse(userService.existsByEmailAndDeletedIsFalse("asfigaosasdfas"));
     }
 
     @Test
-    public void getFilteredUsersWithPage() {
+    void getFilteredUsersWithPage() {
         UserFilter filter = new UserFilter();
         filter.setName("Admin");
         filter.setLimit(5);
@@ -206,7 +202,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getFilteredUsers() {
+    void getFilteredUsers() {
         UserFilter filter = new UserFilter();
         filter.setName("a");
         filter.setEmail("a");
@@ -219,21 +215,13 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void isTheSame() {
+    void isTheSame() {
         assertTrue(userService.isTheSame(1L, "super@admin.com"));
         assertFalse(userService.isTheSame(1L, "asdioasdas"));
     }
 
     @Test
-    public void detachRoleFromUsers() {
-    }
-
-    @Test
-    public void detachDepartmentFromUsers() {
-    }
-
-    @Test
-    public void updateUser() {
+    void updateUser() {
         UserUpdateDto dto = new UserUpdateDto();
         dto.setName("New User");
         UserDto actual = userService.updateUser(3L, dto);
@@ -245,25 +233,20 @@ class UserServiceImplTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
-    public void updateUserByUser() {
-
+    void updateUserThrowsIfSuperAdmin() {
+        UserUpdateDto dto = new UserUpdateDto();
+        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, dto));
     }
 
     @Test
-    public void updateUserThrowsIfSuperAdmin() {
-        assertThrows(IllegalArgumentException.class, () -> userService.updateUser(1L, new UserUpdateDto()));
-    }
-
-    @Test
-    public void updateUserThrowsIfNonExistent() {
+    void updateUserThrowsIfNonExistent() {
         UserUpdateDto userDto = new UserUpdateDto();
         userDto.setName("aaaaaaa");
         assertThrows(ObjectNotFoundException.class, () -> userService.updateUser(1111111L, userDto));
     }
 
     @Test
-    public void softDeleteUser() {
+    void softDeleteUser() {
 
         testUser = userRepository.save(testUser);
         long id = testUser.getId();
@@ -274,18 +257,18 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void softDeleteUserThrowsIfSuperAdmin() {
+    void softDeleteUserThrowsIfSuperAdmin() {
         assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test
-    public void softDeleteUserThrowsIfNonExistent() {
+    void softDeleteUserThrowsIfNonExistent() {
         assertThrows(ObjectNotFoundException.class, () -> userService.softDeleteUser(111111111111L));
     }
 
 
     @Test
-    public void deleteUser() {
+    void deleteUser() {
         UserEntity tester = new UserEntity();
         tester.setEmail("tester@t.com");
         tester.setPassword("1234");
@@ -297,12 +280,12 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void deleteUserThrowsIfSuperAdmin() {
+    void deleteUserThrowsIfSuperAdmin() {
         assertThrows(IllegalArgumentException.class, () -> userService.softDeleteUser(1L));
     }
 
     @Test
-    public void deleteUserThrowsIfNonExistent() {
+    void deleteUserThrowsIfNonExistent() {
         assertThrows(ObjectNotFoundException.class, () -> userService.softDeleteUser(111111111111L));
     }
 }

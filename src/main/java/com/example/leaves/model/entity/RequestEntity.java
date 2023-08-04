@@ -6,7 +6,6 @@ import com.example.leaves.util.DatesUtil;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;

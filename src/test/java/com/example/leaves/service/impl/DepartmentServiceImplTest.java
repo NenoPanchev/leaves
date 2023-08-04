@@ -71,14 +71,14 @@ class DepartmentServiceImplTest {
 
 
     @Test
-    public void seedDepartments() {
+    void seedDepartments() {
         DepartmentEntity actual = mockDepartmentRepository.save(administration);
         serviceToTest.seedDepartments();
         assertEquals(administration.getId(), actual.getId());
     }
 
     @Test
-    public void findByDepartment() {
+    void findByDepartment() {
         when(mockDepartmentRepository.findByDeletedIsFalseAndName(it.getName()))
                 .thenReturn(Optional.of(it));
         DepartmentEntity actual = serviceToTest.findByDepartment(it.getName());
@@ -86,7 +86,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void getAllDepartmentDtos() {
+    void getAllDepartmentDtos() {
         List<DepartmentEntity> entities = Arrays.asList(administration, it);
         when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
                 .thenReturn(entities);
@@ -97,7 +97,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void createDepartment() {
+    void createDepartment() {
         DepartmentDto dto = new DepartmentDto();
         dto.setId(4L);
         dto.setName("TestDepartment");
@@ -117,7 +117,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void findDepartmentById() {
+    void findDepartmentById() {
         when(mockDepartmentRepository.findByIdAndDeletedIsFalse(1L))
                 .thenReturn(Optional.of(administration));
         DepartmentDto actual = serviceToTest.findDepartmentById(1L);
@@ -126,7 +126,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void existsByName() {
+    void existsByName() {
         when(mockDepartmentRepository.existsByNameAndDeletedIsFalse(accounting.getName()))
                 .thenReturn(false);
         boolean actual = serviceToTest.existsByName(accounting.getName());
@@ -134,7 +134,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void deleteDepartment() {
+    void deleteDepartment() {
         when(mockDepartmentRepository.existsById(it.getId()))
                 .thenReturn(true);
         lenient().doNothing().when(mockUserService).detachDepartmentFromUsers(it.getId());
@@ -150,7 +150,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void softDeleteDepartment() {
+    void softDeleteDepartment() {
         when(mockDepartmentRepository.existsById(it.getId()))
                 .thenReturn(true);
         lenient().doNothing().when(mockDepartmentRepository).markAsDeleted(it.getId());
@@ -164,7 +164,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void isTheSame() {
+    void isTheSame() {
         when(mockDepartmentRepository.findNameById(it.getId()))
                 .thenReturn(it.getName());
         boolean actual = serviceToTest.isTheSame(it.getId(), it.getName());
@@ -172,7 +172,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void updateDepartmentById() {
+    void updateDepartmentById() {
         departmentService.seedDepartments();
         userService.seedUsers();
         DepartmentDto dto = new DepartmentDto();
@@ -192,12 +192,13 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void updateDepartmentByIdThrowsIfNonExistentDepartment() {
-        assertThrows(ObjectNotFoundException.class, () -> serviceToTest.updateDepartmentById(99L, new DepartmentDto()));
+    void updateDepartmentByIdThrowsIfNonExistentDepartment() {
+        DepartmentDto departmentDto = new DepartmentDto();
+        assertThrows(ObjectNotFoundException.class, () -> serviceToTest.updateDepartmentById(99L, departmentDto));
     }
 
     @Test
-    public void getAllDepartmentsFilteredWithPage() {
+    void getAllDepartmentsFilteredWithPage() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
         filter.setName("ADMINISTRATION");
@@ -211,7 +212,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void getAllDepartmentsFiltered() {
+    void getAllDepartmentsFiltered() {
         departmentService.seedDepartments();
         DepartmentFilter filter = new DepartmentFilter();
         filter.setName("ADMINISTRATION");
@@ -224,7 +225,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void assignDepartmentAdmins() {
+    void assignDepartmentAdmins() {
         List<DepartmentEntity> entities = Arrays.asList(administration);
         when(mockDepartmentRepository.findAllByDeletedIsFalseOrderById())
                 .thenReturn(entities);
@@ -236,7 +237,7 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void addEmployeeToDepartment() {
+    void addEmployeeToDepartment() {
         when(mockDepartmentRepository.save(administration))
                 .thenReturn(administration);
         serviceToTest.addEmployeeToDepartment(superAdmin, administration);
@@ -244,14 +245,14 @@ class DepartmentServiceImplTest {
     }
 
     @Test
-    public void detachAdminFromDepartment() {
+    void detachAdminFromDepartment() {
         lenient().doNothing().when(mockDepartmentRepository).setAdminNullByAdminId(superAdmin.getId());
         serviceToTest.detachAdminFromDepartment(superAdmin.getId());
         verify(mockDepartmentRepository, times(1)).setAdminNullByAdminId(superAdmin.getId());
     }
 
     @Test
-    public void detachEmployeeFromDepartment() {
+    void detachEmployeeFromDepartment() {
         List<DepartmentEntity> entities = Arrays.asList(administration);
         when(mockDepartmentRepository.findAllByEmployeeId(superAdmin.getId()))
                 .thenReturn(entities);

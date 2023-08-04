@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class RequestServiceImplTestHdb {
+class RequestServiceImplHdbTest {
 
 
     @Autowired

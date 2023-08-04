@@ -29,7 +29,7 @@ import static org.junit.Assert.assertThrows;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class TypeServiceImplTests {
+class TypeServiceImplTests {
 
     @Autowired
     TypeEmployeeRepository mockTypeRepository;
@@ -38,43 +38,6 @@ public class TypeServiceImplTests {
     @Autowired
     TypeEmployeeServiceImpl mockTypeService;
 
-//    @BeforeEach
-//    void setUp() {
-//
-//
-//
-//        // Users
-//        user = new UserEntity();
-//        user.setEmail("user@user.com");
-//        user.setId(2L);
-//        user.setName("User User");
-//        user.setEmployeeInfo(new EmployeeInfo());
-//
-//
-//// Type
-//        TypeEmployee typeEmployee=new TypeEmployee();
-//        typeEmployee.setTypeName("Developer");
-//        typeEmployee.setDaysLeave(30);
-//        typeEmployee.setEmployeeWithType(new ArrayList<>());
-//        typeEmployee.getEmployeesWithType().add(user.getEmployeeInfo());
-//
-//
-//
-//
-//        TypeEmployee typeEmployee2=new TypeEmployee();
-//        typeEmployee.setTypeName("Horse");
-//        typeEmployee.setDaysLeave(35);
-//        typeEmployee.setEmployeeWithType(new ArrayList<>());
-//
-//        types.add(typeEmployee);
-//        types.add(typeEmployee2);
-//
-//        when(mockTypeRepository.findAllByDeletedIsFalse())
-//                .thenReturn(types);
-//
-//        when(mockPasswordEncoder.encode("1234"))
-//                .thenReturn("1234");
-//    }
 @BeforeEach
 void setUp() {
 
@@ -140,7 +103,7 @@ void setUp() {
     }
 
     @Test
-    public void update_Should_CallRepository_When_UpdatingExistingType() {
+    void update_Should_CallRepository_When_UpdatingExistingType() {
         // Arrange
         TypeEmployee mockType = TestsHelper.createMockType();
         TypeEmployeeDto mockTypeDto = TestsHelper.createMockType().toDto();
@@ -202,7 +165,7 @@ void setUp() {
     }
 
     @Test
-    public void create_Should_CallRepository_When_TypeWithSameNameDoesNotExist() {
+    void create_Should_CallRepository_When_TypeWithSameNameDoesNotExist() {
         // Arrange
         TypeEmployee mockType = TestsHelper.createMockType();
         Mockito.when(mockTypeRepository.save(mockType))
@@ -216,17 +179,18 @@ void setUp() {
     }
 
     @Test
-    public void create_Should_Throw_When_TypeWithSameNameExists() {
+    void create_Should_Throw_When_TypeWithSameNameExists() {
 
         // Arrange
         TypeEmployee mockType = TestsHelper.createMockType();
         Mockito.when(mockTypeRepository.existsByTypeName(mockType.getTypeName()))
                 .thenReturn(true);
 
+        TypeEmployeeDto dto = mockType.toDto();
         // Act, Assert
         Assertions.assertThrows(
                 DuplicateEntityException.class,
-                () -> mockTypeService.create(mockType.toDto()));
+                () -> mockTypeService.create(dto));
     }
 
 

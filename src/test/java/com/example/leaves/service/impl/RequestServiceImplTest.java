@@ -157,10 +157,10 @@ class RequestServiceImplTest {
     void disapprove_Should_Throw_When_ApprovedIsProcessed() {
         RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
         mockRequest.setApproved(false);
-        Mockito.when(mockRepository.findById((long) mockRequest.getId()))
+        Long id = mockRequest.getId();
+        Mockito.when(mockRepository.findById((long) id))
                 .thenReturn(mockRequest);
-
-        assertThrows(RequestAlreadyProcessed.class, () -> mockService.disapproveRequest(mockRequest.getId()));
+        assertThrows(RequestAlreadyProcessed.class, () -> mockService.disapproveRequest(id));
 
     }
 
@@ -171,11 +171,12 @@ class RequestServiceImplTest {
         mockRequest.setEmployee(employee);
         mockRequest.setApproved(true);
         RequestDto dto = new RequestDto();
-        Mockito.when(mockRepository.findById((long) mockRequest.getId()))
+        Long id = mockRequest.getId();
+        Mockito.when(mockRepository.findById((long) id))
                 .thenReturn(mockRequest);
         // Act
         assertThrows(RequestAlreadyProcessed.class,
-                () -> mockService.approveRequest(mockRequest.getId(), dto));
+                () -> mockService.approveRequest(id, dto));
 
     }
 
