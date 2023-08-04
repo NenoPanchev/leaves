@@ -210,16 +210,16 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         words.put("requestToName", pdfRequestForm.getRequestToName());
 
         words.put("year", pdfRequestForm.getYear());
-
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         words.put("startDate", request.getApprovedStartDate()
-                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                .format(dateTimeFormatter));
 
         words.put("endDate", request.getApprovedEndDate()
                 .plusDays(1)
-                .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                .format(dateTimeFormatter));
 
         words.put("daysNumber", String.valueOf(request.getDaysRequested()));
-        words.put("date", LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+        words.put("date", LocalDate.now().format(dateTimeFormatter));
 
         return words;
     }

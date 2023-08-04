@@ -18,10 +18,6 @@ public interface RequestRepository extends JpaRepository<RequestEntity, Long>,
 
     RequestEntity findById(long id);
 
-    List<RequestEntity> findAllByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);
-
-    List<RequestEntity> findAllByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
-
     RequestEntity findFirstByStartDateAndEmployeeAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee);
 
     boolean existsByStartDateAndEmployeeAndEndDateAndDeletedIsFalse(LocalDate startDate, EmployeeInfo employee, LocalDate endDate);

@@ -18,7 +18,7 @@ public interface AuthController {
 
     @PostMapping()
     ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody UserLoginDto authenticationRequest,
-                                                                     BindingResult bindingResult);
+                                                BindingResult bindingResult);
 
 
     @PostMapping("/refresh")

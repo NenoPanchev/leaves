@@ -20,7 +20,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "requests", schema = "public")
-@AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 public class RequestEntity extends BaseEntity<RequestDto> {
     @Enumerated(EnumType.STRING)
     private RequestTypeEnum requestType;

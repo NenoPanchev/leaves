@@ -25,7 +25,6 @@ import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
-import com.example.leaves.repository.PasswordResetTokenRepository;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.DepartmentService;
@@ -34,8 +33,14 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.RoleService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.TokenUtil;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -58,6 +63,7 @@ import static com.example.leaves.util.Util.isBlank;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
     private static final String ADMIN = "ADMIN";
     private static final String USER_NOT_FOUND_TEMPLATE = "User with id %d does not exist";
     private static final String USER_NOT_FOUND_MESSAGE = "User not found";
@@ -68,13 +74,11 @@ public class UserServiceImpl implements UserService {
     private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           @Lazy PasswordResetTokenRepository passwordResetTokenRepository,
                            @Lazy EmailService emailService,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
@@ -90,7 +94,6 @@ public class UserServiceImpl implements UserService {
         this.employeeInfoService = employeeInfoService;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Override
@@ -502,8 +505,7 @@ public class UserServiceImpl implements UserService {
         try {
             emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
         } catch (MessagingException e) {
-            //TODO CHANGE EXCEPTION
-            throw new RuntimeException(e);
+            LOGGER.warn("Error sending mail with password reset token");
         }
     }
 

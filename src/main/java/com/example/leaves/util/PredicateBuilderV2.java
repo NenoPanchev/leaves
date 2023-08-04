@@ -74,18 +74,6 @@ public class PredicateBuilderV2<ENTITY> {
         return this;
     }
 
-//    public <T> PredicateBuilderV2<?> equalsRequestTypeEnum(final SingularAttribute<?, T> attribute, final String value) {
-//        if (value != null) {
-//            Expression<String> valueExpression = builder.literal(value.toUpperCase());
-//            Expression<RequestTypeEnum> requestTypeEnumExpression = root.get(attribute.getName()).as(RequestTypeEnum.class);
-//            Expression<RequestTypeEnum> castExpression = (Expression<RequestTypeEnum>) builder.literal(RequestTypeEnum.class).as(requestTypeEnumExpression.getJavaType());
-//            Predicate equalPredicate = builder.equal(castExpression, builder.literal(RequestTypeEnum.valueOf(value.toUpperCase())));
-//            predicates.add(equalPredicate);
-//        }
-//        return this;
-//    }
-
-
     public <T> PredicateBuilderV2<?> equalsField(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
             this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));

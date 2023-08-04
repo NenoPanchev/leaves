@@ -4,7 +4,6 @@ import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -26,11 +25,7 @@ import java.util.List;
                 @NamedAttributeNode("department"),
         }
 )
-@AttributeOverrides(
-        {
-                @AttributeOverride(name = "id", column = @Column(name = "id"))
-        }
-)
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 @Entity
 @Table(name = "users", schema = "public")
 public class UserEntity extends BaseEntity<UserDto> {

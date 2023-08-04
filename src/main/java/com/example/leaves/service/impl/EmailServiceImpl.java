@@ -14,9 +14,7 @@ import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Collections;
 
 @Service
 public class EmailServiceImpl implements EmailService {

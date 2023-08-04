@@ -4,7 +4,6 @@ import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.TypeEmployeeDto;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.NamedAttributeNode;
@@ -22,7 +21,7 @@ import java.util.List;
                 @NamedAttributeNode("employeeWithType")
         }
 )
-@AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
     @Column(name = "type_name")

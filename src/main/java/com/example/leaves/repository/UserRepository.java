@@ -18,9 +18,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     @EntityGraph(value = "full")
     Optional<UserEntity> findByEmailAndDeletedIsFalse(String email);
 
-    @EntityGraph(value = "full")
-    Optional<UserEntity> findByIdAndDeletedIsFalse(Long id);
-
     boolean existsByEmailAndDeletedIsFalse(String email);
 
     boolean existsByEmail(String email);

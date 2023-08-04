@@ -76,10 +76,9 @@ public class PdfUtil {
 
     private static void replaceWords(Map<String, String> words, XWPFRun r) {
         String text = r.getText(0);
-        for (String key : words.keySet()
-        ) {
-            if (text != null && text.contains(key)) {
-                text = text.replace(key, words.get(key));
+        for (Map.Entry<String, String> entry : words.entrySet()) {
+            if (text != null && text.contains(entry.getKey())) {
+                text = text.replace(entry.getKey(), entry.getValue());
                 r.setText(text, 0);
             }
         }
@@ -107,7 +106,6 @@ public class PdfUtil {
                 }
             } catch (final Exception e) {
                 LOGGER.error(e.getMessage(), e);
-                throw new RuntimeException(e);
             }
 
             return FontFactory.getFont(familyName, encoding, size, style, color);

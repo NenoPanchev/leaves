@@ -213,11 +213,8 @@ public class DepartmentServiceImpl implements DepartmentService {
         departmentRepository
                 .findAllByDeletedIsFalseOrderById()
                 .forEach(entity -> {
-                    switch (entity.getName()) {
-                        case "ADMINISTRATION":
-                            entity.setAdmin(userService.findByEmail("super@admin.com"));
-                            break;
-                        default:
+                    if ("ADMINISTRATION".equals(entity.getName())) {
+                        entity.setAdmin(userService.findByEmail("super@admin.com"));
                     }
                     departmentRepository.save(entity);
                 });

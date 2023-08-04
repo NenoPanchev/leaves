@@ -99,7 +99,6 @@ public class TypeEmployeeServiceImpl implements TypeEmployeeService {
     @Override
     @Transactional
     public void delete(long id) {
-        //TODO make change type method for all employees with this type so it can be deleted?
         typeRepository.markAsDeleted(id);
     }
 

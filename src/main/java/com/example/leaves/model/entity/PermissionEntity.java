@@ -3,16 +3,11 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.PermissionDto;
 
 import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-@AttributeOverrides(
-        {
-                @AttributeOverride(name = "id", column = @Column(name = "id"))
-        }
-)
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 @Entity
 @Table(name = "permissions", schema = "public")
 public class PermissionEntity extends BaseEntity<PermissionDto> {
