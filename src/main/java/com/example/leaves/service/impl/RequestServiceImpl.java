@@ -42,8 +42,10 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,10 +99,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void sendNotificationEmailToAdmins(RequestEntity request) {
-        LOGGER.warn("Job Thread: {}", Thread.currentThread().getName());
         userService.getAllAdmins().forEach(
                 (admin -> {
-
                     try {
                         emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
                                 admin.getEmail(),
@@ -111,9 +111,15 @@ public class RequestServiceImpl implements RequestService {
                     } catch (MessagingException e) {
                         LOGGER.warn("error sending notification email to admins for added leave request");
                     }
-
                 }
                 ));
+    }
+
+
+    private void sendNotificationEmailToEmployee(RequestEntity request) {
+        String recipientEmail = request.getEmployee().getUserInfo().getEmail();
+        String message = prepareMessageResponseToEmployeeAboutRequestApproval(request);
+        emailService.send(Collections.singleton(recipientEmail), "Отговор на заявление", message);
     }
 
     @Override
@@ -237,7 +243,7 @@ public class RequestServiceImpl implements RequestService {
             UserEntity userEntity = request.getEmployee().getUserInfo();
 
             if (userEntity == null) {
-                throw new EntityNotFoundException("User  not found ", 1);
+                throw new EntityNotFoundException("User not found ", 1);
             }
 
             if (requestDto.getApprovedStartDate().isBefore(request.getStartDate())
@@ -253,6 +259,10 @@ public class RequestServiceImpl implements RequestService {
             }
             request.setApproved(Boolean.TRUE);
             requestRepository.save(request);
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> sendNotificationEmailToEmployee(request));
+            executor.shutdown();
             return request;
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
@@ -265,7 +275,11 @@ public class RequestServiceImpl implements RequestService {
         RequestEntity request = getById(id);
         if (request.getApproved() == null) {
             request.setApproved(Boolean.FALSE);
-            return requestRepository.save(request);
+            requestRepository.save(request);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> sendNotificationEmailToEmployee(request));
+            executor.shutdown();
+            return request;
         } else {
             throw new RequestAlreadyProcessed(id, "Approve");
         }
@@ -373,9 +387,7 @@ public class RequestServiceImpl implements RequestService {
         Map<String, Map<String, List<Integer>>> maps = new TreeMap<>();
         userService
                 .findAllNamesByDeletedIsFalseWithoutDevAdmin()
-                .forEach(name -> {
-                    maps.put(name, new HashMap<>());
-                });
+                .forEach(name -> maps.put(name, new HashMap<>()));
 
         for (int i = 1; i <= 12; i++) {
             String monthName = Month.of(i).getDisplayName(TextStyle.FULL, new Locale("en", "UK"));
@@ -458,14 +470,12 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredGraterThan(RequestFilter filter) {
-//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecificationGraterThanDates(filter)
                 .or(ifApprovedHasNullGraterThanDates(filter)), pageRequest).map(RequestEntity::toDto);
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredLessThan(RequestFilter filter) {
-//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecificationLessThanDates(filter)
                         .or(ifApprovedHasNullLessThanDates(filter)), pageRequest)
@@ -474,7 +484,6 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredRange(RequestFilter filter) {
-//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         if (filter.getEndDate().isEmpty()) {
             //START DATE - START DATE RANGE
@@ -769,7 +778,6 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private Page<RequestDto> getLeaveRequestDtoFilteredEqual(RequestFilter filter) {
-//        OffsetBasedPageRequest pageRequest = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
         OffsetBasedPageRequestForRequests pageRequest = OffsetBasedPageRequestForRequests.getOffsetBasedPageRequest(filter);
         return requestRepository.findAll(getSpecification(filter).or(ifApprovedHasNull(filter)), pageRequest).map(RequestEntity::toDto);
     }
@@ -894,5 +902,29 @@ public class RequestServiceImpl implements RequestService {
             employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), datesForStartYear.size(), startYear);
             employeeInfoService.decreaseDaysUsedForYear(request.getEmployee(), datesForEndYear.size(), endYear);
         }
+    }
+
+    private String prepareMessageResponseToEmployeeAboutRequestApproval(RequestEntity request) {
+        final String responseTemplate = "Заявлението Ви за %s %s беше %s от %s.";
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        String typeLeave = request.getRequestType().name().equals("LEAVE") ? "платен отпуск" : "работа от вкъщи";
+        String when = request.getStartDate().equals(request.getEndDate()) ? "на " + request.getEndDate().format(dateTimeFormatter) : "от " + request.getStartDate().format(dateTimeFormatter) + " до " + request.getEndDate().format(dateTimeFormatter);
+
+        String result = "";
+
+        if (Boolean.TRUE.equals(request.getApproved())) {
+            if (request.getStartDate().equals(request.getApprovedStartDate()) && request.getEndDate().equals(request.getApprovedEndDate())) {
+                result = "одобрено";
+            } else {
+                String approvedStartDate = request.getApprovedStartDate().format(dateTimeFormatter);
+                String approvedEndDate = request.getApprovedEndDate().format(dateTimeFormatter);
+                result = String.format("частично одобрено за периода от %s до %s", approvedStartDate, approvedEndDate);
+            }
+        } else {
+            result = "неодобрено";
+        }
+        String by = userService.findNameByEmail(request.getLastModifiedBy());
+        by = Util.getFirstAndLastNameFromFullName(by);
+        return String.format(responseTemplate, typeLeave, when, result, by);
     }
 }

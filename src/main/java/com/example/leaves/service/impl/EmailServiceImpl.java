@@ -14,7 +14,9 @@ import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Collections;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -29,7 +31,7 @@ public class EmailServiceImpl implements EmailService {
             " has requested a paid leave!\n" +
             "Start date: %s\n" +
             "End date: %s\n";
-    public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is:%s";
+    public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is: %s";
     public static final String CHANGE_PASSWORD_TOKEN_SUBJECT = "Password Change";
     public static final String DEFAULT_FROM = "vacation@lightsoftbulgaria.com";
     @Value("${should-send-emails:false}")
