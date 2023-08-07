@@ -51,6 +51,10 @@ public class DatesUtil {
         return totalDates;
     }
 
+    public static boolean isNonWorkingDay(LocalDate date) {
+        return holidaysUtil.isWeekend(date) || holidaysUtil.isHoliday(date);
+    }
+
     public HolidaysUtil getHolidaysUtil() {
         return holidaysUtil;
     }
