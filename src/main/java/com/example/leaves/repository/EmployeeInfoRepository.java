@@ -8,19 +8,12 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface EmployeeInfoRepository extends JpaRepository<EmployeeInfo, Long> {
-    Optional<EmployeeInfo> findByUserInfoId(Long id);
+    @Query("SELECT e FROM EmployeeInfo e " +
+            "JOIN FETCH e.historyList " +
+            "WHERE e.id = :id ")
+    Optional<EmployeeInfo> findByUserInfoIdJoinFetchHistoryList(@Param("id") Long id);
 
     @Query("SELECT e.id FROM EmployeeInfo e " +
             "WHERE e.userInfo.id = :id ")
     Optional<Long> findIdByUserId(@Param("id") Long id);
-
-    @Query("SELECT e FROM EmployeeInfo e " +
-            "JOIN e.contracts c " +
-            "WHERE c.id = :id ")
-    Optional<EmployeeInfo> findByContractId(@Param("id") Long id);
-
-    @Query("SELECT e FROM EmployeeInfo e " +
-            "JOIN FETCH e.contracts c " +
-            "WHERE e.id = :id ")
-    Optional<EmployeeInfo> findById(@Param("id") Long id);
 }

@@ -1,23 +1,28 @@
 package com.example.leaves.model.entity;
 
-import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.model.dto.RequestDto;
+import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.util.DatesUtil;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
-@NamedEntityGraph(
-        name = "requestFull",
-        attributeNodes = {
-                @NamedAttributeNode("employee")
-        }
-)
-@Table(name = "leave_requests", schema = "public")
-@AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
-public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
+@Table(name = "requests", schema = "public")
+@AttributeOverride(name = "id", column = @Column(name = "id"))
+public class RequestEntity extends BaseEntity<RequestDto> {
+    @Enumerated(EnumType.STRING)
+    private RequestTypeEnum requestType;
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -34,7 +39,7 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
     private Boolean approved;
 
 
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY,cascade = {CascadeType.ALL})
     @JoinColumn(name = "employee_info_id")
     @JsonBackReference
     private EmployeeInfo employee;
@@ -92,24 +97,28 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         this.endDate = endDate;
     }
 
+    public RequestTypeEnum getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(RequestTypeEnum typeOfRequest) {
+        this.requestType = typeOfRequest;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        LeaveRequest that = (LeaveRequest) o;
-        return startDate.equals(that.startDate) && endDate.equals(that.endDate) && employee.equals(that.employee);
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), startDate, endDate, employee);
+        return super.hashCode();
     }
 
-    public LeaveRequestDto toDto() {
-        LeaveRequestDto dto = new LeaveRequestDto();
+    public RequestDto toDto() {
+        RequestDto dto = new RequestDto();
         super.toDto(dto);
+        dto.setRequestType(this.requestType.name());
         dto.setStartDate(this.startDate);
         dto.setEndDate(this.endDate);
         dto.setCreatedBy(employee.getUserInfo().getName());
@@ -119,16 +128,16 @@ public class LeaveRequest extends BaseEntity<LeaveRequestDto> {
         if (this.approved != null) {
             dto.setApproved(this.approved);
         }
-
         return dto;
     }
 
-    public void toEntity(LeaveRequestDto baseDto) {
+    @Override
+    public void toEntity(RequestDto baseDto) {
         super.toEntity(baseDto);
         this.setApprovedStartDate(baseDto.getApprovedStartDate());
         this.setApprovedEndDate(baseDto.getApprovedEndDate());
         this.setStartDate(baseDto.getStartDate());
         this.setEndDate(baseDto.getEndDate());
-
+        this.setRequestType(RequestTypeEnum.valueOf(baseDto.getRequestType()));
     }
 }

@@ -44,10 +44,12 @@ public class TypeEmployeeDto extends BaseDto {
         this.employeeWithType = employeeWithType;
     }
 
+    @Override
     public boolean isDeleted() {
         return isDeleted;
     }
 
+    @Override
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
     }

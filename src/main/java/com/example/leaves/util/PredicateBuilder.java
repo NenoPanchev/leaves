@@ -7,7 +7,14 @@ import com.example.leaves.service.filter.enums.Operator;
 import org.springframework.expression.Operation;
 import org.springframework.util.CollectionUtils;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import java.time.LocalDate;
@@ -99,7 +106,6 @@ public class PredicateBuilder<ENTITY> {
                 this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(roleJoin.get(fieldName))),
                         "%" + value.toString().toUpperCase().trim() + "%"));
             }
-// todo            this.predicates.add(roleJoin.get(fieldName).in(list));
         }
         return this;
     }
@@ -117,8 +123,6 @@ public class PredicateBuilder<ENTITY> {
                                     final String value) {
 
         if (value != null && !value.isEmpty()) {
-            Path<String> stringPath = this.root.get((SingularAttribute<? super ENTITY, String>) attribute);
-            String val = value.toUpperCase().trim();
             this.predicates.add(this.builder.like(this.builder.upper(this.builder.trim(this.root.get((SingularAttribute<? super ENTITY, String>) attribute))),
                     "%" + value.toUpperCase().trim() + "%"));
         }
@@ -138,6 +142,15 @@ public class PredicateBuilder<ENTITY> {
                                           final T value) {
         if (value != null) {
             this.predicates.add(this.builder.equal(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
+                    value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilder<?> notEquals(final SingularAttribute<?, T> attribute,
+                                          final T value) {
+        if (value != null) {
+            this.predicates.add(this.builder.notEqual(this.root.get((SingularAttribute<? super ENTITY, String>) attribute),
                     value));
         }
         return this;
@@ -203,7 +216,7 @@ public class PredicateBuilder<ENTITY> {
                                                                              final List<IntegerComparison> comparisons,
                                                                              final String firstFieldName,
                                                                              final String secondFieldName) {
-        if (comparisons != null && comparisons.size() > 0) {
+        if (comparisons != null && !comparisons.isEmpty()) {
             Expression<Integer> sum = getSumOfTwoIntegerFieldsAsExpression(attribute, firstFieldName, secondFieldName);
 
             for (IntegerComparison comparison : comparisons) {
@@ -218,7 +231,7 @@ public class PredicateBuilder<ENTITY> {
     public <T> PredicateBuilder<ENTITY> joinCompareDates(final SingularAttribute<?, T> attribute,
                                                                              final List<DateComparison> comparisons,
                                                                              final String fieldName) {
-        if (comparisons != null && comparisons.size() > 0) {
+        if (comparisons != null && !comparisons.isEmpty()) {
             Expression<LocalDate> date = root
                     .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
                     .get(fieldName).as(LocalDate.class);
@@ -232,9 +245,35 @@ public class PredicateBuilder<ENTITY> {
         return this;
     }
 
+    public <T, Y> PredicateBuilder<ENTITY> joinDeepCompareIntegers(final SingularAttribute<?, T> attribute,
+                                                                   final ListAttribute<?, Y> secondAttribute,
+                                                                   final List<IntegerComparison> comparisons,
+                                                                   final String fieldYearName,
+                                                                   final String fieldValueName) {
+        if (comparisons != null && !comparisons.isEmpty()) {
+            int currentYear = LocalDate.now().getYear();
+            final Join<ENTITY, T> firstJoin = root.join((SingularAttribute<? super ENTITY, T>) attribute);
+            final Join<T, Y> secondJoin = firstJoin.join((ListAttribute<? super T, Y>) secondAttribute);
+
+
+            // Create a Predicate to filter HistoryEntity records by calendarYear
+
+            // Combine the current year Predicate with other comparisons using 'and' or 'or' depending on your needs
+            Predicate finalPredicate = builder.equal(secondJoin.get(fieldYearName), currentYear);
+            for (IntegerComparison comparison : comparisons) {
+                int value = comparison.getValue();
+                Predicate predicate = getPredicateForComparisonByOperator(comparison.getOperator(), secondJoin.get(fieldValueName), value);
+                finalPredicate = builder.and(finalPredicate, predicate);
+            }
+
+            this.predicates.add(finalPredicate);
+        }
+        return this;
+    }
+
     public <T> PredicateBuilder<ENTITY> compareDates(final SingularAttribute<?, T> attribute,
                                                          final List<DateComparison> comparisons) {
-        if (comparisons != null && comparisons.size() > 0) {
+        if (comparisons != null && !comparisons.isEmpty()) {
             Path<LocalDate> path = this.root.get((SingularAttribute<? super ENTITY, LocalDate>) attribute);
             for (DateComparison comparison : comparisons) {
                 LocalDate value = comparison.getDate();
@@ -285,37 +324,7 @@ public class PredicateBuilder<ENTITY> {
                 .join((SingularAttribute<? super ENTITY, T>) attribute, JoinType.INNER)
                 .get(secondFieldName).as(Integer.class);
 
-        Expression<Integer> sum = builder.sum(firstValue, secondValue);
-        return sum;
-    }
-
-
-    public <T extends Number> PredicateBuilder<?> compare(final SingularAttribute<?, T> attribute,
-                                                          final Operation operation, T value) {
-        if (value == null || operation == null) {
-            return this;
-        }
-
-        switch (operation) {
-//            case GREATER_OR_EQUAL:
-//                greatOrEqual(attribute, value);
-//                break;
-//            case LESS_OR_EQUAL:
-//                lessOrEqual(attribute, value);
-//                break;
-//            case GREATER:
-//                great(attribute, value);
-//                break;
-//            case
-//                    LESS:
-//                less(attribute, value);
-//            break;
-//            case EQUAL:
-//                equal(attribute, value);
-//                break;
-//
-        }
-        return this;
+        return builder.sum(firstValue, secondValue);
     }
 
     public List<Predicate> build() {

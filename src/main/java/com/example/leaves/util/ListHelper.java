@@ -12,11 +12,10 @@ public final class ListHelper {
     public static <T extends Number> T getGreatestNum(List<T> nums) {
         if (nums != null && !nums.isEmpty()) {
             return nums.stream().max(Comparator.comparing(Number::intValue))
-                    .get();
+                    .orElse(null);
         } else {
             return null;
         }
-
     }
 
     public static LocalDate getLatestDate(List<LocalDate> dates) {

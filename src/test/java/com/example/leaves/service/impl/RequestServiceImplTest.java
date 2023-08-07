@@ -3,11 +3,10 @@ package com.example.leaves.service.impl;
 
 import com.example.leaves.TestsHelper;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
-import com.example.leaves.model.dto.LeaveRequestDto;
+import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.LeaveRequest;
-import com.example.leaves.repository.LeaveRequestRepository;
-import com.example.leaves.service.impl.LeaveRequestServiceImpl;
+import com.example.leaves.model.entity.RequestEntity;
+import com.example.leaves.repository.RequestRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,14 +29,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class LeaveRequestServiceImplTest {
+class RequestServiceImplTest {
     @MockBean
-    LeaveRequestRepository mockRepository;
+    RequestRepository mockRepository;
 
 
 
     @Autowired
-    LeaveRequestServiceImpl mockService;
+    RequestServiceImpl mockService;
 
     @BeforeEach
     void setUp() {
@@ -64,19 +63,19 @@ public class LeaveRequestServiceImplTest {
     @Test
     void getById_should_returnRequest_when_matchExist() {
         //Arrange
-        LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
-        Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
-                .thenReturn(mockLeaveRequest);
+        RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
+        Mockito.when(mockRepository.findById((long) mockRequest.getId()))
+                .thenReturn(mockRequest);
         // Act
-        LeaveRequest result = mockService.getById(mockLeaveRequest.getId());
+        RequestEntity result = mockService.getById(mockRequest.getId());
 
         // Assert
         Assertions.assertAll(
-                () -> Assertions.assertEquals(mockLeaveRequest.getId(), result.getId()),
-                () -> Assertions.assertEquals(mockLeaveRequest.getDaysRequested(), result.getDaysRequested()),
-                () -> Assertions.assertEquals(mockLeaveRequest.getEmployee(), result.getEmployee()),
-                () -> Assertions.assertEquals(mockLeaveRequest.getStartDate(), result.getStartDate()),
-                () -> Assertions.assertEquals(mockLeaveRequest.getEndDate(), result.getEndDate())
+                () -> Assertions.assertEquals(mockRequest.getId(), result.getId()),
+                () -> Assertions.assertEquals(mockRequest.getDaysRequested(), result.getDaysRequested()),
+                () -> Assertions.assertEquals(mockRequest.getEmployee(), result.getEmployee()),
+                () -> Assertions.assertEquals(mockRequest.getStartDate(), result.getStartDate()),
+                () -> Assertions.assertEquals(mockRequest.getEndDate(), result.getEndDate())
         );
     }
 
@@ -92,12 +91,12 @@ public class LeaveRequestServiceImplTest {
     }
 
     @Test
-    public void approve_Should_ChangeApprovedToTrue_When_ApprovedIsNull() {
+    void approve_Should_ChangeApprovedToTrue_When_ApprovedIsNull() {
         // Arrange
-        LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
+        RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
         EmployeeInfo employee = TestsHelper.createMockEmployee();
-        mockLeaveRequest.setEmployee(employee);
-        LeaveRequestDto dto = new LeaveRequestDto();
+        mockRequest.setEmployee(employee);
+        RequestDto dto = new RequestDto();
         dto.setStartDate(LocalDate.now());
         dto.setEndDate(LocalDate.now());
 
@@ -106,16 +105,16 @@ public class LeaveRequestServiceImplTest {
 
 
         Mockito.when(mockRepository.findById(1L))
-                .thenReturn(mockLeaveRequest);
+                .thenReturn(mockRequest);
 
 
 
         // Act
-        mockService.approveRequest(mockLeaveRequest.getId(), dto);
+        mockService.approveRequest(mockRequest.getId(), dto);
 
         // Assert
         Assertions.assertAll(
-                () -> Assertions.assertEquals(true, mockLeaveRequest.getApproved()));
+                () -> Assertions.assertEquals(true, mockRequest.getApproved()));
     }
 
 //    @Test
@@ -140,43 +139,44 @@ public class LeaveRequestServiceImplTest {
 
 
     @Test
-    public void disapprove_Should_ChangeApprovedToFalse_When_ApprovedIsNull() {
+    void disapprove_Should_ChangeApprovedToFalse_When_ApprovedIsNull() {
         // Arrange
-        LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
-        Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
-                .thenReturn(mockLeaveRequest);
+        RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
+        Mockito.when(mockRepository.findById((long) mockRequest.getId()))
+                .thenReturn(mockRequest);
 
         // Act
-        mockService.disapproveRequest(mockLeaveRequest.getId());
+        mockService.disapproveRequest(mockRequest.getId());
 
         // Assert
         Assertions.assertAll(
-                () -> Assertions.assertEquals(false, mockLeaveRequest.getApproved()));
+                () -> Assertions.assertEquals(false, mockRequest.getApproved()));
     }
 
     @Test
-    public void disapprove_Should_Throw_When_ApprovedIsProcessed() {
-        LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
-        mockLeaveRequest.setApproved(false);
-        Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
-                .thenReturn(mockLeaveRequest);
-
-        assertThrows(RequestAlreadyProcessed.class, () -> mockService.disapproveRequest(mockLeaveRequest.getId()));
+    void disapprove_Should_Throw_When_ApprovedIsProcessed() {
+        RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
+        mockRequest.setApproved(false);
+        Long id = mockRequest.getId();
+        Mockito.when(mockRepository.findById((long) id))
+                .thenReturn(mockRequest);
+        assertThrows(RequestAlreadyProcessed.class, () -> mockService.disapproveRequest(id));
 
     }
 
     @Test
-    public void approve_Should_Throw_When_ApprovedIsProcessed() {
-        LeaveRequest mockLeaveRequest = TestsHelper.createMockLeaveRequest();
+    void approve_Should_Throw_When_ApprovedIsProcessed() {
+        RequestEntity mockRequest = TestsHelper.createMockLeaveRequest();
         EmployeeInfo employee = TestsHelper.createMockEmployee();
-        mockLeaveRequest.setEmployee(employee);
-        mockLeaveRequest.setApproved(true);
-        LeaveRequestDto dto = new LeaveRequestDto();
-        Mockito.when(mockRepository.findById((long) mockLeaveRequest.getId()))
-                .thenReturn(mockLeaveRequest);
+        mockRequest.setEmployee(employee);
+        mockRequest.setApproved(true);
+        RequestDto dto = new RequestDto();
+        Long id = mockRequest.getId();
+        Mockito.when(mockRepository.findById((long) id))
+                .thenReturn(mockRequest);
         // Act
         assertThrows(RequestAlreadyProcessed.class,
-                () -> mockService.approveRequest(mockLeaveRequest.getId(), dto));
+                () -> mockService.approveRequest(id, dto));
 
     }
 

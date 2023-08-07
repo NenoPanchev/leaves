@@ -1,6 +1,12 @@
 package com.example.leaves.util;
 
-import javax.persistence.criteria.*;
+import com.example.leaves.model.entity.enums.RequestTypeEnum;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import java.time.LocalDateTime;
@@ -52,9 +58,18 @@ public class PredicateBuilderV2<ENTITY> {
         return this;
     }
 
-    public <T> PredicateBuilderV2<?> equal(final SingularAttribute<?, T> attribute, final T value) {
+    public <T> PredicateBuilderV2<?> equals(final SingularAttribute<?, T> attribute, final T value) {
         if (value != null) {
             this.predicates.add(builder.equal(this.root.get((SingularAttribute<? super ENTITY, T>) attribute), value));
+        }
+        return this;
+    }
+
+    public <T> PredicateBuilderV2<?> equalsRequestTypeEnum(final SingularAttribute<?, T> attribute, final String value) {
+        if (!Util.isBlank(value)) {
+            Expression<RequestTypeEnum> requestTypeEnumExpression = root.get((SingularAttribute<? super ENTITY, T>) attribute).as(RequestTypeEnum.class);
+            RequestTypeEnum enumValue = RequestTypeEnum.valueOf(value.toUpperCase());
+            this.predicates.add(builder.equal(requestTypeEnumExpression, enumValue));
         }
         return this;
     }

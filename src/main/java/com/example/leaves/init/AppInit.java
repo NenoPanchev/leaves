@@ -24,7 +24,7 @@ public class AppInit implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         permissionService.seedPermissions();
         roleService.seedRoles();
         departmentService.seedDepartments();

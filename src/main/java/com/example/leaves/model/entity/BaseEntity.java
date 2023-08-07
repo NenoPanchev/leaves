@@ -3,7 +3,12 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.BaseDto;
 import com.example.leaves.util.EntityListener;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -25,7 +30,7 @@ public abstract class BaseEntity<T extends BaseDto> {
     private boolean deleted;
 
 
-    public BaseEntity() {
+    protected BaseEntity() {
     }
 
     public Long getId() {

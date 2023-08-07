@@ -1,7 +1,11 @@
 package com.example.leaves.repository;
 
 import com.example.leaves.model.entity.RoleEntity;
-import org.springframework.data.jpa.repository.*;
+import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +17,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, Long>, JpaSpec
 
         @EntityGraph(value = "role")
     List<RoleEntity> findAllByNameInAndDeletedIsFalse(String... roles);
-    @EntityGraph(value = "role")
     boolean existsByNameAndDeletedIsFalse(String name);
 
     @Query("SELECT r.name FROM RoleEntity r " +

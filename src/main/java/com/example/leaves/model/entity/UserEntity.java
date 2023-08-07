@@ -3,7 +3,18 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,11 +25,7 @@ import java.util.List;
                 @NamedAttributeNode("department"),
         }
 )
-@AttributeOverrides(
-        {
-                @AttributeOverride(name = "id", column = @Column(name = "id"))
-        }
-)
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 @Entity
 @Table(name = "users", schema = "public")
 public class UserEntity extends BaseEntity<UserDto> {
@@ -28,7 +35,7 @@ public class UserEntity extends BaseEntity<UserDto> {
     private String email;
     @Column(nullable = false, name = "password")
     private String password;
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "department_id")
     private DepartmentEntity department;
     @ManyToMany
@@ -87,15 +94,15 @@ public class UserEntity extends BaseEntity<UserDto> {
         return this;
     }
 
-
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public void toDto(UserDto dto) {
         if (dto == null) {
             return;
@@ -121,6 +128,7 @@ public class UserEntity extends BaseEntity<UserDto> {
         dto.setEmployeeInfo(this.employeeInfo.toDto());
     }
 
+    @Override
     public void toEntity(UserDto dto) {
         if (dto == null) {
             return;
@@ -153,5 +161,15 @@ public class UserEntity extends BaseEntity<UserDto> {
 
     public void setEmployeeInfo(EmployeeInfo employeeInfo) {
         this.employeeInfo = employeeInfo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

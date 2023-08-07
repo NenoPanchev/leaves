@@ -1,7 +1,7 @@
 package com.example.leaves;
 
 import com.example.leaves.model.entity.EmployeeInfo;
-import com.example.leaves.model.entity.LeaveRequest;
+import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.model.entity.TypeEmployee;
 import com.example.leaves.model.entity.UserEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,22 +33,22 @@ public class TestsHelper {
     }
 
 
-    public static LeaveRequest createMockLeaveRequest() {
-        LeaveRequest mockLeaveRequest = new LeaveRequest();
-        mockLeaveRequest.setId(1L);
-//        mockLeaveRequest.setEmployee(createMockEmployee());
-        mockLeaveRequest.setStartDate(LocalDate.now());
-        mockLeaveRequest.setEndDate(LocalDate.now().plusDays(10));
-        return mockLeaveRequest;
+    public static RequestEntity createMockLeaveRequest() {
+        RequestEntity mockRequest = new RequestEntity();
+        mockRequest.setId(1L);
+//        mockRequest.setEmployee(createMockEmployee());
+        mockRequest.setStartDate(LocalDate.now());
+        mockRequest.setEndDate(LocalDate.now().plusDays(10));
+        return mockRequest;
     }
 
-    public static LeaveRequest createMockLeaveRequestWithEmployee() {
-        LeaveRequest mockLeaveRequest = new LeaveRequest();
-        mockLeaveRequest.setId(1L);
-        mockLeaveRequest.setEmployee(createMockEmployee());
-        mockLeaveRequest.setStartDate(LocalDate.now());
-        mockLeaveRequest.setEndDate(LocalDate.now().plusDays(10));
-        return mockLeaveRequest;
+    public static RequestEntity createMockLeaveRequestWithEmployee() {
+        RequestEntity mockRequest = new RequestEntity();
+        mockRequest.setId(1L);
+        mockRequest.setEmployee(createMockEmployee());
+        mockRequest.setStartDate(LocalDate.now());
+        mockRequest.setEndDate(LocalDate.now().plusDays(10));
+        return mockRequest;
     }
 
     /**

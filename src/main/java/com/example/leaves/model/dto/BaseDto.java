@@ -13,7 +13,7 @@ public abstract class BaseDto {
 
     private boolean isDeleted;
 
-    public BaseDto() {
+    protected BaseDto() {
     }
 
     public Long getId() {
@@ -65,4 +65,5 @@ public abstract class BaseDto {
     public void setDeleted(boolean deleted) {
         isDeleted = deleted;
     }
+
 }

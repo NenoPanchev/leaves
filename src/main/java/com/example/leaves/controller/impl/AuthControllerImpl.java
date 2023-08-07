@@ -8,10 +8,11 @@ import com.example.leaves.model.payload.request.RefreshRequest;
 import com.example.leaves.model.payload.request.UserLoginDto;
 import com.example.leaves.model.payload.response.AuthenticationResponse;
 import com.example.leaves.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
@@ -43,8 +44,15 @@ public class AuthControllerImpl implements AuthController {
             throw new ValidationException(bindingResult);
         }
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("Bad credentials");
+        }
+
 
         final UserDetails userDetails = userDetailService
                 .loadUserByUsername(authenticationRequest.getEmail());
@@ -55,23 +63,13 @@ public class AuthControllerImpl implements AuthController {
     }
 
     @Override
-    public ResponseEntity<?> refreshUserOnClientRefresh(RefreshRequest jwt) {
-//        final String authorizationHeader = request.getHeader("Authorization");
-//
-//        String username = null;
-//        String jwt = null;
-//
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-//            jwt = authorizationHeader.substring(7);
-//            username = jwtUtil.extractUsername(jwt);
-//        }
+    public ResponseEntity<AuthenticationResponse> refreshUserOnClientRefresh(RefreshRequest jwt) {
         final UserDetails userDetails = userDetailService
                 .loadUserByUsername(jwtUtil.extractUsername(jwt.getJwt()));
 
         AuthenticationResponse authenticationResponse = new AuthenticationResponse(jwt.getJwt());
         mapUserDetailsToAuthenticationResponse(userDetails, authenticationResponse);
         return ResponseEntity.ok(authenticationResponse);
-
     }
 
     private void mapUserDetailsToAuthenticationResponse(UserDetails userDetails, AuthenticationResponse authenticationResponse) {

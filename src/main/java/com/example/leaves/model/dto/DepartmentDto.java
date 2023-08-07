@@ -13,9 +13,6 @@ public class DepartmentDto extends BaseDto {
     private String adminEmail;
     private List<String> employeeEmails;
 
-    public DepartmentDto() {
-    }
-
     @Size(min = 2, max = 20, message = "Department name must be between 2 and 20 characters")
     @NotEmpty
     public String getName() {

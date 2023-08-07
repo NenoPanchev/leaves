@@ -75,10 +75,11 @@ public class DepartmentControllerImpl implements DepartmentController {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
-        if (dto.getName() != null) {
-            if (departmentService.existsByName(dto.getName().toUpperCase()) && !departmentService.isTheSame(id, dto.getName().toUpperCase())) {
+        if (dto.getName() != null
+                && (departmentService.existsByName(dto.getName().toUpperCase())
+                && !departmentService.isTheSame(id, dto.getName().toUpperCase()))) {
                 throw new ResourceAlreadyExistsException(String.format("%s department already exists", dto.getName().toUpperCase()));
-            }
+
         }
 
         return ResponseEntity

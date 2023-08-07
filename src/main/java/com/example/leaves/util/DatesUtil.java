@@ -22,13 +22,12 @@ public class DatesUtil {
     public static List<LocalDate> countBusinessDaysBetween(final LocalDate startDate,
                                                            final LocalDate endDate
     ) {
-//        final Optional<List<LocalDate>> holidays
         // Validate method arguments
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("Invalid method argument(s) to countBusinessDaysBetween (" + startDate + "," + endDate + "," + "holidays" + ")");
         }
 
-//        // Predicate 1: Is a given date is a holiday
+        // Predicate 1: Is a given date is a holiday
         Predicate<LocalDate> isHoliday = date -> holidaysUtil.isHoliday(date);
 
         // Predicate 2: Is a given date is a weekday
@@ -37,9 +36,6 @@ public class DatesUtil {
 
 
         // Iterate over stream of all dates and check each day against any weekday or holiday
-//        return getAllDatesBetween(startDate,endDate).stream()
-//                .filter(isWeekend.or(isHoliday).negate())
-//                .collect(Collectors.toList());
         return getAllDatesBetween(startDate, endDate).stream()
                 .filter(isWeekend.negate())
                 .filter(isHoliday.negate())

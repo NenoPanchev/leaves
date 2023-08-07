@@ -15,12 +15,7 @@ public class PasswordChangeDto {
     private String oldPassword;
     private String newPassword;
     private String newPasswordConfirm;
-
     private String token;
-
-
-    public PasswordChangeDto() {
-    }
 
     @Size(min = 4, max = 20, message = "Password must be between 4 and 20 characters")
     public String getOldPassword() {

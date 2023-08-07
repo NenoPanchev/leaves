@@ -8,13 +8,8 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 public class EmployeeInfoDto extends UserDto {
-
     private long typeId;
-
     private int daysLeave;
-    private int carryoverDaysLeave;
-    private int currentYearDaysLeave;
-
     private LocalDate contractStartDate;
 
     private String typeName;
@@ -31,14 +26,6 @@ public class EmployeeInfoDto extends UserDto {
 
     public void setTypeId(long typeId) {
         this.typeId = typeId;
-    }
-
-    public int getDaysLeave() {
-        return daysLeave;
-    }
-
-    public void setDaysLeave(int daysLeave) {
-        this.daysLeave = daysLeave;
     }
 
     public String getTypeName() {
@@ -82,19 +69,11 @@ public class EmployeeInfoDto extends UserDto {
         this.contractStartDate = contractStartDate;
     }
 
-    public int getCarryoverDaysLeave() {
-        return carryoverDaysLeave;
+    public int getDaysLeave() {
+        return daysLeave;
     }
 
-    public void setCarryoverDaysLeave(int carryoverDaysLeave) {
-        this.carryoverDaysLeave = carryoverDaysLeave;
-    }
-
-    public int getCurrentYearDaysLeave() {
-        return currentYearDaysLeave;
-    }
-
-    public void setCurrentYearDaysLeave(int currentYearDaysLeave) {
-        this.currentYearDaysLeave = currentYearDaysLeave;
+    public void setDaysLeave(int daysLeave) {
+        this.daysLeave = daysLeave;
     }
 }

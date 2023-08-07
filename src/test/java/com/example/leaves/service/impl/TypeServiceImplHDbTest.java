@@ -18,7 +18,7 @@ import java.util.List;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class TypeServiceImplTestHDb {
+class TypeServiceImplHDbTest {
 
     @Autowired
     TypeEmployeeRepository repository;

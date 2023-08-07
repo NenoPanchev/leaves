@@ -4,70 +4,71 @@ import com.example.leaves.controller.RequestController;
 import com.example.leaves.exceptions.EntityNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
-import com.example.leaves.model.dto.LeaveRequestDto;
-import com.example.leaves.service.LeaveRequestService;
-import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.model.dto.*;
+import com.example.leaves.service.RequestService;
+import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 public class RequestControllerImpl implements RequestController {
-    private final LeaveRequestService leaveRequestService;
+    private final RequestService requestService;
 
 
     @Autowired
-    public RequestControllerImpl(LeaveRequestService leaveRequestService) {
-        this.leaveRequestService = leaveRequestService;
+    public RequestControllerImpl(RequestService requestService) {
+        this.requestService = requestService;
     }
 
     @Override
-    public List<LeaveRequestDto> getAll() {
-        return leaveRequestService.getAll();
+    public List<RequestDto> getAll() {
+        return requestService.getAll();
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByCurrentUser() {
+    public List<RequestDto> getAllByCurrentUser() {
 
-        return leaveRequestService.getAllByCurrentUser();
+        return requestService.getAllByCurrentUser();
     }
 
     @Override
-    public List<LeaveRequestDto> getAllByUserId(@PathVariable long id) {
+    public List<RequestDto> getAllByUserId(@PathVariable long id) {
 
-        return leaveRequestService.getAllByUserId(id);
+        return requestService.getAllByUserId(id);
     }
 
     @Override
-    public List<LeaveRequestDto> getAllFilter(LeaveRequestFilter filter) {
-        return leaveRequestService.getAllFilter(filter);
+    public List<RequestDto> getAllFilter(RequestFilter filter) {
+        return requestService.getAllFilter(filter);
     }
 
     @Override
-    public LeaveRequestDto update(LeaveRequestDto leaveRequestDto) {
-        return leaveRequestService.updateEndDate(leaveRequestDto);
+    public RequestDto update(RequestDto requestDto) {
+        return requestService.updateEndDate(requestDto);
     }
 
     @Override
-    public LeaveRequestDto getById(long id) {
-        return leaveRequestService.getById(id).toDto();
+    public RequestDto getById(long id) {
+        return requestService.getById(id).toDto();
     }
 
     @Override
-    public LeaveRequestDto addRequest(LeaveRequestDto leaveRequestDto) {
-
-        return leaveRequestService.addRequest(leaveRequestDto).toDto();
+    public RequestDto addRequest(RequestDto requestDto) {
+        return requestService.addRequest(requestDto).toDto();
     }
 
     @Override
-    public void approveRequest(long id, LeaveRequestDto leaveRequestDto) {
+    public void approveRequest(long id, RequestDto requestDto) {
         try {
-            leaveRequestService.approveRequest(id, leaveRequestDto);
+            requestService.approveRequest(id, requestDto);
         } catch (RequestAlreadyProcessed | PaidleaveNotEnoughException e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage(), e);
         }
@@ -76,7 +77,7 @@ public class RequestControllerImpl implements RequestController {
     @Override
     public void disapproveRequest(int id) {
         try {
-            leaveRequestService.disapproveRequest(id);
+            requestService.disapproveRequest(id);
         } catch (RequestAlreadyProcessed | PaidleaveNotEnoughException e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage(), e);
         }
@@ -85,7 +86,7 @@ public class RequestControllerImpl implements RequestController {
     @Override
     public void delete(long id) {
         try {
-            leaveRequestService.delete(id);
+            requestService.delete(id);
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
@@ -94,20 +95,28 @@ public class RequestControllerImpl implements RequestController {
     @Override
     public void unMarkAsDeleted(long id) {
         try {
-            leaveRequestService.unMarkAsDelete(id);
+            requestService.unMarkAsDelete(id);
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @Override
-    public Page<LeaveRequestDto> getPageFiltered(LeaveRequestFilter filter) {
-        return leaveRequestService.getLeaveRequestDtoFilteredPage(filter);
+    public Page<RequestDto> getPageFiltered(RequestFilter filter) {
+        return requestService.getLeaveRequestDtoFilteredPage(filter);
     }
-//    @Override
-//    public void clearAllProcessedRequests(HttpHeaders headers) {
-//        Employee employee = AuthenticationHelper.tryGetUser(headers);
-//        leaveRequestService.clearAllProcessed();
-//    }
 
+    @Override
+    public ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(LocalDate date) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getAllApprovedRequestsInAMonth(date));
+    }
+
+    @Override
+    public ResponseEntity<List<DaysUsedByMonthViewDto>> getDaysLeaveUsedTableView(int year) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getDaysLeaveUsedTableView(year));
+    }
 }

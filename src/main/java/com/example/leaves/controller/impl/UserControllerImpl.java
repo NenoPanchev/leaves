@@ -3,15 +3,12 @@ package com.example.leaves.controller.impl;
 import com.example.leaves.controller.UserController;
 import com.example.leaves.exceptions.ResourceAlreadyExistsException;
 import com.example.leaves.exceptions.ValidationException;
-import com.example.leaves.model.dto.PdfRequestForm;
-import com.example.leaves.model.dto.UserDto;
+import com.example.leaves.model.dto.*;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
-import com.example.leaves.model.payload.response.LeavesAnnualReport;
-import com.example.leaves.service.ContractService;
 import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.UserService;
-import com.example.leaves.service.filter.LeavesReportFilter;
+import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.service.filter.UserFilter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -28,13 +25,10 @@ import java.util.List;
 @RestController
 public class UserControllerImpl implements UserController {
     private final UserService userService;
-    private final ContractService contractService;
-
     private final EmployeeInfoService employeeInfoService;
 
-    public UserControllerImpl(UserService userService, ContractService contractService, EmployeeInfoService employeeInfoService) {
+    public UserControllerImpl(UserService userService, EmployeeInfoService employeeInfoService) {
         this.userService = userService;
-        this.contractService = contractService;
         this.employeeInfoService = employeeInfoService;
     }
 
@@ -99,10 +93,11 @@ public class UserControllerImpl implements UserController {
         if (bindingResult.hasErrors()) {
             throw new ValidationException(bindingResult);
         }
-        if (dto.getName() != null) {
-            if (userService.existsByEmailAndDeletedIsFalse(dto.getEmail()) && !userService.isTheSame(id, dto.getEmail())) {
+        if (dto.getName() != null
+                && (userService.existsByEmailAndDeletedIsFalse(dto.getEmail())
+                && !userService.isTheSame(id, dto.getEmail()))) {
                 throw new ResourceAlreadyExistsException("This email is already in use");
-            }
+
         }
 
         UserDto user = userService.updateUser(id, dto);
@@ -121,7 +116,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity changePassword(PasswordChangeDto dto, Long id, BindingResult bindingResult) {
+    public ResponseEntity<Void> changePassword(PasswordChangeDto dto, Long id, BindingResult bindingResult) {
 
         userService.changePassword(id, dto);
         return ResponseEntity
@@ -130,7 +125,7 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity validatePassword(String password, Long id) {
+    public ResponseEntity<Void> validatePassword(String password, Long id) {
 
         userService.validatePassword(id, password);
         return ResponseEntity
@@ -139,16 +134,15 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity validateChangePasswordToken(String token, Long id) {
-        //TODO WHY IS TOKEN ""token""
-        userService.validatePasswordToken(id, token.substring(1,token.length()-1));
+    public ResponseEntity<Void> validateChangePasswordToken(String token, Long id) {
+        userService.validatePasswordToken(id, token.substring(1, token.length() - 1));
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .build();
     }
 
     @Override
-    public ResponseEntity<?> sendChangePasswordToken(Long id) {
+    public ResponseEntity<Void> sendChangePasswordToken(Long id) {
         userService.sendChangePasswordToken(id);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -182,7 +176,7 @@ public class UserControllerImpl implements UserController {
     @Override
     public ResponseEntity<UserDto> getUserByEmail(String text) {
         UserDto userDto = new UserDto();
-        String email = text.replaceAll("\"", "");
+        String email = text.replace("\"", "");
         userService.findByEmail(email).toDto(userDto);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -198,15 +192,33 @@ public class UserControllerImpl implements UserController {
 
     @Override
     public void notifyUsersOfTheirPaidLeave() {
-        employeeInfoService.notifyEmployeesOfTheirLeftPaidLeave();
+        employeeInfoService.notifyEmployeesOfTheirPaidLeaveLeft();
     }
 
     @Override
-    public ResponseEntity<Page<LeavesAnnualReport>> getLeavesAnnualReportByUserId(Long id, LeavesReportFilter filter) {
+    public ResponseEntity<Page<HistoryDto>> getHistoryReportByUserId(Long id, HistoryFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(employeeInfoService.getAnnualLeavesInfoByUserId(id, filter));
+                .body(employeeInfoService.getHistoryInfoByUserId(id, filter));
 
+    }
+
+    @Override
+    public ResponseEntity<List<HistoryDto>> getHistory(long userId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(employeeInfoService.getHistoryListByUserId(userId));
+    }
+
+    @Override
+    public ResponseEntity<String> importHistory(List<HistoryDto> historyDtoList, BindingResult bindingResult, long userId) {
+        if (bindingResult.hasErrors()) {
+            throw new ValidationException(bindingResult);
+        }
+        employeeInfoService.importHistory(historyDtoList, userId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("History imported");
     }
 }
 

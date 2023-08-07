@@ -12,9 +12,6 @@ public class RoleDto extends BaseDto {
     private String name;
     private List<PermissionDto> permissions;
 
-    public RoleDto() {
-    }
-
     @Size(min = 4, max = 20, message = "Role must be between 4 and 20 characters")
     @NotEmpty
     public String getName() {

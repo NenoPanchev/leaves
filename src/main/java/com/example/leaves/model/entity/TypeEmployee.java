@@ -3,7 +3,13 @@ package com.example.leaves.model.entity;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.TypeEmployeeDto;
 
-import javax.persistence.*;
+import javax.persistence.AttributeOverride;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +21,7 @@ import java.util.List;
                 @NamedAttributeNode("employeeWithType")
         }
 )
-@AttributeOverrides({@AttributeOverride(name = "id", column = @Column(name = "id"))})
+@AttributeOverride(name = "id", column = @Column(name = "id"))
 public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
     @Column(name = "type_name")
@@ -24,7 +30,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
     @Column(name = "type_days")
     private int daysLeave;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "employeeType")
+    @OneToMany(mappedBy = "employeeType")
     private List<EmployeeInfo> employeeWithType;
 
     public List<EmployeeInfo> getEmployeesWithType() {
@@ -54,10 +60,6 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         this.employeeWithType.add(employeeWithType);
     }
 
-    public List<EmployeeInfo> getEmployeeWithType() {
-        return employeeWithType;
-    }
-
     public void setEmployeeWithType(List<EmployeeInfo> employeeWithType) {
         this.employeeWithType = employeeWithType;
     }
@@ -80,6 +82,7 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
         return typeEmployeeDto;
     }
 
+    @Override
     public void toEntity(TypeEmployeeDto typeEmployeeDto) {
         super.toEntity(typeEmployeeDto);
         this.setTypeName(typeEmployeeDto.getTypeName());
@@ -87,4 +90,13 @@ public class TypeEmployee extends BaseEntity<TypeEmployeeDto> {
 
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

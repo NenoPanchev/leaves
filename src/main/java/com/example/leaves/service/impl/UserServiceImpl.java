@@ -1,19 +1,46 @@
 package com.example.leaves.service.impl;
 
-import com.example.leaves.exceptions.*;
+import com.example.leaves.exceptions.EntityNotFoundException;
+import com.example.leaves.exceptions.ObjectNotFoundException;
+import com.example.leaves.exceptions.PasswordChangeTokenExpiredException;
+import com.example.leaves.exceptions.PasswordChangeTokenNotCreatedException;
+import com.example.leaves.exceptions.PasswordsNotMatchingException;
+import com.example.leaves.exceptions.SameNewPasswordException;
+import com.example.leaves.exceptions.UnauthorizedException;
 import com.example.leaves.model.dto.EmployeeInfoDto;
 import com.example.leaves.model.dto.RoleDto;
 import com.example.leaves.model.dto.UserDto;
-import com.example.leaves.model.entity.*;
+import com.example.leaves.model.entity.BaseEntity_;
+import com.example.leaves.model.entity.DepartmentEntity;
+import com.example.leaves.model.entity.DepartmentEntity_;
+import com.example.leaves.model.entity.EmployeeInfo;
+import com.example.leaves.model.entity.EmployeeInfo_;
+import com.example.leaves.model.entity.HistoryEntity_;
+import com.example.leaves.model.entity.PasswordResetToken;
+import com.example.leaves.model.entity.RoleEntity;
+import com.example.leaves.model.entity.RoleEntity_;
+import com.example.leaves.model.entity.TypeEmployee;
+import com.example.leaves.model.entity.TypeEmployee_;
+import com.example.leaves.model.entity.UserEntity;
+import com.example.leaves.model.entity.UserEntity_;
 import com.example.leaves.model.payload.request.PasswordChangeDto;
 import com.example.leaves.model.payload.request.UserUpdateDto;
-import com.example.leaves.repository.PasswordResetTokenRepository;
 import com.example.leaves.repository.TypeEmployeeRepository;
 import com.example.leaves.repository.UserRepository;
-import com.example.leaves.service.*;
+import com.example.leaves.service.DepartmentService;
+import com.example.leaves.service.EmailService;
+import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.RoleService;
+import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.UserFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.OffsetBasedPageRequest;
+import com.example.leaves.util.PredicateBuilder;
+import com.example.leaves.util.TokenUtil;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +51,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.persistence.criteria.Predicate;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
@@ -31,27 +59,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.example.leaves.util.Util.isBlank;
+
 @Service
 public class UserServiceImpl implements UserService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final String ADMIN = "ADMIN";
+    private static final String USER_NOT_FOUND_TEMPLATE = "User with id %d does not exist";
+    private static final String USER_NOT_FOUND_MESSAGE = "User not found";
+    private static final String INCORRECT_OLD_PASSWORD_MESSAGE = "Incorrect old password!";
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final DepartmentService departmentService;
     private final TypeEmployeeRepository typeEmployeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeInfoService employeeInfoService;
-    private final ContractService contractService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final EmailService emailService;
     private final ModelMapper modelMapper;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           @Lazy PasswordResetTokenRepository passwordResetTokenRepository,
                            @Lazy EmailService emailService,
                            @Lazy RoleService roleService,
                            @Lazy DepartmentService departmentService,
                            @Lazy TypeEmployeeRepository typeEmployeeRepository,
-                           @Lazy EmployeeInfoService employeeInfoService, ContractService contractService, ModelMapper modelMapper) {
+                           @Lazy EmployeeInfoService employeeInfoService,
+                           ModelMapper modelMapper) {
 
         this.userRepository = userRepository;
         this.roleService = roleService;
@@ -59,10 +92,8 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.typeEmployeeRepository = typeEmployeeRepository;
         this.employeeInfoService = employeeInfoService;
-        this.contractService = contractService;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
     @Override
@@ -72,7 +103,6 @@ public class UserServiceImpl implements UserService {
             return;
         }
         // Get types of Employee
-        TypeEmployee trainee = typeEmployeeRepository.findById(2L);
         TypeEmployee developer = typeEmployeeRepository.findById(1L);
 
         // Super Admin
@@ -81,44 +111,15 @@ public class UserServiceImpl implements UserService {
         superAdmin.setName("Super Admin");
         superAdmin.setEmail("super@admin.com");
         superAdmin.setPassword(passwordEncoder.encode("1234"));
-        superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", "ADMIN", "USER"));
+        superAdmin.setRoles(roleService.findAllByRoleIn("SUPER_ADMIN", ADMIN, "USER"));
         superAdmin.setDepartment(administration);
 
         // Employee Info
-        createEmployeeInfoFor(superAdmin, LocalDate.of(2017, 1, 1), developer);
+        EmployeeInfo employeeInfo = employeeInfoService.createEmployeeInfoFor(LocalDate.of(2017, 1, 1), developer);
+        superAdmin.setEmployeeInfo(employeeInfo);
 
         userRepository.save(superAdmin);
         departmentService.addEmployeeToDepartment(superAdmin, administration);
-
-        // Admin
-        UserEntity admin = new UserEntity();
-        admin.setName("Admin Admin");
-        admin.setEmail("admin@admin.com");
-        admin.setPassword(passwordEncoder.encode("1234"));
-        admin.setRoles(roleService.findAllByRoleIn("ADMIN", "USER"));
-        admin.setDepartment(administration);
-
-        // Employee Info
-        createEmployeeInfoFor(admin, LocalDate.of(2017, 1, 1), developer);
-
-        userRepository.save(admin);
-        departmentService.addEmployeeToDepartment(admin, administration);
-
-
-        // User
-        DepartmentEntity it = departmentService.findByDepartment("IT");
-        UserEntity user = new UserEntity();
-        user.setName("User User");
-        user.setEmail("user@user.com");
-        user.setPassword(passwordEncoder.encode("1234"));
-        user.setRoles(roleService.findAllByRoleIn("USER"));
-        user.setDepartment(it);
-
-        // Employee Info
-        createEmployeeInfoFor(user, LocalDate.of(2019, 1, 1), trainee);
-
-        userRepository.save(user);
-        departmentService.addEmployeeToDepartment(user, it);
     }
 
     @Override
@@ -132,10 +133,10 @@ public class UserServiceImpl implements UserService {
         entity.setDepartment(department);
         List<RoleEntity> roles = checkAuthorityAndGetRoles(dto.getRoles());
         entity.setRoles(roles);
-        setEmployeeInfoFromDto(entity, dto.getEmployeeInfo());
-
+        EmployeeInfo employeeInfo = getEmployeeInfoFromDto(dto.getEmployeeInfo());
+        entity.setEmployeeInfo(employeeInfo);
         entity = userRepository.save(entity);
-        if (!isEmpty(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment())) {
             departmentService.addEmployeeToDepartment(entity, department);
 
         }
@@ -157,7 +158,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto getUserDtoById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         UserDto dto = new UserDto();
         userRepository.findByIdAndDeletedIsFalse(id).toDto(dto);
@@ -169,7 +170,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity getUserById(long id) {
         if (userRepository.findByIdAndDeletedIsFalse(id) == null) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         return userRepository.findByIdAndDeletedIsFalse(id);
     }
@@ -195,10 +196,10 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
         }
         if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         UserEntity userEntity = userRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id)));
         departmentService.detachAdminFromDepartment(id);
         departmentService.detachEmployeeFromDepartment(userEntity);
         userRepository.deleteById(id);
@@ -211,10 +212,9 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("You cannot delete SUPER_ADMIN");
         }
         if (!userRepository.existsById(id)) {
-            throw new ObjectNotFoundException(String.format("User with id %d does not exist", id));
+            throw new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id));
         }
         userRepository.markAsDeleted(id);
-//        userRepository.softDeleteById(id);
     }
 
     @Override
@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService {
         }
         UserDto dto = modelMapper.map(updateDto, UserDto.class);
         UserEntity entity = userRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(String.format("User with id %d does not exist", id)));
+                .orElseThrow(() -> new ObjectNotFoundException(String.format(USER_NOT_FOUND_TEMPLATE, id)));
         String initialEntityDepartmentName = entity.getDepartment() == null ? "" : entity.getDepartment().getName();
         boolean sameDepartment = true;
         entity.toEntity(dto);
@@ -233,13 +233,13 @@ public class UserServiceImpl implements UserService {
         entity.setRoles(roles);
         DepartmentEntity departmentEntity = null;
 
-        if (!isEmpty(dto.getDepartment()) && !initialEntityDepartmentName.equals(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment()) && !initialEntityDepartmentName.equals(dto.getDepartment())) {
             sameDepartment = false;
             departmentEntity = departmentService
                     .findByDepartment(dto.getDepartment());
             entity.setDepartment(departmentEntity);
         }
-        updateEmployeeInfo(entity, dto.getEmployeeInfo(), updateDto.getContractChange());
+        updateEmployeeInfo(entity, dto.getEmployeeInfo());
 
         entity = userRepository.saveAndFlush(entity);
 
@@ -254,86 +254,17 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo, String contractChange) {
-        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
+    private void updateEmployeeInfo(UserEntity entity, EmployeeInfoDto employeeInfo) {
+        if (employeeInfo == null || isBlank(employeeInfo.getTypeName())) {
             return;
         }
-        if (contractChange.equals("Initial")) {
-            editInitialContract(entity.getEmployeeInfo(), employeeInfo);
-        } else if (contractChange.equals("New")) {
-            ContractEntity lastContract = contractService.getTheLastContract(entity.getEmployeeInfo().getContracts());
-
-            boolean isLastContractStartDate = lastContract.getStartDate().equals(employeeInfo.getContractStartDate());
-
-            boolean isAfterLastContractStartDate = employeeInfo.getContractStartDate().isAfter(lastContract.getStartDate());
-
-
-            if (isLastContractStartDate) {
-                editLastContract(entity.getEmployeeInfo(), employeeInfo, lastContract);
-            } else {
-                if (isAfterLastContractStartDate) {
-                    addNewContract(entity.getEmployeeInfo(), employeeInfo);
-                } else {
-                    throw new IllegalContractStartDateException("New contract start date must be in present or future and not between other contract dates");
-                }
-            }
+        if (!entity.getEmployeeInfo().getEmployeeType().getTypeName().equals(employeeInfo.getTypeName())) {
+            TypeEmployee newType = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
+            entity.getEmployeeInfo().setEmployeeType(newType);
         }
-        entity.getEmployeeInfo().setCurrentYearDaysLeave(
-                employeeInfoService.calculateCurrentYearPaidLeave(entity.getEmployeeInfo()));
-    }
-
-    private void editInitialContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
-        ContractEntity initialContract = entityInfo.getContracts().get(0);
-
-        if (isNewStartDate(initialContract, infoDto)) {
-            entityInfo.setContractStartDate(infoDto.getContractStartDate());
-            initialContract.setStartDate(infoDto.getContractStartDate());
+        if (!entity.getEmployeeInfo().getContractStartDate().equals(employeeInfo.getContractStartDate())) {
+            entity.getEmployeeInfo().setContractStartDate(employeeInfo.getContractStartDate());
         }
-        if (isNewTypeEmployee(initialContract, infoDto)) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
-            initialContract.setTypeName(infoDto.getTypeName());
-
-            if (entityInfo.getContracts().size() == 1) {
-                entityInfo.setEmployeeType(newType);
-            }
-        }
-    }
-
-    private void editLastContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto, ContractEntity lastContract) {
-        if (isNewTypeEmployee(lastContract, infoDto)) {
-            TypeEmployee newType = typeEmployeeRepository.findByTypeName(infoDto.getTypeName());
-            lastContract.setTypeName(infoDto.getTypeName());
-            entityInfo.setEmployeeType(newType);
-            contractService.deleteDummyContracts(entityInfo.getContracts(), infoDto.getContractStartDate());
-        }
-    }
-
-    private void addNewContract(EmployeeInfo entityInfo, EmployeeInfoDto infoDto) {
-        ContractEntity lastContract = contractService.getTheLastContract(entityInfo.getContracts());
-
-
-        if (!isNewTypeEmployee(lastContract, infoDto)) {
-            throw new IllegalArgumentException("New contract must have different type");
-        }
-
-        if (lastContract.getEndDate() == null) {
-            lastContract.setEndDate(infoDto.getContractStartDate().minusDays(1));
-        }
-        if (contractService.aDateIsBetweenOtherContractDates(infoDto.getContractStartDate(), entityInfo.getContracts())) {
-            throw new IllegalArgumentException("Contract date cannot be between other contract dates");
-        }
-        entityInfo.setEmployeeType(typeEmployeeRepository.findByTypeName(infoDto.getTypeName()));
-        ContractEntity newContract = new ContractEntity(infoDto.getTypeName(), infoDto.getContractStartDate(), entityInfo);
-        contractService.save(newContract);
-        entityInfo.addContract(newContract);
-    }
-
-    private boolean isNewTypeEmployee(ContractEntity contract, EmployeeInfoDto dto) {
-        return !contract.getTypeName().equals(dto.getTypeName());
-    }
-
-    private boolean isNewStartDate(ContractEntity contract, EmployeeInfoDto dto) {
-        return !contract.getStartDate().equals(dto.getContractStartDate());
     }
 
     private List<RoleEntity> checkAuthorityAndGetRoles(List<RoleDto> dto) {
@@ -344,7 +275,7 @@ public class UserServiceImpl implements UserService {
                     .stream()
                     .map(roleDto -> {
                         String name = roleDto.getName().toUpperCase();
-                        if (name.equals("ADMIN")) {
+                        if (ADMIN.equals(name)) {
                             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                             boolean isSuperAdmin = authentication
                                     .getAuthorities()
@@ -383,7 +314,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new EntityNotFoundException("Type not found"));
         UserEntity user = userRepository
                 .findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
         user.getEmployeeInfo().setEmployeeType(typeEmployee);
         UserDto dto = new UserDto();
         userRepository.save(user).toDto(dto);
@@ -400,7 +331,7 @@ public class UserServiceImpl implements UserService {
         if (filter.getLimit() != null && filter.getLimit() > 0) {
             int offset = filter.getOffset() == null ? 0 : filter.getOffset();
             int limit = filter.getLimit();
-            OffsetLimitPageRequest pageable = new OffsetLimitPageRequest(offset, limit);
+            OffsetBasedPageRequest pageable = new OffsetBasedPageRequest(offset, limit);
             Page<UserEntity> page = userRepository.findAll(getSpecification(filter), pageable);
             entities = page.getContent();
         } else {
@@ -422,10 +353,11 @@ public class UserServiceImpl implements UserService {
         return (root, query, criteriaBuilder) ->
         {
             Predicate[] predicates = new PredicateBuilder<>(root, criteriaBuilder)
-                    .in(UserEntity_.id, filter.getIds())
+                    .in(BaseEntity_.id, filter.getIds())
+                    .notEquals(BaseEntity_.id, 1L)
                     .like(UserEntity_.email, filter.getEmail())
                     .like(UserEntity_.name, filter.getName())
-                    .equals(UserEntity_.deleted, filter.isDeleted())
+                    .equals(BaseEntity_.deleted, filter.isDeleted())
                     .joinLike(UserEntity_.department, filter.getDepartment(),
                             DepartmentEntity_.NAME)
                     .joinIn(UserEntity_.roles, filter.getRoles(), RoleEntity_.NAME)
@@ -435,17 +367,17 @@ public class UserServiceImpl implements UserService {
                     .joinCompareDates(UserEntity_.employeeInfo,
                             filter.getStartDateComparisons(),
                             EmployeeInfo_.CONTRACT_START_DATE)
-                    .joinCompareIntegerWithSumOfTwoFields(UserEntity_.employeeInfo,
+                    .joinDeepCompareIntegers(UserEntity_.employeeInfo, EmployeeInfo_.historyList,
                             filter.getDaysLeaveComparisons(),
-                            EmployeeInfo_.CURRENT_YEAR_DAYS_LEAVE,
-                            EmployeeInfo_.CARRYOVER_DAYS_LEAVE)
+                            HistoryEntity_.CALENDAR_YEAR,
+                            HistoryEntity_.DAYS_LEFT)
                     .build()
                     .toArray(new Predicate[0]);
 
 
             return query.where(predicates)
                     .distinct(true)
-                    .orderBy(criteriaBuilder.asc(root.get(UserEntity_.ID)))
+                    .orderBy(criteriaBuilder.asc(root.get(BaseEntity_.ID)))
                     .getGroupRestriction();
         };
     }
@@ -488,13 +420,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserEntity findUserById(long id) {
-        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("user not found"));
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
     public UserDto findUserByEmail(String email) {
         UserDto dto = new UserDto();
-        userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("user not found")).toDto(dto);
+        userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE)).toDto(dto);
         return dto;
     }
 
@@ -506,7 +438,7 @@ public class UserServiceImpl implements UserService {
                                 .getContext()
                                 .getAuthentication()
                                 .getName())
-                .orElseThrow(() -> new EntityNotFoundException("user not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -518,7 +450,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Long findIdByEmail(String email) {
         return userRepository.findIdByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -538,7 +470,7 @@ public class UserServiceImpl implements UserService {
             throw new PasswordsNotMatchingException("New passwords and confirmation must match!");
         }
         if (!passwordEncoder.matches(dto.getOldPassword(), entity.getPassword())) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
         if (dto.getOldPassword().equals(dto.getNewPassword())) {
             throw new SameNewPasswordException("New password can not match the previous one!");
@@ -570,23 +502,21 @@ public class UserServiceImpl implements UserService {
 
         createPasswordResetTokenForUser(entity, token);
 
-//        try {
-//            //TODO UNCOMMENT WHEN EMAIL READY
-//            emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
-//        } catch (MessagingException e) {
-//            //TODO CHANGE EXCEPTION
-//            throw new RuntimeException(e);
-//        }
+        try {
+            emailService.sendChangePasswordToken(entity.getName(),entity.getEmail(),token);
+        } catch (MessagingException e) {
+            LOGGER.warn("Error sending mail with password reset token");
+        }
     }
 
     @Override
     public void validatePassword(Long id, String password) {
         UserEntity entity = getUserEntity(id);
         if (password == null || password.isEmpty()) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
         if (!passwordEncoder.matches(password, entity.getPassword())) {
-            throw new PasswordsNotMatchingException("Incorrect old password!");
+            throw new PasswordsNotMatchingException(INCORRECT_OLD_PASSWORD_MESSAGE);
         }
     }
 
@@ -608,13 +538,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updatePersonalInfo(UserUpdateDto dto) {
         UserEntity entity = getCurrentUser();
-        if (!entity.getEmail().equals(dto.getEmail()))
-        {
+        if (!entity.getEmail().equals(dto.getEmail())) {
             throw new UnauthorizedException("You can't change others personal info!");
         }
         entity.getEmployeeInfo().setSsn(EncryptionUtil.encrypt(String.valueOf(dto.getEmployeeInfo().getSsn())));
         entity.getEmployeeInfo().setAddress(dto.getEmployeeInfo().getAddress());
-        UserDto outDto=new UserDto();
+        UserDto outDto = new UserDto();
         userRepository.save(entity).toDto(outDto);
         return outDto;
     }
@@ -625,10 +554,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(ObjectNotFoundException::new);
     }
 
+    @Override
+    public List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin() {
+        return userRepository.findAllNamesByDeletedIsFalseWithoutDevAdmin();
+    }
+
     private UserEntity getUserEntity(Long id) {
-        UserEntity entity = userRepository
-                .findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
-        return entity;
+        return userRepository
+                .findById(id).orElseThrow(() -> new ObjectNotFoundException(USER_NOT_FOUND_MESSAGE));
     }
 
     private void createPasswordResetTokenForUser(UserEntity entity, String token) {
@@ -642,8 +575,7 @@ public class UserServiceImpl implements UserService {
     public Page<UserDto> getUsersPage(UserFilter filter) {
         Page<UserDto> page = null;
         if (filter.getLimit() != null && filter.getLimit() > 0) {
-            int offset = filter.getOffset() == null ? 0 : filter.getOffset();
-            int limit = filter.getLimit();
+
             OffsetBasedPageRequest pageable = OffsetBasedPageRequest.getOffsetBasedPageRequest(filter);
             page = userRepository
                     .findAll(getSpecification(filter), pageable)
@@ -658,13 +590,13 @@ public class UserServiceImpl implements UserService {
 
     private void sortEmployeeDepartmentRelation(UserEntity entity, DepartmentEntity departmentEntity, String initialEntityDepartmentName,
                                                 String dtoDepartmentName, boolean sameDepartment) {
-        if (!isEmpty(dtoDepartmentName) && !sameDepartment) {
+        if (!isBlank(dtoDepartmentName) && !sameDepartment) {
             if (!initialEntityDepartmentName.equals("")) {
                 departmentService.detachEmployeeFromDepartment(entity);
             }
             departmentService.addEmployeeToDepartment(entity, departmentEntity);
         }
-        if ((isEmpty(dtoDepartmentName)) && !initialEntityDepartmentName.equals("")) {
+        if ((isBlank(dtoDepartmentName)) && !initialEntityDepartmentName.equals("")) {
             departmentService.detachEmployeeFromDepartment(entity);
             entity.setDepartment(null);
         }
@@ -673,14 +605,14 @@ public class UserServiceImpl implements UserService {
 
 
     private DepartmentEntity getDepartmentFromDto(UserDto dto, DepartmentEntity department) {
-        if (!isEmpty(dto.getDepartment())) {
+        if (!isBlank(dto.getDepartment())) {
             department = departmentService
                     .findByDepartment(dto.getDepartment());
         }
         return department;
     }
 
-    private void setEmployeeInfoFromDto(UserEntity entity, EmployeeInfoDto employeeInfo) {
+    private EmployeeInfo getEmployeeInfoFromDto(EmployeeInfoDto employeeInfo) {
         LocalDate startDate;
         if (employeeInfo != null) {
             startDate = employeeInfo.getContractStartDate() != null
@@ -690,25 +622,12 @@ public class UserServiceImpl implements UserService {
         }
 
         TypeEmployee type;
-        if (employeeInfo == null || isEmpty(employeeInfo.getTypeName())) {
+        if (employeeInfo == null || isBlank(employeeInfo.getTypeName())) {
             type = typeEmployeeRepository.findByTypeName("Trainee");
         } else {
             type = typeEmployeeRepository.findByTypeName(employeeInfo.getTypeName());
         }
-        createEmployeeInfoFor(entity, startDate, type);
+        return employeeInfoService.createEmployeeInfoFor(startDate, type);
     }
 
-    private boolean isEmpty(String name) {
-        return name == null || name.equals("");
-    }
-
-    private void createEmployeeInfoFor(UserEntity entity, LocalDate startDate, TypeEmployee type) {
-        EmployeeInfo info = new EmployeeInfo();
-        info.setEmployeeType(type);
-        info.setContractStartDate(startDate);
-        info.addContract(new ContractEntity(type.getTypeName(), startDate, info));
-        int days = employeeInfoService.calculateCurrentYearPaidLeave(info);
-        info.setCurrentYearDaysLeave(days);
-        entity.setEmployeeInfo(info);
-    }
 }

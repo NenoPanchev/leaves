@@ -1,0 +1,75 @@
+spring:
+  datasource:
+    driverClassName: org.postgresql.Driver
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+  h2:
+    console:
+      enabled: true
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+server:
+  error:
+    include-message: on-param
+  port: ${SERVER_PORT}
+
+notification:
+  mail:
+    enable: true
+    host: mail.lightsoftbulgaria.com
+    port: 465
+    username: vacation@lightsoftbulgaria.com
+    password: B6=5=g!F.?KU
+    protocol: smtp
+    java-mail-properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+        starttls:
+          enable: true
+        ssl:
+          trust: mail.lightsoftbulgaria.com
+
+logging:
+  file:
+    name: logs/leaves.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+
+allowed-leave-days-to-carry-over: 5
+holidays:
+  api:
+    base:
+      url: https://date.nager.at/api/v3/publicholidays/
+
+cron-jobs:
+  update:
+    holidays: "0 0 0 1 6 *"     # At 00:00 on day-of-month 1 in June.                   Updates holidays for current and next year.
+    paid-leave: "0 0 1 1 1 *"   # At 01:00 on day-of-month 1 in January.                Transfers allowed days leave to next year's.
+    history: "0 0 9 1 12 *"     # # At 09:00 on day-of-month 1 in December.             Adds data for next year, so it allows merged December-January vacations.
+  notify:
+    paid-leave:
+      left: "0 0 9 1 10,11 *"   # At 09:00 on day-of-month 1 in October and November.   Notifies employees to spend their remaining surplus days leave.
+      used: "0 0 9 1 * *"       # At 08:00 on day-of-month 1.                           Sends report about each employee's spent days during previous month.
+    email-recipients:
+      - "aleksandar.vasilev@lightsoftbulgaria.com"
+      - "neno.panchev@lightsoftbulgaria.com"
+
+
+ui:
+  address: "https://vacation.lightsoftbulgaria.com"
+
+should-send-emails: true

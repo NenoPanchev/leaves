@@ -7,9 +7,6 @@ public class RoleFilter extends BaseFilter {
     private String name;
     private List<String> permissions;
 
-    public RoleFilter() {
-    }
-
     public String getName() {
         return name;
     }

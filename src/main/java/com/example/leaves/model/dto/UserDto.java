@@ -22,13 +22,9 @@ public class UserDto extends BaseDto {
     private String confirmPassword;
     private String department;
     private List<RoleDto> roles;
-
     private EmployeeInfoDto employeeInfo;
 
-    public UserDto() {
-    }
-
-    @Size(min = 2, max = 20, message = "Username must be between 2 and 20 characters")
+    @Size(min = 2, max = 70, message = "Username must be between 2 and 70 characters")
     public String getName() {
         return name;
     }

@@ -1,11 +1,20 @@
 package com.example.leaves.controller;
 
-import com.example.leaves.model.dto.LeaveRequestDto;
-import com.example.leaves.service.filter.LeaveRequestFilter;
+import com.example.leaves.model.dto.*;
+import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RequestMapping("/api/requests")
@@ -13,35 +22,35 @@ import java.util.List;
 public interface RequestController {
     @GetMapping
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAll();
+    List<RequestDto> getAll();
 
     @GetMapping("/employee")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByCurrentUser();
+    List<RequestDto> getAllByCurrentUser();
 
     @GetMapping("/employee/{id}")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllByUserId(@PathVariable long id);
+    List<RequestDto> getAllByUserId(@PathVariable long id);
 
     @PostMapping("/filter")
     @PreAuthorize("hasAuthority('READ')")
-    List<LeaveRequestDto> getAllFilter(@RequestBody LeaveRequestFilter searchCriteria);
+    List<RequestDto> getAllFilter(@RequestBody RequestFilter searchCriteria);
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto getById(@PathVariable long id);
+    RequestDto getById(@PathVariable long id);
 
     @PutMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto update(@RequestBody LeaveRequestDto leaveRequestDto);
+    RequestDto update(@RequestBody RequestDto requestDto);
 
     @PostMapping
     @PreAuthorize("hasAuthority('READ')")
-    LeaveRequestDto addRequest(@RequestBody LeaveRequestDto leaveRequestDto);
+    RequestDto addRequest(@RequestBody RequestDto requestDto);
 
     @PutMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('WRITE')")
-    void approveRequest(@PathVariable long id, @RequestBody LeaveRequestDto leaveRequestDto);
+    void approveRequest(@PathVariable long id, @RequestBody RequestDto requestDto);
 
     @PutMapping("/{id}/disapprove")
     @PreAuthorize("hasAuthority('WRITE')")
@@ -55,10 +64,15 @@ public interface RequestController {
     @PreAuthorize("hasAuthority('DELETE')")
     void unMarkAsDeleted(@PathVariable long id);
 
-    //    @DeleteMapping("/clear")
-//    void clearAllProcessedRequests(@RequestHeader HttpHeaders headers);
     @PostMapping("/Page")
     @PreAuthorize("hasRole('ADMIN')")
-    Page<LeaveRequestDto> getPageFiltered(@RequestBody LeaveRequestFilter filter);
+    Page<RequestDto> getPageFiltered(@RequestBody RequestFilter filter);
 
+    @PostMapping("/approved")
+    @PreAuthorize("hasAnyAuthority('READ')")
+    ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(@RequestBody LocalDate date);
+
+    @PostMapping("/days-used-table")
+    @PreAuthorize("hasAnyAuthority('READ')")
+    ResponseEntity<List<DaysUsedByMonthViewDto>> getDaysLeaveUsedTableView(@RequestBody int year);
 }

@@ -8,9 +8,6 @@ public class DepartmentFilter extends BaseFilter {
     private String adminEmail;
     private List<String> employeeEmails;
 
-    public DepartmentFilter() {
-    }
-
     public List<Long> getIds() {
         return ids;
     }
