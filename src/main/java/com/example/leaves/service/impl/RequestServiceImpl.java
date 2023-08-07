@@ -398,6 +398,7 @@ public class RequestServiceImpl implements RequestService {
                         String name = request.getEmployee().getUserInfo().getName();
                         maps.get(name).putIfAbsent(monthName, new ArrayList<>());
                         maps.get(name).get(monthName).addAll(getDaysOfMonthUsed(request.toDto(), date));
+                        Collections.sort(maps.get(name).get(monthName));
                     });
         }
         for (Map.Entry<String, Map<String, List<Integer>>> entry : maps.entrySet()) {
