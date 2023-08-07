@@ -25,7 +25,9 @@ import com.example.leaves.service.RoleService;
 import com.example.leaves.service.TypeEmployeeService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.HistoryFilter;
+import com.example.leaves.util.DatesUtil;
 import com.example.leaves.util.EncryptionUtil;
+import com.example.leaves.util.HolidaysUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
@@ -214,8 +216,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
         words.put("startDate", request.getApprovedStartDate()
                 .format(dateTimeFormatter));
 
-        words.put("endDate", request.getApprovedEndDate()
-                .plusDays(1)
+        words.put("endDate", getNextWorkDay(request.getApprovedEndDate())
                 .format(dateTimeFormatter));
 
         words.put("daysNumber", String.valueOf(request.getDaysRequested()));
@@ -400,5 +401,13 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     private int getDaysLeaveLeftForYear(EmployeeInfo employeeInfo, int year) {
         HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         return historyEntity.getTotalDaysLeave() - historyEntity.getDaysUsed();
+    }
+
+    private LocalDate getNextWorkDay(LocalDate date) {
+        LocalDate nextDay = date.plusDays(1);
+        while (DatesUtil.isNonWorkingDay(nextDay)) {
+            nextDay = nextDay.plusDays(1);
+        }
+        return nextDay;
     }
 }

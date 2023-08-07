@@ -112,7 +112,7 @@ public class HolidaysUtil {
         return counter;
     }
 
-    private boolean isWeekend(LocalDate date) {
+    public boolean isWeekend(LocalDate date) {
         return isSaturday(date) || isSunday(date);
     }
 
