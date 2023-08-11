@@ -17,5 +17,7 @@ public interface HistoryService {
     void updateEntityListFromDtoList(EmployeeInfo employeeInfo, List<HistoryDto> historyDtoList);
     List<HistoryDto> toDtoList(List<HistoryEntity> historyEntities);
 
-    HistoryEntity getHystoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year);
+    HistoryEntity getHistoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year);
+
+    HistoryDto getHistoryDtoByUserNameAndYear(String name, int year);
 }

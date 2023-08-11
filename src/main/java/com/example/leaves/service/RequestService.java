@@ -37,4 +37,6 @@ public interface RequestService {
 
     List<DaysUsedByMonthViewDto> getDaysLeaveUsedTableView(int year);
     DaysUsedByMonthViewDto getDaysLeaveUsedByYearAndEmployeeId(int year, long id);
+
+    List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LocalDate date);
 }

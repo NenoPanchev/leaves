@@ -8,6 +8,8 @@ import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
 import com.example.leaves.model.dto.DaysUsedByMonthViewDto;
+import com.example.leaves.model.dto.DaysUsedInMonthViewDto;
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.model.entity.BaseEntity_;
 import com.example.leaves.model.entity.EmployeeInfo;
@@ -20,6 +22,7 @@ import com.example.leaves.repository.RequestRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.EmailService;
 import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.HistoryService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.RequestFilter;
@@ -46,6 +49,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -71,13 +75,14 @@ public class RequestServiceImpl implements RequestService {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
     private final AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig;
+    private final HistoryService historyService;
 
     @Autowired
     public RequestServiceImpl(UserRepository employeeRepository,
                               RequestRepository requestRepository,
                               @Lazy UserService userService,
                               EmailService emailService,
-                              @Lazy EmployeeInfoService employeeInfoService, AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig) {
+                              @Lazy EmployeeInfoService employeeInfoService, AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig, HistoryService historyService) {
 
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
@@ -85,6 +90,7 @@ public class RequestServiceImpl implements RequestService {
         this.emailService = emailService;
         this.employeeInfoService = employeeInfoService;
         this.appYmlRecipientsToNotifyConfig = appYmlRecipientsToNotifyConfig;
+        this.historyService = historyService;
     }
 
 
@@ -428,6 +434,38 @@ public class RequestServiceImpl implements RequestService {
 
         }
         return dto;
+    }
+
+    @Override
+    public List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LocalDate date) {
+        List<DaysUsedInMonthViewDto> dtoList = new ArrayList<>();
+        userService
+                .findAllNamesByDeletedIsFalseWithoutDevAdmin()
+                .forEach(name -> {
+                    HistoryDto historyDto = historyService.getHistoryDtoByUserNameAndYear(name, date.getYear());
+                    DaysUsedInMonthViewDto viewDto = new DaysUsedInMonthViewDto(name, historyDto);
+                    dtoList.add(viewDto);
+
+                });
+
+            List<RequestEntity> requests = requestRepository.findAllApprovedRequestsInAMonthOfYear(date.getMonthValue(), date.getYear());
+
+            requests
+                    .forEach(request -> {
+                        String name = request.getEmployee().getUserInfo().getName();
+
+                        DaysUsedInMonthViewDto viewDto = dtoList
+                                .stream()
+                                .filter(dto -> dto.getName().equals(name))
+                                .findFirst()
+                                .orElseThrow(ObjectNotFoundException::new);
+
+                        List<Integer> daysOfMonthUsed = getDaysOfMonthUsed(request.toDto(), date);
+                        daysOfMonthUsed
+                                .forEach(day -> viewDto.getDays().put(day, request.getRequestType().name()));
+                    });
+        dtoList.sort(Comparator.comparing(DaysUsedInMonthViewDto::getName));
+        return dtoList;
     }
 
     @Override

@@ -73,6 +73,10 @@ public interface RequestController {
     ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(@RequestBody LocalDate date);
 
     @PostMapping("/days-used-table")
-    @PreAuthorize("hasAnyAuthority('READ')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<DaysUsedByMonthViewDto>> getDaysLeaveUsedTableView(@RequestBody int year);
+
+    @PostMapping("/days-used/per-month")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<List<DaysUsedInMonthViewDto>> getAllDaysLeaveUsedPerMonth(@RequestBody LocalDate date);
 }

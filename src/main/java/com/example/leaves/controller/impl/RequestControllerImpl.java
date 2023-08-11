@@ -119,4 +119,11 @@ public class RequestControllerImpl implements RequestController {
                 .status(HttpStatus.OK)
                 .body(requestService.getDaysLeaveUsedTableView(year));
     }
+
+    @Override
+    public ResponseEntity<List<DaysUsedInMonthViewDto>> getAllDaysLeaveUsedPerMonth(LocalDate date) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getAllDaysLeavePerMonthView(date));
+    }
 }

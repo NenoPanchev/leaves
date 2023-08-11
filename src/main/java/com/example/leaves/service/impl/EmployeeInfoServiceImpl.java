@@ -27,7 +27,6 @@ import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.HistoryFilter;
 import com.example.leaves.util.DatesUtil;
 import com.example.leaves.util.EncryptionUtil;
-import com.example.leaves.util.HolidaysUtil;
 import com.example.leaves.util.OffsetBasedPageRequest;
 import com.example.leaves.util.PdfUtil;
 import com.example.leaves.util.Util;
@@ -244,8 +243,8 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
                 .stream()
                 .map(UserEntity::getEmployeeInfo)
                 .forEach(employeeInfo -> {
-                    HistoryEntity newYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear);
-                    HistoryEntity oldYear = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear - 1);
+                    HistoryEntity newYear = historyService.getHistoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear);
+                    HistoryEntity oldYear = historyService.getHistoryEntityFromListByYear(employeeInfo.getHistoryList(), currentYear - 1);
                     int daysLeftFromPreviousYear = oldYear.getDaysLeft();
                     if (daysLeftFromPreviousYear > allowedDaysPaidLeaveToCarryOver) {
                         daysLeftFromPreviousYear = allowedDaysPaidLeaveToCarryOver;
@@ -329,7 +328,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public void increaseDaysUsedForYear(EmployeeInfo employeeInfo, int daysRequested, int year) {
-        HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
+        HistoryEntity historyEntity = historyService.getHistoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         if (historyEntity.getDaysLeft() < daysRequested) {
             throw new PaidleaveNotEnoughException(daysRequested, historyEntity.getDaysLeft());
         }
@@ -339,7 +338,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
 
     @Override
     public void decreaseDaysUsedForYear(EmployeeInfo employeeInfo, int daysRequested, int year) {
-        HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
+        HistoryEntity historyEntity = historyService.getHistoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         historyEntity.decreaseDaysUsed(daysRequested);
         employeeInfoRepository.save(employeeInfo);
     }
@@ -399,7 +398,7 @@ public class EmployeeInfoServiceImpl implements EmployeeInfoService {
     }
 
     private int getDaysLeaveLeftForYear(EmployeeInfo employeeInfo, int year) {
-        HistoryEntity historyEntity = historyService.getHystoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
+        HistoryEntity historyEntity = historyService.getHistoryEntityFromListByYear(employeeInfo.getHistoryList(), year);
         return historyEntity.getTotalDaysLeave() - historyEntity.getDaysUsed();
     }
 
