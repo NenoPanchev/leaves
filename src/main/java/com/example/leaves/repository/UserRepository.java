@@ -88,4 +88,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
             "WHERE u.deleted = false " +
             "AND u.id != 1 ")
     List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
+
+    @Query("SELECT DISTINCT u FROM UserEntity u " +
+            "LEFT JOIN FETCH u.employeeInfo e " +
+            "LEFT JOIN FETCH e.historyList h " +
+            "WHERE u.deleted = false " +
+            "AND u.id != 1 ")
+    List<UserEntity> findAllByDeletedIsFalseWithoutDevAdmin();
+
 }

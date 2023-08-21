@@ -6,6 +6,7 @@ import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
 import com.example.leaves.model.dto.*;
 import com.example.leaves.service.RequestService;
+import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -121,9 +122,9 @@ public class RequestControllerImpl implements RequestController {
     }
 
     @Override
-    public ResponseEntity<List<DaysUsedInMonthViewDto>> getAllDaysLeaveUsedPerMonth(LocalDate date) {
+    public ResponseEntity<List<DaysUsedInMonthViewDto>> getAllDaysLeaveUsedPerMonth(LeavesGridFilter filter) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(requestService.getAllDaysLeavePerMonthView(date));
+                .body(requestService.getAllDaysLeavePerMonthView(filter));
     }
 }

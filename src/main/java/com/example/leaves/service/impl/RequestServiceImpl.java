@@ -16,6 +16,7 @@ import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
 import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.model.entity.RequestEntity_;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.repository.RequestRepository;
@@ -25,6 +26,7 @@ import com.example.leaves.service.EmployeeInfoService;
 import com.example.leaves.service.HistoryService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
 import com.example.leaves.util.*;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.MailSendException;
-import org.springframework.scheduling.annotation.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -60,6 +62,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
+import static com.example.leaves.constants.GlobalConstants.HOME_OFFICE;
+import static com.example.leaves.constants.GlobalConstants.LEAVE;
 
 @Service
 public class RequestServiceImpl implements RequestService {
@@ -437,34 +441,67 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LocalDate date) {
+    public List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LeavesGridFilter filter) {
         List<DaysUsedInMonthViewDto> dtoList = new ArrayList<>();
-        userService
-                .findAllNamesByDeletedIsFalseWithoutDevAdmin()
+        java.util.function.Predicate<UserEntity> showAdmins = user -> {
+            if (filter.isShowAdmins()) {
+                return user != null;
+            } else {
+                return user
+                        .getRoles()
+                        .stream()
+                        .map(RoleEntity::getName)
+                        .noneMatch("ADMIN"::equals);
+            }
+        };
+
+        java.util.function.Predicate<RequestEntity> showTypes = request -> {
+            switch (filter.getShowType().name()) {
+                case LEAVE:
+                case HOME_OFFICE:
+                    return filter.getShowType().name().equals(request.getRequestType().name());
+                default:
+                    return request != null;
+            }
+        };
+
+        List<UserEntity> users = userService
+                .findAllByDeletedIsFalseWithoutDevAdmin();
+        List<String> names = users
+                .stream()
+                .filter(showAdmins)
+                .sorted(getUserComparatorByFilter(filter))
+                .map(UserEntity::getName)
+                .collect(Collectors.toList());
+
+        names
                 .forEach(name -> {
-                    HistoryDto historyDto = historyService.getHistoryDtoByUserNameAndYear(name, date.getYear());
+                    HistoryDto historyDto = historyService.getHistoryDtoByUserNameAndYear(name, filter.getDate().getYear());
                     DaysUsedInMonthViewDto viewDto = new DaysUsedInMonthViewDto(name, historyDto);
                     dtoList.add(viewDto);
 
                 });
 
-            List<RequestEntity> requests = requestRepository.findAllApprovedRequestsInAMonthOfYear(date.getMonthValue(), date.getYear());
+        List<RequestEntity> requests = requestRepository
+                .findAllApprovedRequestsInAMonthOfYear(filter.getDate().getMonthValue(), filter.getDate().getYear())
+                .stream()
+                .filter(showTypes)
+                .collect(Collectors.toList());
 
-            requests
-                    .forEach(request -> {
-                        String name = request.getEmployee().getUserInfo().getName();
+        requests
+                .forEach(request -> {
+                    String name = request.getEmployee().getUserInfo().getName();
 
-                        DaysUsedInMonthViewDto viewDto = dtoList
-                                .stream()
-                                .filter(dto -> dto.getName().equals(name))
-                                .findFirst()
-                                .orElseThrow(ObjectNotFoundException::new);
+                    DaysUsedInMonthViewDto viewDto = dtoList
+                            .stream()
+                            .filter(dto -> dto.getName().equals(name))
+                            .findFirst()
+                            .orElseThrow(ObjectNotFoundException::new);
 
-                        List<Integer> daysOfMonthUsed = getDaysOfMonthUsed(request.toDto(), date);
-                        daysOfMonthUsed
-                                .forEach(day -> viewDto.getDays().put(day, request.getRequestType().name()));
-                    });
-        dtoList.sort(Comparator.comparing(DaysUsedInMonthViewDto::getName));
+                    List<Integer> daysOfMonthUsed = getDaysOfMonthUsed(request.toDto(), filter.getDate());
+                    daysOfMonthUsed
+                            .forEach(day -> viewDto.getDays().put(day, request.getRequestType().name()));
+                });
         return dtoList;
     }
 
@@ -908,7 +945,7 @@ public class RequestServiceImpl implements RequestService {
 
     private void refundApprovedDays(long id) {
         RequestEntity request = getById(id);
-        if (request.getApproved() == null || Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
+        if (request.getApproved() == null || Boolean.FALSE.equals(request.getApproved()) || !LEAVE.equals(request.getRequestType().name())) {
             return;
         }
         decreaseDaysUsedAccordingly(request);
@@ -946,7 +983,7 @@ public class RequestServiceImpl implements RequestService {
     private String prepareMessageResponseToEmployeeAboutRequestApproval(RequestEntity request) {
         final String responseTemplate = "Заявлението Ви за %s %s беше %s от %s.";
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String typeLeave = request.getRequestType().name().equals("LEAVE") ? "платен отпуск" : "работа от вкъщи";
+        String typeLeave = request.getRequestType().name().equals(LEAVE) ? "платен отпуск" : "работа от вкъщи";
         String when = request.getStartDate().equals(request.getEndDate()) ? "на " + request.getEndDate().format(dateTimeFormatter) : "от " + request.getStartDate().format(dateTimeFormatter) + " до " + request.getEndDate().format(dateTimeFormatter);
 
         String result = "";
@@ -965,5 +1002,16 @@ public class RequestServiceImpl implements RequestService {
         String by = userService.findNameByEmail(request.getLastModifiedBy());
         by = Util.getFirstAndLastNameFromFullName(by);
         return String.format(responseTemplate, typeLeave, when, result, by);
+    }
+
+    private Comparator<UserEntity> getUserComparatorByFilter(LeavesGridFilter filter) {
+        switch (filter.getSortBy()) {
+            case NAME:
+                return Comparator.comparing(UserEntity::getName);
+            case START_DATE:
+                return Comparator.comparing(u -> u.getEmployeeInfo().getContractStartDate());
+            default:
+                return Comparator.comparing(UserEntity::getId);
+        }
     }
 }
