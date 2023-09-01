@@ -84,10 +84,19 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     @Query("SELECT u.name FROM UserEntity u " +
             "WHERE u.email = :email ")
     Optional<String> findNameByEmail(@Param("email") String email);
+
     @Query("SELECT u.name FROM UserEntity u " +
             "WHERE u.deleted = false " +
             "AND u.id != 1 ")
     List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
+
+    @Query("SELECT u.name FROM UserEntity u " +
+            "LEFT JOIN u.roles r " +
+            "WHERE u.deleted = false " +
+            "AND 1 NOT IN(SELECT r2.id FROM UserEntity u2 " +
+            "LEFT JOIN u2.roles r2 " +
+            "WHERE u2.id = u.id) ")
+    List<String> findAllNamesByDeletedIsFalseWithoutAdmins();
 
     @Query("SELECT DISTINCT u FROM UserEntity u " +
             "LEFT JOIN FETCH u.employeeInfo e " +

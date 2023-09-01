@@ -77,4 +77,5 @@ public interface UserService {
 
     List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
     List<UserEntity> findAllByDeletedIsFalseWithoutDevAdmin();
+    List<String> findAllEmployeeNamesWithoutAdmins();
 }

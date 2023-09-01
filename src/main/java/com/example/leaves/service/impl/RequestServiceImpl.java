@@ -28,7 +28,11 @@ import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
 import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.DatesUtil;
+import com.example.leaves.util.ListHelper;
+import com.example.leaves.util.OffsetBasedPageRequestForRequests;
+import com.example.leaves.util.PredicateBuilderV2;
+import com.example.leaves.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +53,7 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -363,29 +368,31 @@ public class RequestServiceImpl implements RequestService {
         return list;
     }
 
-    @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 8 1 * *}", zone = EUROPE_SOFIA)
+    @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 10 28-31 * *}", zone = EUROPE_SOFIA)
     public void notifyAccountingOfPaidLeaveUsed() {
+        final LocalDate currentDate = LocalDate.now();
+        final LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());
+        if (!currentDate.equals(lastDayOfMonth)) {
+            return;
+        }
         if (appYmlRecipientsToNotifyConfig.getEmailRecipients().isEmpty()) {
             LOGGER.warn("Notifying about paid leave used cancelled. No recipients.");
             return;
         }
-        LocalDate date = LocalDate.now().minusMonths(1);
-        int year = date.getYear();
-        int month = date.getMonthValue();
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
         Map<String, List<Integer>> employeesDaysUsed = new TreeMap<>();
+        userService.findAllEmployeeNamesWithoutAdmins()
+                .forEach(name -> employeesDaysUsed.putIfAbsent(name, new ArrayList<>()));
         List<RequestEntity> requests = requestRepository
                 .findAllApprovedLeaveRequestsInAMonthOfYear(month, year);
         requests
                 .forEach(request -> {
                     String name = request.getEmployee().getUserInfo().getName();
                     employeesDaysUsed.putIfAbsent(name, new ArrayList<>());
-                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request.toDto(), date));
+                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request.toDto(), currentDate));
                 });
         String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG")).toLowerCase();
-        if (employeesDaysUsed.isEmpty()) {
-            LOGGER.info("Notifying cancelled. No paid leave days have been used in {}", monthName);
-            return;
-        }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
         emailService.send(appYmlRecipientsToNotifyConfig.getEmailRecipients(), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify sent.");
@@ -935,7 +942,12 @@ public class RequestServiceImpl implements RequestService {
         sb.append(System.lineSeparator());
         for (Map.Entry<String, List<Integer>> entry : employeesDaysUsed.entrySet()) {
             String stringJoin = String.join(",", entry.getValue().toString());
-            sb.append(String.format("%s: Общо (%d дни) - %s%n%n", entry.getKey(), entry.getValue().size(), stringJoin));
+            sb.append(String.format("%s: Общо (%d дни)", entry.getKey(), entry.getValue().size()));
+            if (entry.getValue().isEmpty()) {
+                sb.append(System.lineSeparator());
+            } else {
+                sb.append(String.format(" - %s%n", stringJoin));
+            }
         }
         sb.append(System.lineSeparator());
         sb.append(MAIL_TO_ACCOUNTING_POSTFIX);
