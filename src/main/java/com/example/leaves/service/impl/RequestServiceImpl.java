@@ -114,12 +114,16 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void sendNotificationEmailToAdmins(RequestEntity request) {
+        final String requestTypeName = "leave".equalsIgnoreCase(request.getRequestType().name()) ? "paid leave" : request.getRequestType().name().toLowerCase().replace("_", " ");
         userService.getAllAdmins().forEach(
                 (admin -> {
                     try {
+
                         emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
                                 admin.getEmail(),
-                                "New Leave Request", request);
+                                String.format("New %s request", requestTypeName),
+                                request,
+                                requestTypeName);
 
                     } catch (MailSendException e) {
                         LOGGER.warn("error sending notification email to admin: {} for added leave request. Reason - Invalid email address.", admin.getName());

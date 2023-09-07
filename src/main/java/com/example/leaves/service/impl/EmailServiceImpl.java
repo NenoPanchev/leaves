@@ -26,10 +26,10 @@ public class EmailServiceImpl implements EmailService {
     @Value("${ui.address:http://localhost:3000/}")
     public String uiAddress;
     public static final String NEW_REQUEST_NOTIFICATION_MSG = "Employee with name: %s and email: %s" +
-            " has requested a paid leave!\n" +
+            " has requested %s!\n" +
             "Start date: %s\n" +
             "End date: %s\n";
-    public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested an password change.\nYour token is: %s";
+    public static final String CHANGE_PASSWORD_TOKEN_MSG = "You have requested a password change.\nYour token is: %s";
     public static final String CHANGE_PASSWORD_TOKEN_SUBJECT = "Password Change";
     public static final String DEFAULT_FROM = "vacation@lightsoftbulgaria.com";
     @Value("${should-send-emails:false}")
@@ -64,21 +64,22 @@ public class EmailServiceImpl implements EmailService {
     public void sendMailToNotifyAboutNewRequest(String recipientName,
                                                 String recipientEmail,
                                                 String subject,
-                                                RequestEntity request) throws MessagingException {
+                                                RequestEntity request,
+                                                String requestTypeName) throws MessagingException {
         if (!shouldSendEmails) {
             throw new MessagingException();
         }
         String employeeName = request.getEmployee().getUserInfo().getName();
         String employeeEmail = request.getEmployee().getUserInfo().getEmail();
 
-        final Context ctx = prepareContext(recipientName, String.format(NEW_REQUEST_NOTIFICATION_MSG, employeeName, employeeEmail, request.getStartDate().toString(), request.getEndDate()));
+        final Context ctx = prepareContext(recipientName, String.format(NEW_REQUEST_NOTIFICATION_MSG, employeeName, employeeEmail, requestTypeName, request.getStartDate().toString(), request.getEndDate()));
 
         // Prepare message using a Spring helper
         final MimeMessage mimeMessage = prepareMimeMsg(recipientEmail, subject, ctx);
 
         // Send mail
         this.emailSender.send(mimeMessage);
-        LOGGER.info("Mail sent to {} regarding leave request by {}", recipientName, employeeName);
+        LOGGER.info("Mail sent to {} regarding {} request by {}", recipientName, requestTypeName, employeeName);
     }
 
     @Override
