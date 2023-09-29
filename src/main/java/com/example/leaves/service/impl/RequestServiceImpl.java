@@ -8,22 +8,31 @@ import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.exceptions.PaidleaveNotEnoughException;
 import com.example.leaves.exceptions.RequestAlreadyProcessed;
 import com.example.leaves.model.dto.DaysUsedByMonthViewDto;
+import com.example.leaves.model.dto.DaysUsedInMonthViewDto;
+import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.dto.RequestDto;
 import com.example.leaves.model.entity.BaseEntity_;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
 import com.example.leaves.model.entity.RequestEntity;
 import com.example.leaves.model.entity.RequestEntity_;
+import com.example.leaves.model.entity.RoleEntity;
 import com.example.leaves.model.entity.UserEntity;
 import com.example.leaves.model.entity.enums.RequestTypeEnum;
 import com.example.leaves.repository.RequestRepository;
 import com.example.leaves.repository.UserRepository;
 import com.example.leaves.service.EmailService;
 import com.example.leaves.service.EmployeeInfoService;
+import com.example.leaves.service.HistoryService;
 import com.example.leaves.service.RequestService;
 import com.example.leaves.service.UserService;
+import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
-import com.example.leaves.util.*;
+import com.example.leaves.util.DatesUtil;
+import com.example.leaves.util.ListHelper;
+import com.example.leaves.util.OffsetBasedPageRequestForRequests;
+import com.example.leaves.util.PredicateBuilderV2;
+import com.example.leaves.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +40,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.MailSendException;
-import org.springframework.scheduling.annotation.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -44,8 +53,10 @@ import java.time.Month;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -56,6 +67,8 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import static com.example.leaves.constants.GlobalConstants.EUROPE_SOFIA;
+import static com.example.leaves.constants.GlobalConstants.HOME_OFFICE;
+import static com.example.leaves.constants.GlobalConstants.LEAVE;
 
 @Service
 public class RequestServiceImpl implements RequestService {
@@ -71,13 +84,14 @@ public class RequestServiceImpl implements RequestService {
     private final UserService userService;
     private final EmployeeInfoService employeeInfoService;
     private final AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig;
+    private final HistoryService historyService;
 
     @Autowired
     public RequestServiceImpl(UserRepository employeeRepository,
                               RequestRepository requestRepository,
                               @Lazy UserService userService,
                               EmailService emailService,
-                              @Lazy EmployeeInfoService employeeInfoService, AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig) {
+                              @Lazy EmployeeInfoService employeeInfoService, AppYmlRecipientsToNotifyConfig appYmlRecipientsToNotifyConfig, HistoryService historyService) {
 
         this.employeeRepository = employeeRepository;
         this.requestRepository = requestRepository;
@@ -85,6 +99,7 @@ public class RequestServiceImpl implements RequestService {
         this.emailService = emailService;
         this.employeeInfoService = employeeInfoService;
         this.appYmlRecipientsToNotifyConfig = appYmlRecipientsToNotifyConfig;
+        this.historyService = historyService;
     }
 
 
@@ -99,12 +114,16 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private void sendNotificationEmailToAdmins(RequestEntity request) {
+        final String requestTypeName = "leave".equalsIgnoreCase(request.getRequestType().name()) ? "paid leave" : request.getRequestType().name().toLowerCase().replace("_", " ");
         userService.getAllAdmins().forEach(
                 (admin -> {
                     try {
+
                         emailService.sendMailToNotifyAboutNewRequest(admin.getName(),
                                 admin.getEmail(),
-                                "New Leave Request", request);
+                                String.format("New %s request", requestTypeName),
+                                request,
+                                requestTypeName);
 
                     } catch (MailSendException e) {
                         LOGGER.warn("error sending notification email to admin: {} for added leave request. Reason - Invalid email address.", admin.getName());
@@ -353,29 +372,31 @@ public class RequestServiceImpl implements RequestService {
         return list;
     }
 
-    @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 8 1 * *}", zone = EUROPE_SOFIA)
+    @Scheduled(cron = "${cron-jobs.notify.paid-leave.used:0 0 10 28-31 * *}", zone = EUROPE_SOFIA)
     public void notifyAccountingOfPaidLeaveUsed() {
+        final LocalDate currentDate = LocalDate.now();
+        final LocalDate lastDayOfMonth = currentDate.with(TemporalAdjusters.lastDayOfMonth());
+        if (!currentDate.equals(lastDayOfMonth)) {
+            return;
+        }
         if (appYmlRecipientsToNotifyConfig.getEmailRecipients().isEmpty()) {
             LOGGER.warn("Notifying about paid leave used cancelled. No recipients.");
             return;
         }
-        LocalDate date = LocalDate.now().minusMonths(1);
-        int year = date.getYear();
-        int month = date.getMonthValue();
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
         Map<String, List<Integer>> employeesDaysUsed = new TreeMap<>();
+        userService.findAllEmployeeNamesWithoutAdmins()
+                .forEach(name -> employeesDaysUsed.putIfAbsent(name, new ArrayList<>()));
         List<RequestEntity> requests = requestRepository
                 .findAllApprovedLeaveRequestsInAMonthOfYear(month, year);
         requests
                 .forEach(request -> {
                     String name = request.getEmployee().getUserInfo().getName();
                     employeesDaysUsed.putIfAbsent(name, new ArrayList<>());
-                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request.toDto(), date));
+                    employeesDaysUsed.get(name).addAll(getDaysOfMonthUsed(request.toDto(), currentDate));
                 });
         String monthName = Month.of(month).getDisplayName(TextStyle.FULL, new Locale("bg", "BG")).toLowerCase();
-        if (employeesDaysUsed.isEmpty()) {
-            LOGGER.info("Notifying cancelled. No paid leave days have been used in {}", monthName);
-            return;
-        }
         String message = generateMessageForAccountingNote(employeesDaysUsed, monthName, year);
         emailService.send(appYmlRecipientsToNotifyConfig.getEmailRecipients(), MONTHLY_PAID_LEAVE_REPORT_SUBJECT, message);
         LOGGER.info("Monthly paid leave used notify sent.");
@@ -428,6 +449,71 @@ public class RequestServiceImpl implements RequestService {
 
         }
         return dto;
+    }
+
+    @Override
+    public List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LeavesGridFilter filter) {
+        List<DaysUsedInMonthViewDto> dtoList = new ArrayList<>();
+        java.util.function.Predicate<UserEntity> showAdmins = user -> {
+            if (filter.isShowAdmins()) {
+                return user != null;
+            } else {
+                return user
+                        .getRoles()
+                        .stream()
+                        .map(RoleEntity::getName)
+                        .noneMatch("ADMIN"::equals);
+            }
+        };
+
+        java.util.function.Predicate<RequestEntity> showTypes = request -> {
+            switch (filter.getShowType().name()) {
+                case LEAVE:
+                case HOME_OFFICE:
+                    return filter.getShowType().name().equals(request.getRequestType().name());
+                default:
+                    return request != null;
+            }
+        };
+
+        List<UserEntity> users = userService
+                .findAllByDeletedIsFalseWithoutDevAdmin();
+        List<String> names = users
+                .stream()
+                .filter(showAdmins)
+                .sorted(getUserComparatorByFilter(filter))
+                .map(UserEntity::getName)
+                .collect(Collectors.toList());
+
+        names
+                .forEach(name -> {
+                    HistoryDto historyDto = historyService.getHistoryDtoByUserNameAndYear(name, filter.getDate().getYear());
+                    DaysUsedInMonthViewDto viewDto = new DaysUsedInMonthViewDto(name, historyDto);
+                    dtoList.add(viewDto);
+
+                });
+
+        List<RequestEntity> requests = requestRepository
+                .findAllApprovedRequestsInAMonthOfYear(filter.getDate().getMonthValue(), filter.getDate().getYear())
+                .stream()
+                .filter(showTypes)
+                .collect(Collectors.toList());
+
+        requests
+                .forEach(request -> {
+                    String name = request.getEmployee().getUserInfo().getName();
+
+                    DaysUsedInMonthViewDto viewDto = dtoList
+                            .stream()
+                            .filter(dto -> dto.getName().equals(name))
+                            .findFirst()
+                            .orElseThrow(ObjectNotFoundException::new);
+
+                    List<Integer> daysOfMonthUsed = getDaysOfMonthUsed(request.toDto(), filter.getDate());
+                    daysOfMonthUsed
+                            .forEach(day -> viewDto.getDays().put(day, request.getRequestType().name()));
+                });
+        return dtoList;
     }
 
     @Override
@@ -860,7 +946,12 @@ public class RequestServiceImpl implements RequestService {
         sb.append(System.lineSeparator());
         for (Map.Entry<String, List<Integer>> entry : employeesDaysUsed.entrySet()) {
             String stringJoin = String.join(",", entry.getValue().toString());
-            sb.append(String.format("%s: Общо (%d дни) - %s%n%n", entry.getKey(), entry.getValue().size(), stringJoin));
+            sb.append(String.format("%s: Общо (%d дни)", entry.getKey(), entry.getValue().size()));
+            if (entry.getValue().isEmpty()) {
+                sb.append(System.lineSeparator());
+            } else {
+                sb.append(String.format(" - %s%n", stringJoin));
+            }
         }
         sb.append(System.lineSeparator());
         sb.append(MAIL_TO_ACCOUNTING_POSTFIX);
@@ -870,7 +961,7 @@ public class RequestServiceImpl implements RequestService {
 
     private void refundApprovedDays(long id) {
         RequestEntity request = getById(id);
-        if (request.getApproved() == null || Boolean.FALSE.equals(request.getApproved()) || !"LEAVE".equals(request.getRequestType().name())) {
+        if (request.getApproved() == null || Boolean.FALSE.equals(request.getApproved()) || !LEAVE.equals(request.getRequestType().name())) {
             return;
         }
         decreaseDaysUsedAccordingly(request);
@@ -908,7 +999,7 @@ public class RequestServiceImpl implements RequestService {
     private String prepareMessageResponseToEmployeeAboutRequestApproval(RequestEntity request) {
         final String responseTemplate = "Заявлението Ви за %s %s беше %s от %s.";
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        String typeLeave = request.getRequestType().name().equals("LEAVE") ? "платен отпуск" : "работа от вкъщи";
+        String typeLeave = request.getRequestType().name().equals(LEAVE) ? "платен отпуск" : "работа от вкъщи";
         String when = request.getStartDate().equals(request.getEndDate()) ? "на " + request.getEndDate().format(dateTimeFormatter) : "от " + request.getStartDate().format(dateTimeFormatter) + " до " + request.getEndDate().format(dateTimeFormatter);
 
         String result = "";
@@ -927,5 +1018,16 @@ public class RequestServiceImpl implements RequestService {
         String by = userService.findNameByEmail(request.getLastModifiedBy());
         by = Util.getFirstAndLastNameFromFullName(by);
         return String.format(responseTemplate, typeLeave, when, result, by);
+    }
+
+    private Comparator<UserEntity> getUserComparatorByFilter(LeavesGridFilter filter) {
+        switch (filter.getSortBy()) {
+            case NAME:
+                return Comparator.comparing(UserEntity::getName);
+            case START_DATE:
+                return Comparator.comparing(u -> u.getEmployeeInfo().getContractStartDate());
+            default:
+                return Comparator.comparing(UserEntity::getId);
+        }
     }
 }

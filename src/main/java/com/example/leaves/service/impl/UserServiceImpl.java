@@ -40,7 +40,6 @@ import com.example.leaves.util.TokenUtil;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
@@ -557,6 +556,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin() {
         return userRepository.findAllNamesByDeletedIsFalseWithoutDevAdmin();
+    }
+
+    @Override
+    public List<UserEntity> findAllByDeletedIsFalseWithoutDevAdmin() {
+        return userRepository.findAllByDeletedIsFalseWithoutDevAdmin();
+    }
+
+    @Override
+    public List<String> findAllEmployeeNamesWithoutAdmins() {
+        return userRepository.findAllNamesByDeletedIsFalseWithoutAdmins();
     }
 
     private UserEntity getUserEntity(Long id) {

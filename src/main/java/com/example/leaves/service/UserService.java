@@ -76,4 +76,6 @@ public interface UserService {
     String findNameByEmail(String email);
 
     List<String> findAllNamesByDeletedIsFalseWithoutDevAdmin();
+    List<UserEntity> findAllByDeletedIsFalseWithoutDevAdmin();
+    List<String> findAllEmployeeNamesWithoutAdmins();
 }

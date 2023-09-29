@@ -1,6 +1,7 @@
 package com.example.leaves.controller;
 
 import com.example.leaves.model.dto.*;
+import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +74,10 @@ public interface RequestController {
     ResponseEntity<List<RequestDto>> getAllApprovedRequestsInAMonth(@RequestBody LocalDate date);
 
     @PostMapping("/days-used-table")
-    @PreAuthorize("hasAnyAuthority('READ')")
+    @PreAuthorize("hasAuthority('READ')")
     ResponseEntity<List<DaysUsedByMonthViewDto>> getDaysLeaveUsedTableView(@RequestBody int year);
+
+    @PostMapping("/days-used/per-month")
+    @PreAuthorize("hasAuthority('READ')")
+    ResponseEntity<List<DaysUsedInMonthViewDto>> getAllDaysLeaveUsedPerMonth(@RequestBody LeavesGridFilter filter);
 }

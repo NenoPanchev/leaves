@@ -2,6 +2,7 @@ package com.example.leaves.service;
 
 import com.example.leaves.model.dto.*;
 import com.example.leaves.model.entity.RequestEntity;
+import com.example.leaves.service.filter.LeavesGridFilter;
 import com.example.leaves.service.filter.RequestFilter;
 import org.springframework.data.domain.Page;
 
@@ -37,4 +38,6 @@ public interface RequestService {
 
     List<DaysUsedByMonthViewDto> getDaysLeaveUsedTableView(int year);
     DaysUsedByMonthViewDto getDaysLeaveUsedByYearAndEmployeeId(int year, long id);
+
+    List<DaysUsedInMonthViewDto> getAllDaysLeavePerMonthView(LeavesGridFilter filter);
 }

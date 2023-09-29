@@ -1,8 +1,10 @@
 package com.example.leaves.service.impl;
 
+import com.example.leaves.exceptions.ObjectNotFoundException;
 import com.example.leaves.model.dto.HistoryDto;
 import com.example.leaves.model.entity.EmployeeInfo;
 import com.example.leaves.model.entity.HistoryEntity;
+import com.example.leaves.repository.HistoryRepository;
 import com.example.leaves.service.HistoryService;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class HistoryServiceImpl implements HistoryService {
+    private final HistoryRepository historyRepository;
+
+    public HistoryServiceImpl(HistoryRepository historyRepository) {
+        this.historyRepository = historyRepository;
+    }
 
     @Override
     public Map<Integer, Integer> createInitialHistory(LocalDate startDate) {
@@ -96,11 +103,23 @@ public class HistoryServiceImpl implements HistoryService {
     }
 
     @Override
-    public HistoryEntity getHystoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year) {
+    public HistoryEntity getHistoryEntityFromListByYear(List<HistoryEntity> historyEntityList, int year) {
         return historyEntityList
                 .stream()
                 .filter(historyEntity -> historyEntity.getCalendarYear() == year)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("No history for that year"));
+    }
+
+    @Override
+    public HistoryDto getHistoryDtoByUserNameAndYear(String name, int year) {
+        return historyRepository
+                .findByEmployeeInfoUserInfoNameAndCalendarYear(name, year)
+                .map(entity -> {
+                    HistoryDto dto = new HistoryDto();
+                    entity.toDto(dto);
+                    return dto;
+                })
+                .orElseThrow(() -> new ObjectNotFoundException(String.format("No history for user with name: %s for year: %d", name, year)));
     }
 }

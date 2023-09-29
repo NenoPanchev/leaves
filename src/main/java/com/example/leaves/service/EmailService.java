@@ -17,7 +17,8 @@ public interface EmailService {
     void sendMailToNotifyAboutNewRequest(String recipientName,
                                          String recipientEmail,
                                          String subject,
-                                         RequestEntity request) throws MessagingException;
+                                         RequestEntity request,
+                                         String requestTypeName) throws MessagingException;
 
     void sendChangePasswordToken(
             final String recipientName,
